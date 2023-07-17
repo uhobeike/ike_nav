@@ -14,18 +14,19 @@ namespace ike_nav
 {
 
 IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options)
-: Node("ike_map_server_composition", options)
+: Node("ike_map_server", options), map_yaml_path_("")
 {
+  initPublisher();
   setParam();
   getParam();
-  initPublisher();
+
+  RCLCPP_INFO(get_logger(), "%s", map_yaml_path_.c_str());
 }
-
-void IkeMapServer::setParam() {}
-
-void IkeMapServer::getParam() {}
-
 void IkeMapServer::initPublisher() {}
+
+void IkeMapServer::setParam() { this->declare_parameter("map_yaml_path", ""); }
+
+void IkeMapServer::getParam() { this->get_parameter("map_yaml_path", map_yaml_path_); }
 
 }  // namespace ike_nav
 

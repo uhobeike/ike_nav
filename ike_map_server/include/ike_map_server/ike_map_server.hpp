@@ -20,6 +20,7 @@ protected:
   void getParam();
 
 private:
+  std::string map_yaml_path_;
 };
 
 }  // namespace ike_nav
