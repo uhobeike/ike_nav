@@ -9,6 +9,15 @@
 namespace ike_nav
 {
 
+struct Pgm
+{
+  std::string header, image;
+  int rows, cols, max_val, negate;
+  double resolution, occupied_thresh, free_thresh;
+  std::vector<unsigned char> pixels;
+  std::vector<double> origin;
+};
+
 class IkeMapServer : public rclcpp::Node
 {
 public:
@@ -17,10 +26,10 @@ public:
 protected:
   void initPublisher();
   void setParam();
-  void getParam();
+  bool readMapYaml(Pgm & pgm);
+  bool readPgm(Pgm & pgm);
 
 private:
-  std::string map_yaml_path_;
 };
 
 }  // namespace ike_nav

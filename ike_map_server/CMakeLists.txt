@@ -9,11 +9,13 @@ find_package(ament_cmake_auto REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-ament_auto_add_library(ike_map_server_composition SHARED
+ament_auto_add_library(${PROJECT_NAME} SHARED
   src/ike_map_server.cpp
 )
 
-rclcpp_components_register_node(ike_map_server_composition
+target_link_libraries(${PROJECT_NAME} ${YAML_CPP_LIBRARIES})
+
+rclcpp_components_register_nodes(${PROJECT_NAME}
   PLUGIN "ike_nav::IkeMapServer"
   EXECUTABLE ${PROJECT_NAME}
 )
