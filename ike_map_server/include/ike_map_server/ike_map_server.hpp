@@ -6,6 +6,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <std_srvs/srv/trigger.hpp>
 
@@ -33,10 +34,12 @@ protected:
 
   bool readMapYaml(Pgm & pgm);
   bool readPgm(Pgm & pgm);
-  void publishMap(Pgm & pgm);
+  void createOccupancyGrid(Pgm & pgm, nav_msgs::msg::OccupancyGrid & occupancy_grid);
+  void publishMap(nav_msgs::msg::OccupancyGrid & occupancy_grid);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
+  rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
 };
 

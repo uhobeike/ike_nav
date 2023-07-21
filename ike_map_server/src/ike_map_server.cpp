@@ -29,7 +29,10 @@ IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_
     get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
   readMapYaml(pgm);
   readPgm(pgm);
-  publishMap(pgm);
+
+  nav_msgs::msg::OccupancyGrid map;
+  createOccupancyGrid(pgm, map);
+  publishMap(map);
 }
 
 void IkeMapServer::initPublisher()
@@ -39,18 +42,45 @@ void IkeMapServer::initPublisher()
 
 void IkeMapServer::initService()
 {
+  auto get_map =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<ike_nav_msgs::srv::GetMap_Request> request,
+      std::shared_ptr<ike_nav_msgs::srv::GetMap_Response> response) -> void {
+    (void)request_header;
+
+    Pgm pgm;
+    RCLCPP_INFO(
+      get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
+    readMapYaml(pgm);
+    readPgm(pgm);
+
+    nav_msgs::msg::OccupancyGrid map;
+    createOccupancyGrid(pgm, map);
+
+    response->map = map;
+    response->success = true;
+    response->message = "Called /get_map. Send map done.";
+  };
+  get_map_srv_ = create_service<ike_nav_msgs::srv::GetMap>("get_map", get_map);
+
   auto publish_map =
     [this](
       const std::shared_ptr<rmw_request_id_t> request_header,
       [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
       std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
     (void)request_header;
+
     Pgm pgm;
     RCLCPP_INFO(
       get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
     readMapYaml(pgm);
     readPgm(pgm);
-    publishMap(pgm);
+
+    nav_msgs::msg::OccupancyGrid map;
+    createOccupancyGrid(pgm, map);
+    publishMap(map);
+
     response->success = true;
     response->message = "Called /publish_map. Publish map done.";
   };
@@ -109,10 +139,8 @@ bool IkeMapServer::readPgm(Pgm & pgm)
   return true;
 }
 
-void IkeMapServer::publishMap(Pgm & pgm)
+void IkeMapServer::createOccupancyGrid(Pgm & pgm, nav_msgs::msg::OccupancyGrid & occupancy_grid)
 {
-  auto occupancy_grid = nav_msgs::msg::OccupancyGrid();
-
   occupancy_grid.header.stamp = now();
   occupancy_grid.header.frame_id = "map";
 
@@ -150,6 +178,10 @@ void IkeMapServer::publishMap(Pgm & pgm)
       ++index;
     }
   }
+}
+
+void IkeMapServer::publishMap(nav_msgs::msg::OccupancyGrid & occupancy_grid)
+{
   map_pub_->publish(occupancy_grid);
   RCLCPP_INFO(get_logger(), "Publish occupancy grid done");
 }
