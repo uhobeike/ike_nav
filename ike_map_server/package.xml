@@ -13,6 +13,7 @@
   <depend>rclcpp_components</depend>
   <depend>std_srvs</depend>
   <depend>nav_msgs</depend>
+  <depend>ike_nav_msgs</depend>
   <depend>yaml-cpp</depend>
 
   <test_depend>ament_lint_auto</test_depend>
