@@ -4,7 +4,9 @@
 #ifndef IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
 #define IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+
+#include <nav_msgs/msg/occupancy_grid.hpp>
 
 namespace ike_nav
 {
@@ -29,7 +31,10 @@ protected:
   bool readMapYaml(Pgm & pgm);
   bool readPgm(Pgm & pgm);
 
+  void publishMap(Pgm & pgm);
+
 private:
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
 };
 
 }  // namespace ike_nav

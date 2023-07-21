@@ -23,12 +23,18 @@ IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_
 
   initPublisher();
   setParam();
-  readMapYaml(pgm);
+  RCLCPP_INFO(
+    get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
 
+  readMapYaml(pgm);
   readPgm(pgm);
-  RCLCPP_INFO(get_logger(), "%s", this->get_parameter("map_yaml_path").as_string().c_str());
+  publishMap(pgm);
 }
-void IkeMapServer::initPublisher() {}
+
+void IkeMapServer::initPublisher()
+{
+  map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map", rclcpp::QoS(1).reliable());
+}
 
 void IkeMapServer::setParam() { this->declare_parameter("map_yaml_path", ""); }
 
@@ -49,16 +55,19 @@ bool IkeMapServer::readPgm(Pgm & pgm)
 {
   std::string pgm_path = this->get_parameter("map_yaml_path").as_string();
   std::size_t found = pgm_path.find_last_of("/");
-  if (found != std::string::npos)
+  if (found != std::string::npos) {
     pgm_path.erase(found);
-  else
+    pgm_path = pgm_path + "/" + pgm.image;
+  } else
     return false;
 
   std::ifstream file(pgm_path, std::ios::binary);
   if (!file) {
     std::cerr << "Cannot open file!\n";
     return false;
-  }
+  } else
+    RCLCPP_INFO(get_logger(), "Open pgm: %s", pgm_path.c_str());
+
   file >> pgm.header;
   if (pgm.header != "P5") {  // assuming the image is in P5 format
     std::cerr << "Can only handle P5 format!\n";
@@ -71,10 +80,57 @@ bool IkeMapServer::readPgm(Pgm & pgm)
   }
   file.ignore(1);  // skip newline character
 
+  RCLCPP_INFO(get_logger(), "Read pgm: %s", pgm_path.c_str());
   pgm.pixels.resize(pgm.rows * pgm.cols);
   file.read(reinterpret_cast<char *>(pgm.pixels.data()), pgm.pixels.size());
+  RCLCPP_INFO(get_logger(), "Read pgm done: %s", pgm_path.c_str());
 
   return true;
+}
+
+void IkeMapServer::publishMap(Pgm & pgm)
+{
+  auto occupancy_grid = nav_msgs::msg::OccupancyGrid();
+
+  occupancy_grid.header.stamp = now();
+  occupancy_grid.header.frame_id = "map";
+
+  occupancy_grid.info.map_load_time = now();
+  occupancy_grid.info.resolution = pgm.resolution;
+  occupancy_grid.info.width = pgm.cols;
+  occupancy_grid.info.height = pgm.rows;
+  occupancy_grid.info.origin.position.x = 0;
+  occupancy_grid.info.origin.position.y = 0;
+  occupancy_grid.info.origin.orientation.w = cos(pgm.origin[2] / 2);
+  occupancy_grid.info.origin.orientation.z = sin(pgm.origin[2] / 2);
+
+  int map_size = occupancy_grid.info.width * occupancy_grid.info.height;
+  occupancy_grid.data.resize(map_size);
+
+  for (auto & pixel : pgm.pixels) {
+    if (pixel >= 254)
+      pixel = 0;
+    else if (pixel == 205)
+      pixel = -1;
+    else if (pixel == 0)
+      pixel = 100;
+  }
+
+  std::vector<int8_t> pixels;
+  for (auto & pixel : pgm.pixels) {
+    pixels.push_back(static_cast<int8_t>(pixel));
+  }
+
+  unsigned int index = 0;
+  for (unsigned int y = 0; y < occupancy_grid.info.height; y++) {
+    for (unsigned int x = 0; x < occupancy_grid.info.width; x++) {
+      unsigned int i = x + (occupancy_grid.info.height - y - 1) * occupancy_grid.info.width;
+      occupancy_grid.data[i] = pixels[index];
+      ++index;
+    }
+  }
+  map_pub_->publish(occupancy_grid);
+  RCLCPP_INFO(get_logger(), "Publish occupancy grid done");
 }
 
 }  // namespace ike_nav
