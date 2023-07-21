@@ -7,6 +7,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <nav_msgs/msg/occupancy_grid.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 namespace ike_nav
 {
@@ -27,14 +28,16 @@ public:
 
 protected:
   void initPublisher();
+  void initService();
   void setParam();
+
   bool readMapYaml(Pgm & pgm);
   bool readPgm(Pgm & pgm);
-
   void publishMap(Pgm & pgm);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
 };
 
 }  // namespace ike_nav

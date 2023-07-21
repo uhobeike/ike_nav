@@ -22,10 +22,11 @@ IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_
   Pgm pgm;
 
   initPublisher();
+  initService();
   setParam();
+
   RCLCPP_INFO(
     get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
-
   readMapYaml(pgm);
   readPgm(pgm);
   publishMap(pgm);
@@ -34,6 +35,26 @@ IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_
 void IkeMapServer::initPublisher()
 {
   map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map", rclcpp::QoS(1).reliable());
+}
+
+void IkeMapServer::initService()
+{
+  auto publish_map =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+    Pgm pgm;
+    RCLCPP_INFO(
+      get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
+    readMapYaml(pgm);
+    readPgm(pgm);
+    publishMap(pgm);
+    response->success = true;
+    response->message = "Called /publish_map. Publish map done.";
+  };
+  publish_map_srv_ = create_service<std_srvs::srv::Trigger>("publish_map", publish_map);
 }
 
 void IkeMapServer::setParam() { this->declare_parameter("map_yaml_path", ""); }

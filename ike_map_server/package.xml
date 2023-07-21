@@ -11,6 +11,7 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>std_srvs</depend>
   <depend>nav_msgs</depend>
   <depend>yaml-cpp</depend>
 
