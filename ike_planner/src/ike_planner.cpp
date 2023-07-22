@@ -38,20 +38,26 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
 
 std::vector<ike_nav::Node> IkePlanner::getObstacles(nav_msgs::msg::OccupancyGrid & map)
 {
-  std::vector<ike_nav::Node> node;
+  std::vector<ike_nav::Node> obstacles_node;
   for (unsigned int y = 0; y < map.info.height; y++) {
     for (unsigned int x = 0; x < map.info.width; x++) {
       unsigned int i = x + (map.info.height - y - 1) * map.info.width;
-      if (map.data[i] == 100) node.push_back(ike_nav::Node(x, y));
+      if (map.data[i] == 100) obstacles_node.push_back(ike_nav::Node(x, y));
     }
   }
 
-  return node;
+  return obstacles_node;
 }
 
 std::vector<std::pair<double, double>> IkePlanner::getObstaclesXY(
-  std::vector<ike_nav::Node> obstacle_node)
+  std::vector<ike_nav::Node> obstacles_node)
 {
+  std::vector<std::pair<double, double>> obstacles_xy;
+
+  for (auto node : obstacles_node)
+    obstacles_xy.push_back(std::pair<double, double>(node.x, node.y));
+
+  return obstacles_xy;
 }
 
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
