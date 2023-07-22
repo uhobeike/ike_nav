@@ -11,9 +11,9 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
 
-  double lower_left, upper_left, lower_right, upper_right;
-  lower_left = map.info.height;
-  upper_right = map.info.width;
+  // double lower_left, upper_left, lower_right, upper_right;
+  // lower_left = map.info.height;
+  // upper_right = map.info.width;
 
   // four corners of the map coordinate system
   x_min_world_ = 0.0;
@@ -34,11 +34,13 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
   xy_ = std::vector<std::pair<double, double>>();
   initialized_ = false;
+
+  RCLCPP_INFO(get_logger(), "IkePlanner initialized done");
 }
 
 std::vector<ike_nav::Node> IkePlanner::getObstacles(nav_msgs::msg::OccupancyGrid & map)
 {
-  std::vector<ike_nav::Node> obstacles_node;
+  auto obstacles_node = std::vector<ike_nav::Node>();
   for (unsigned int y = 0; y < map.info.height; y++) {
     for (unsigned int x = 0; x < map.info.width; x++) {
       unsigned int i = x + (map.info.height - y - 1) * map.info.width;
@@ -52,8 +54,7 @@ std::vector<ike_nav::Node> IkePlanner::getObstacles(nav_msgs::msg::OccupancyGrid
 std::vector<std::pair<double, double>> IkePlanner::getObstaclesXY(
   std::vector<ike_nav::Node> obstacles_node)
 {
-  std::vector<std::pair<double, double>> obstacles_xy;
-
+  auto obstacles_xy = std::vector<std::pair<double, double>>();
   for (auto node : obstacles_node)
     obstacles_xy.push_back(std::pair<double, double>(node.x, node.y));
 
@@ -62,9 +63,9 @@ std::vector<std::pair<double, double>> IkePlanner::getObstaclesXY(
 
 nav_msgs::msg::OccupancyGrid IkePlanner::createGrid(nav_msgs::msg::OccupancyGrid & map)
 {
-  auto grid = nav_msgs::msg::OccupancyGrid();
-  grid = map;
-  for (auto & data : grid.data) data = INFINITY;
+  nav_msgs::msg::OccupancyGrid grid = map;
+  constexpr int8_t inf = 127;
+  for (auto & data : grid.data) data = inf;
 
   return grid;
 }
