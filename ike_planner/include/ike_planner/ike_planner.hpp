@@ -33,6 +33,10 @@ protected:
 
   nav_msgs::msg::OccupancyGrid createGrid(nav_msgs::msg::OccupancyGrid & map);
 
+  std::pair<double, double> calculateKey(ike_nav::Node node);
+
+  double h(ike_nav::Node node);
+
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
@@ -41,7 +45,7 @@ private:
   std::vector<ike_nav::Node> obstacles_;
   std::vector<std::pair<double, double>> obstacles_xy_;
   ike_nav::Node start_, goal_;
-  std::map<Node, double> U_;
+  std::map<ike_nav::Node, std::pair<double, double>> U_;
   double km_, kold_;
   nav_msgs::msg::OccupancyGrid rhs_, g_;
   std::vector<std::pair<double, double>> detected_obstacles_xy_, xy_;

@@ -26,17 +26,26 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
 
   start_ = ike_nav::Node(0.0, 0.0);
   goal_ = ike_nav::Node(0.0, 0.0);
-  U_ = std::map<Node, double>();
+  U_.insert(std::make_pair(goal_, calculateKey(goal_)));
   km_ = 0.0;
   kold_ = 0.0;
   rhs_ = createGrid(map);
   g_ = createGrid(map);
   detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
   xy_ = std::vector<std::pair<double, double>>();
-  initialized_ = false;
+  initialized_ = true;
 
   RCLCPP_INFO(get_logger(), "IkePlanner initialized done");
 }
+
+std::pair<double, double> IkePlanner::calculateKey(ike_nav::Node s)
+{
+  return std::pair<double, double>(
+    std::min(g_.data[s.x + s.y], rhs_.data[s.x + s.y]) + h(s) + km_,
+    std::min(g_.data[s.x + s.y], rhs_.data[s.x + s.y]));
+}
+
+double IkePlanner::h(ike_nav::Node node) { return 1; }
 
 std::vector<ike_nav::Node> IkePlanner::getObstacles(nav_msgs::msg::OccupancyGrid & map)
 {
