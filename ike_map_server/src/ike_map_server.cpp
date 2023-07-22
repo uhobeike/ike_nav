@@ -3,8 +3,6 @@
 
 #include "ike_map_server/ike_map_server.hpp"
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <yaml-cpp/yaml.h>
 
 #include <filesystem>
