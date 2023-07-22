@@ -29,8 +29,8 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   U_ = std::map<Node, double>();
   km_ = 0.0;
   kold_ = 0.0;
-  rhs_ = nav_msgs::msg::OccupancyGrid();
-  g_ = nav_msgs::msg::OccupancyGrid();
+  rhs_ = createGrid(map);
+  g_ = createGrid(map);
   detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
   xy_ = std::vector<std::pair<double, double>>();
   initialized_ = false;
@@ -58,6 +58,15 @@ std::vector<std::pair<double, double>> IkePlanner::getObstaclesXY(
     obstacles_xy.push_back(std::pair<double, double>(node.x, node.y));
 
   return obstacles_xy;
+}
+
+nav_msgs::msg::OccupancyGrid IkePlanner::createGrid(nav_msgs::msg::OccupancyGrid & map)
+{
+  auto grid = nav_msgs::msg::OccupancyGrid();
+  grid = map;
+  for (auto & data : grid.data) data = INFINITY;
+
+  return grid;
 }
 
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
