@@ -6,7 +6,37 @@
 namespace ike_nav
 {
 
-IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_map_server", options)
+IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner", options)
+{
+  auto map = nav_msgs::msg::OccupancyGrid();
+  map = getMap();
+
+  double lower_left, upper_left, lower_right, upper_right;
+  lower_left = map.info.height;
+  upper_right = map.info.width;
+
+  // four corners of the map coordinate system
+  x_min_world_ = 0.0;
+  y_min_world_ = 0.0;
+  x_max_ = x_min_world_ + map.info.width;
+  y_max_ = y_min_world_ + map.info.height;
+
+  obstacles_ = getObstacles();
+  obstacles_xy_ = getObstaclesXY();
+
+  start_ = ike_nav::Node(0.0, 0.0);
+  goal_ = ike_nav::Node(0.0, 0.0);
+  U_ = std::map<Node, double>();
+  km_ = 0.0;
+  kold_ = 0.0;
+  rhs_ = nav_msgs::msg::OccupancyGrid();
+  g_ = nav_msgs::msg::OccupancyGrid();
+  detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
+  xy_ = std::vector<std::pair<double, double>>();
+  initialized_ = false;
+}
+
+nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
 {
   auto get_map = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
   while (!get_map->wait_for_service(std::chrono::seconds(1))) {
@@ -23,12 +53,13 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_map_serv
     RCLCPP_ERROR(this->get_logger(), "service call failed :(");
     get_map->remove_pending_request(result_future);
   }
-  auto result = result_future.get();
 
-  map_pub_ =
-    this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
+  return result_future.get()->map;
 
-  map_pub_->publish(result->map);
+  // map_pub_ =
+  //   this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
+
+  // map_pub_->publish(result->map);
 }
 
 }  // namespace ike_nav
