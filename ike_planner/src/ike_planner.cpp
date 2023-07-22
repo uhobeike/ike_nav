@@ -21,8 +21,8 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   x_max_ = x_min_world_ + map.info.width;
   y_max_ = y_min_world_ + map.info.height;
 
-  obstacles_ = getObstacles();
-  obstacles_xy_ = getObstaclesXY();
+  obstacles_ = getObstacles(map);
+  obstacles_xy_ = getObstaclesXY(obstacles_);
 
   start_ = ike_nav::Node(0.0, 0.0);
   goal_ = ike_nav::Node(0.0, 0.0);
@@ -34,6 +34,24 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
   xy_ = std::vector<std::pair<double, double>>();
   initialized_ = false;
+}
+
+std::vector<ike_nav::Node> IkePlanner::getObstacles(nav_msgs::msg::OccupancyGrid & map)
+{
+  std::vector<ike_nav::Node> node;
+  for (unsigned int y = 0; y < map.info.height; y++) {
+    for (unsigned int x = 0; x < map.info.width; x++) {
+      unsigned int i = x + (map.info.height - y - 1) * map.info.width;
+      if (map.data[i] == 100) node.push_back(ike_nav::Node(x, y));
+    }
+  }
+
+  return node;
+}
+
+std::vector<std::pair<double, double>> IkePlanner::getObstaclesXY(
+  std::vector<ike_nav::Node> obstacle_node)
+{
 }
 
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()

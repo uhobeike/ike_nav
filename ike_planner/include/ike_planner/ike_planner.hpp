@@ -27,8 +27,8 @@ public:
 
 protected:
   nav_msgs::msg::OccupancyGrid getMap();
-  std::vector<ike_nav::Node> getObstacles();
-  std::vector<std::pair<double, double>> getObstaclesXY();
+  std::vector<ike_nav::Node> getObstacles(nav_msgs::msg::OccupancyGrid & map);
+  std::vector<std::pair<double, double>> getObstaclesXY(std::vector<ike_nav::Node> obstacle_node);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
