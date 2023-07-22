@@ -1,0 +1,3 @@
+/**:
+  ros__parameters:
+    map_yaml_path: "/home/user-name/map.yaml"
