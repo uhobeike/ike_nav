@@ -28,38 +28,9 @@ public:
 protected:
   nav_msgs::msg::OccupancyGrid getMap();
 
-  std::vector<ike_nav::Node> getObstacles(nav_msgs::msg::OccupancyGrid & map);
-  std::vector<std::pair<double, double>> getObstaclesXY(std::vector<ike_nav::Node> obstacles_node);
-  nav_msgs::msg::OccupancyGrid createGrid(nav_msgs::msg::OccupancyGrid & map);
-  double h(ike_nav::Node node);
-
-  std::pair<double, double> calculateKey(ike_nav::Node node);
-  bool compareKeys(std::pair<double, double> key_pair1, std::pair<double, double> key_pair2);
-
-  void computeShortestPath();
-  std::vector<ike_nav::Node> pred(ike_nav::Node u);
-  std::vector<ike_nav::Node> getNeighbours(ike_nav::Node u);
-  void updateVertex(ike_nav::Node u);
-  bool compareCoordinates(ike_nav::Node node1, ike_nav::Node node2);
-  std::vector<ike_nav::Node> succ(ike_nav::Node u);
-  int8_t c(ike_nav::Node node1, ike_nav::Node node2);
-  bool isObstacle(ike_nav::Node node);
-
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
-
-  double x_min_world_, y_min_world_, x_max_, y_max_;
-  std::vector<ike_nav::Node> obstacles_;
-  std::vector<std::pair<double, double>> obstacles_xy_;
-  ike_nav::Node start_, goal_;
-  std::map<ike_nav::Node, std::pair<double, double>> U_;
-  double km_;
-  // double km_, kold_;
-  std::pair<double, double> kold_;
-  nav_msgs::msg::OccupancyGrid rhs_, g_;
-  std::vector<std::pair<double, double>> detected_obstacles_xy_, xy_;
-  bool initialized_;
 };
 
 }  // namespace ike_nav
