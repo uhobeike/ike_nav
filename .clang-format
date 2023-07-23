@@ -12,10 +12,7 @@ BreakBeforeBraces: Custom
 ColumnLimit: 100
 ConstructorInitializerIndentWidth: 0
 ContinuationIndentWidth: 2
-IndentWidth: 2
-TabWidth: 2
 DerivePointerAlignment: false
-UseTab: Always
 PointerAlignment: Middle
 ReflowComments: false
 
