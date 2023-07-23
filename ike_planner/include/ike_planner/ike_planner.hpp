@@ -40,8 +40,9 @@ private:
 
   double resolution_, robot_radius_;
   double min_x_, min_y_, max_x_, max_y_;
-  nav_msgs::msg::OccupancyGrid obstacle_map_;
+  nav_msgs::msg::OccupancyGrid * obstacle_map_;
   uint32_t x_width, y_width;
+  std::vector<std::tuple<double, double, uint8_t>> motion_;
 };
 
 }  // namespace ike_nav
