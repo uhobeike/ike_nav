@@ -14,10 +14,14 @@ namespace ike_nav
 
 struct Node
 {
-  double x, y, cost;
+  double x, y, cost, parent_index;
 
   Node() : x(0.0), y(0.0), cost(0.0) {}
   Node(double x, double y) : x(x), y(y), cost(0.0) {}
+  Node(double x, double y, double cost, double parent_index)
+  : x(x), y(y), cost(cost), parent_index(parent_index)
+  {
+  }
 };
 
 class IkePlanner : public rclcpp::Node
@@ -28,9 +32,16 @@ public:
 protected:
   nav_msgs::msg::OccupancyGrid getMap();
 
+  std::vector<std::tuple<double, double, uint8_t>> getMotionModel();
+
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
+
+  double resolution_, robot_radius_;
+  double min_x_, min_y_, max_x_, max_y_;
+  nav_msgs::msg::OccupancyGrid obstacle_map_;
+  uint32_t x_width, y_width;
 };
 
 }  // namespace ike_nav

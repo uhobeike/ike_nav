@@ -10,6 +10,26 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
 {
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
+
+  resolution_ = map.info.resolution;
+  robot_radius_ = 1.0;
+  min_x_ = min_y_ = max_x_ = max_y_ = 0.0;
+  obstacle_map_ = nav_msgs::msg::OccupancyGrid();
+  x_width = y_width = 0;
+}
+
+std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
+{
+  //dx, dy, cost
+  return std::vector<std::tuple<double, double, uint8_t>>{
+    {1, 0, 1},
+    {0, 1, 1},
+    {-1, 0, 1},
+    {0, -1, 1},
+    {-1, -1, std::sqrt(2)},
+    {-1, 1, std::sqrt(2)},
+    {1, -1, std::sqrt(2)},
+    {1, 1, std::sqrt(2)}};
 }
 
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
