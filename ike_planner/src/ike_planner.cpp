@@ -15,9 +15,12 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   robot_radius_ = 1.0;
   min_x_ = min_y_ = max_x_ = max_y_ = 0.0;
   *obstacle_map_ = nav_msgs::msg::OccupancyGrid();
-  x_width = y_width = 0;
+  x_width_ = map.info.width;
+  y_width_ = map.info.height;
   motion_ = getMotionModel();
   obstacle_map_ = &map;
+
+  RCLCPP_INFO(this->get_logger(), "IkePlanner constructor done");
 }
 
 std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
@@ -37,13 +40,51 @@ std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
 void IkePlanner::planning(double sx, double sy, double gx, double gy)
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
-  auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
+  auto goal_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
+
+  std::map<double, ike_nav::Node> open_set, closed_set;
+
+  open_set.insert(std::make_pair(calcGridIndex(start_node), start_node));
+
+  while (rclcpp::ok()) {
+    if (open_set.size() == 0) {
+      RCLCPP_ERROR(this->get_logger(), "Open set is empty");
+      rclcpp::shutdown();
+    }
+
+    // clang-format off
+    auto c_id = [&]() -> uint32_t {
+      std::map<uint32_t, double> id_cost_map;
+      for (auto id_node_map : open_set) {
+	      id_cost_map.insert(std::make_pair(
+	        id_node_map.first, open_set[id_node_map.first].cost 
+            + calcHeurisic(goal_node, open_set[id_node_map.first])));
+      }
+
+      return std::min_element(
+	       id_cost_map.begin(), id_cost_map.end(),
+	       [](const auto & a, const auto & b) 
+         { return a.second < b.second; }
+         )->first;
+    }();
+    // clang-format on
+  }
+}
+
+double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
+{
+  auto w = 1.0;
+  auto d = w * std::hypot(node1.x - node2.x, node1.y - node2.y);
+
+  return d;
 }
 
 uint32_t IkePlanner::calcXYIndex(double position)
 {
   return static_cast<uint32_t>(std::round(position / resolution_));
 }
+
+uint32_t IkePlanner::calcGridIndex(ike_nav::Node node) { return node.y * x_width_ + node.x; }
 
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
 {

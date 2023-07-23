@@ -36,6 +36,8 @@ protected:
 
   void planning(double sx, double sy, double gx, double gy);
   uint32_t calcXYIndex(double positio);
+  uint32_t calcGridIndex(ike_nav::Node node);
+  double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
@@ -44,7 +46,7 @@ private:
   double resolution_, robot_radius_;
   double min_x_, min_y_, max_x_, max_y_;
   nav_msgs::msg::OccupancyGrid * obstacle_map_;
-  uint32_t x_width, y_width;
+  uint32_t x_width_, y_width_;
   std::vector<std::tuple<double, double, uint8_t>> motion_;
 
   double start_x_, start_y_, goal_x_, goal_y_;
