@@ -51,11 +51,48 @@ void IkePlanner::computeShortestPath()
     kold_ = U_.begin()->second;
     ike_nav::Node u = U_.begin()->first;
     U_.erase(U_.begin());
-    if (true) {
-    } else if (true) {
+    if (compareKeys(kold_, calculateKey(u))) {
+      U_.insert(std::make_pair(u, calculateKey(u)));
+    } else if (g_.data[u.x + u.y] > rhs_.data[u.x + u.y]) {
+      g_.data[u.x + u.y] = rhs_.data[u.x + u.y];
+      for (auto s : pred(u)) updateVertex(s);
     } else {
     }
   }
+}
+
+void IkePlanner::updateVertex(ike_nav::Node u)
+{
+  if (!compareCoordinates(u, goal_))
+    rhs_.data[u.x + u.y] = [&]() -> int8_t {
+      auto sprimes = succ(u);
+      std::vector<int8_t> rhs_data;
+      for (auto sprime : sprimes) {
+	rhs_data.push_back(c(u, sprime));
+      }
+    }();
+}
+
+int8_t IkePlanner::c(ike_nav::Node node1, ike_nav::Node node2)
+{
+  if (isObstacle) return
+}
+
+bool IkePlanner::isObstacle(ike_nav::Node node) {}
+
+std::vector<ike_nav::Node> IkePlanner::succ(ike_nav::Node u) { return getNeighbours(u); }
+
+bool IkePlanner::compareCoordinates(ike_nav::Node node1, ike_nav::Node node2)
+{
+  return node1.x == node2.x and node1.y == node2.y;
+}
+
+std::vector<ike_nav::Node> IkePlanner::pred(ike_nav::Node u) { return getNeighbours(u); }
+
+std::vector<ike_nav::Node> IkePlanner::getNeighbours(ike_nav::Node u)
+{
+  std::vector<ike_nav::Node> nodes;
+  return nodes;
 }
 
 std::pair<double, double> IkePlanner::calculateKey(ike_nav::Node s)
@@ -65,7 +102,8 @@ std::pair<double, double> IkePlanner::calculateKey(ike_nav::Node s)
     std::min(g_.data[s.x + s.y], rhs_.data[s.x + s.y]));
 }
 
-bool compareKeys(std::pair<double, double> key_pair1, std::pair<double, double> key_pair2)
+bool IkePlanner::compareKeys(
+  std::pair<double, double> key_pair1, std::pair<double, double> key_pair2)
 {
   return key_pair1.first < key_pair2.first ||
 	 (key_pair1.first == key_pair2.first and key_pair1.second < key_pair2.second);

@@ -37,6 +37,13 @@ protected:
   bool compareKeys(std::pair<double, double> key_pair1, std::pair<double, double> key_pair2);
 
   void computeShortestPath();
+  std::vector<ike_nav::Node> pred(ike_nav::Node u);
+  std::vector<ike_nav::Node> getNeighbours(ike_nav::Node u);
+  void updateVertex(ike_nav::Node u);
+  bool compareCoordinates(ike_nav::Node node1, ike_nav::Node node2);
+  std::vector<ike_nav::Node> succ(ike_nav::Node u);
+  int8_t c(ike_nav::Node node1, ike_nav::Node node2);
+  bool isObstacle(ike_nav::Node node);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
