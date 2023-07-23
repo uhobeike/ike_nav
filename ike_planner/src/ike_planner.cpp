@@ -101,6 +101,27 @@ void IkePlanner::planning(double sx, double sy, double gx, double gy)
   }
 }
 
+std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
+  ike_nav::Node goal_node, std::map<double, ike_nav::Node> closed_set)
+{
+  std::vector<double> rx, ry;
+  rx.push_back(calcGridPosition(goal_node.x));
+  ry.push_back(calcGridPosition(goal_node.y));
+
+  auto parent_index = goal_node.parent_index;
+
+  while (parent_index != -1) {
+    auto n = closed_set[parent_index];
+    rx.push_back(calcGridPosition(n.x));
+    ry.push_back(calcGridPosition(n.y));
+    parent_index = n.parent_index;
+  }
+
+  return std::make_pair(rx, ry);
+}
+
+double IkePlanner::calcGridPosition(uint32_t goal_node_position) {}
+
 bool IkePlanner::verifyNode(ike_nav::Node node) { return true; }
 
 double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)

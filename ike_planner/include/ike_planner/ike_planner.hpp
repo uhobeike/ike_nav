@@ -39,6 +39,9 @@ protected:
   uint32_t calcGridIndex(ike_nav::Node node);
   double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
   bool verifyNode(ike_nav::Node node);
+  std::pair<std::vector<double>, std::vector<double>> calcFinalPath(
+    ike_nav::Node goal_node, std::map<double, ike_nav::Node> closed_set);
+  double calcGridPosition(uint32_t goal_node_position);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
