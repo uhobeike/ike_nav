@@ -28,14 +28,34 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   goal_ = ike_nav::Node(0.0, 0.0);
   U_.insert(std::make_pair(goal_, calculateKey(goal_)));
   km_ = 0.0;
-  kold_ = 0.0;
+  kold_ = std::pair<double, double>();
   rhs_ = createGrid(map);
   g_ = createGrid(map);
   detected_obstacles_xy_ = std::vector<std::pair<double, double>>();
   xy_ = std::vector<std::pair<double, double>>();
   initialized_ = true;
-
   RCLCPP_INFO(get_logger(), "IkePlanner initialized done");
+
+  computeShortestPath();
+}
+
+void IkePlanner::computeShortestPath()
+{
+  bool has_elements = false;
+  has_elements = U_.size() > 0;
+
+  bool rhs_not_equal_to_g = false;
+  rhs_not_equal_to_g = rhs_.data[start_.x + start_.y] != g_.data[start_.x + start_.y];
+
+  while (true) {
+    kold_ = U_.begin()->second;
+    ike_nav::Node u = U_.begin()->first;
+    U_.erase(U_.begin());
+    if (true) {
+    } else if (true) {
+    } else {
+    }
+  }
 }
 
 std::pair<double, double> IkePlanner::calculateKey(ike_nav::Node s)
@@ -43,6 +63,12 @@ std::pair<double, double> IkePlanner::calculateKey(ike_nav::Node s)
   return std::pair<double, double>(
     std::min(g_.data[s.x + s.y], rhs_.data[s.x + s.y]) + h(s) + km_,
     std::min(g_.data[s.x + s.y], rhs_.data[s.x + s.y]));
+}
+
+bool compareKeys(std::pair<double, double> key_pair1, std::pair<double, double> key_pair2)
+{
+  return key_pair1.first < key_pair2.first ||
+	 (key_pair1.first == key_pair2.first and key_pair1.second < key_pair2.second);
 }
 
 double IkePlanner::h(ike_nav::Node node) { return 1; }
