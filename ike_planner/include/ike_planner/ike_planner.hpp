@@ -14,11 +14,11 @@ namespace ike_nav
 
 struct Node
 {
-  double x, y, cost, parent_index;
+  uint32_t x, y, cost, parent_index;
 
-  Node() : x(0.0), y(0.0), cost(0.0) {}
-  Node(double x, double y) : x(x), y(y), cost(0.0) {}
-  Node(double x, double y, double cost, double parent_index)
+  Node() : x(0), y(0), cost(0.0) {}
+  Node(uint32_t x, uint32_t y) : x(x), y(y), cost(0.0) {}
+  Node(uint32_t x, uint32_t y, double cost, double parent_index)
   : x(x), y(y), cost(cost), parent_index(parent_index)
   {
   }
@@ -34,6 +34,9 @@ protected:
 
   std::vector<std::tuple<double, double, uint8_t>> getMotionModel();
 
+  void planning(double sx, double sy, double gx, double gy);
+  uint32_t calcXYIndex(double positio);
+
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
@@ -43,6 +46,8 @@ private:
   nav_msgs::msg::OccupancyGrid * obstacle_map_;
   uint32_t x_width, y_width;
   std::vector<std::tuple<double, double, uint8_t>> motion_;
+
+  double start_x_, start_y_, goal_x_, goal_y_;
 };
 
 }  // namespace ike_nav

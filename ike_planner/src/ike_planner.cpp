@@ -34,6 +34,17 @@ std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
     {1, 1, std::sqrt(2)}};
 }
 
+void IkePlanner::planning(double sx, double sy, double gx, double gy)
+{
+  auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
+  auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
+}
+
+uint32_t IkePlanner::calcXYIndex(double position)
+{
+  return static_cast<uint32_t>(std::round(position / resolution_));
+}
+
 nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
 {
   auto get_map = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
