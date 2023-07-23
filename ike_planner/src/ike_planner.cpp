@@ -19,8 +19,10 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   y_width_ = map.info.height;
   motion_ = getMotionModel();
   obstacle_map_ = &map;
-
   RCLCPP_INFO(this->get_logger(), "IkePlanner constructor done");
+
+  planning(0.0, 0.0, 0.0, 0.0);
+  RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
 }
 
 std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
@@ -37,7 +39,8 @@ std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
     {1, 1, std::sqrt(2)}};
 }
 
-void IkePlanner::planning(double sx, double sy, double gx, double gy)
+std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
+  double sx, double sy, double gx, double gy)
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
   auto goal_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
@@ -99,6 +102,8 @@ void IkePlanner::planning(double sx, double sy, double gx, double gy)
       }
     }
   }
+
+  return calcFinalPath(goal_node, closed_set);
 }
 
 std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
@@ -120,9 +125,25 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
   return std::make_pair(rx, ry);
 }
 
-double IkePlanner::calcGridPosition(uint32_t goal_node_position) {}
+double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
 
-bool IkePlanner::verifyNode(ike_nav::Node node) { return true; }
+bool IkePlanner::verifyNode(ike_nav::Node node)
+{
+  if (node.x < min_x_)
+    return false;
+  else if (node.y < min_y_)
+    return false;
+  else if (node.x >= max_x_)
+    return false;
+  else if (node.y >= min_y_)
+    return false;
+
+  if (obstacle_map_
+        ->data[node.x + (obstacle_map_->info.height - node.y - 1) * obstacle_map_->info.width])
+    return false;
+
+  return true;
+}
 
 double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
 {

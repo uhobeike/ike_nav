@@ -18,7 +18,7 @@ struct Node
 
   Node() : x(0), y(0), cost(0.0) {}
   Node(uint32_t x, uint32_t y) : x(x), y(y), cost(0.0) {}
-  Node(uint32_t x, uint32_t y, double cost, double parent_index)
+  Node(uint32_t x, uint32_t y, double cost, int32_t parent_index)
   : x(x), y(y), cost(cost), parent_index(parent_index)
   {
   }
@@ -34,7 +34,8 @@ protected:
 
   std::vector<std::tuple<double, double, uint8_t>> getMotionModel();
 
-  void planning(double sx, double sy, double gx, double gy);
+  std::pair<std::vector<double>, std::vector<double>> planning(
+    double sx, double sy, double gx, double gy);
   uint32_t calcXYIndex(double positio);
   uint32_t calcGridIndex(ike_nav::Node node);
   double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
