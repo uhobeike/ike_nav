@@ -8,6 +8,7 @@
 
 #include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
+#include <nav_msgs/msg/path.hpp>
 
 namespace ike_nav
 {
@@ -50,6 +51,7 @@ protected:
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   double resolution_, robot_radius_;

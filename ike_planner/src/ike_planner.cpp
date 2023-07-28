@@ -3,6 +3,8 @@
 
 #include "ike_planner/ike_planner.hpp"
 
+#include <geometry_msgs/msg/pose_stamped.hpp>
+
 namespace ike_nav
 {
 
@@ -13,6 +15,8 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
 
   search_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
     "planner_searched_map", rclcpp::QoS(1).reliable());
+  plan_path_pub_ =
+    this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
 
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
@@ -141,15 +145,25 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
   auto parent_index = goal_node.parent_index;
 
   // check calcFinalPath
+  auto plan_path = nav_msgs::msg::Path();
+  auto pose_stamp = geometry_msgs::msg::PoseStamped();
 
   while (parent_index != -1) {
     auto n = closed_set[parent_index];
     rx.push_back(calcGridPosition(n.x));
     ry.push_back(calcGridPosition(n.y));
     parent_index = n.parent_index;
+
+    pose_stamp.pose.position.x = calcGridPosition(n.x);
+    pose_stamp.pose.position.y = calcGridPosition(n.y);
+    plan_path.poses.push_back(pose_stamp);
   }
 
+  plan_path.header.frame_id = "map";
+  plan_path.header.stamp = rclcpp::Time(0);
+
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
+  plan_path_pub_->publish(plan_path);
 
   return std::make_pair(rx, ry);
 }
