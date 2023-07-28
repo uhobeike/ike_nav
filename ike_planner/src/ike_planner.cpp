@@ -36,6 +36,7 @@ void IkePlanner::initPublisher()
 
 void IkePlanner::initPlanner()
 {
+  RCLCPP_INFO(this->get_logger(), "IkePlanner initialized");
   obstacle_map_ = getMap();
   resolution_ = obstacle_map_.info.resolution;
   robot_radius_ = 1.0;
@@ -44,6 +45,7 @@ void IkePlanner::initPlanner()
   max_y_ = y_width_ = obstacle_map_.info.height;
   motion_ = getMotionModel();
   search_map_ = obstacle_map_;
+  RCLCPP_INFO(this->get_logger(), "IkePlanner initialized done");
 }
 
 void IkePlanner::declareParam()
