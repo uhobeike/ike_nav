@@ -32,6 +32,8 @@ public:
   explicit IkePlanner(const rclcpp::NodeOptions & options);
 
 protected:
+  void initPublisher();
+  // void initilizePlanner();
   void declareParam();
   void getParam();
 

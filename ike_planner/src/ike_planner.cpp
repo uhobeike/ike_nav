@@ -10,13 +10,9 @@ namespace ike_nav
 
 IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner", options)
 {
+  initPublisher();
   declareParam();
   getParam();
-
-  search_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
-    "planner_searched_map", rclcpp::QoS(1).reliable());
-  plan_path_pub_ =
-    this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
 
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
@@ -39,6 +35,16 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   planning(start_x_, start_y_, goal_x_, goal_y_);
   RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
 }
+
+void IkePlanner::initPublisher()
+{
+  search_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "planner_searched_map", rclcpp::QoS(1).reliable());
+  plan_path_pub_ =
+    this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
+}
+
+// void IkePlanner::initilizePlanner() {}
 
 void IkePlanner::declareParam()
 {
