@@ -25,7 +25,7 @@ def generate_launch_description():
             ComposableNode(
                 package='ike_map_server',
                 plugin='ike_nav::IkeMapServer',
-                name='map_server',
+                name='ike_map_server',
                 parameters=[params_file],
                 extra_arguments=[{'use_intra_process_comms': True}],
             )
