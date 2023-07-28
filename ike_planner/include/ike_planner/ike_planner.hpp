@@ -19,7 +19,7 @@ struct Node
 
   Node() : x(0), y(0), cost(0.0) {}
   Node(uint32_t x, uint32_t y) : x(x), y(y), cost(0.0) {}
-  Node(uint32_t x, uint32_t y, double cost, int32_t parent_index)
+  Node(uint32_t x, uint32_t y, double cost, uint32_t parent_index)
   : x(x), y(y), cost(cost), parent_index(parent_index)
   {
   }
@@ -50,7 +50,7 @@ private:
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   double resolution_, robot_radius_;
-  double min_x_, min_y_, max_x_, max_y_;
+  uint32_t min_x_, min_y_, max_x_, max_y_;
   nav_msgs::msg::OccupancyGrid * obstacle_map_;
   nav_msgs::msg::OccupancyGrid obstacle_map_debug_;
   uint32_t x_width_, y_width_;

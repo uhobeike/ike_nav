@@ -15,9 +15,9 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
 
   resolution_ = map.info.resolution;
   robot_radius_ = 1.0;
-  min_x_ = min_y_ = max_x_ = max_y_ = 0.0;
-  x_width_ = map.info.width;
-  y_width_ = map.info.height;
+  min_x_ = min_y_ = 0;
+  max_x_ = x_width_ = map.info.width;
+  max_y_ = y_width_ = map.info.height;
   motion_ = getMotionModel();
   obstacle_map_ = &map;
   obstacle_map_debug_ = map;
@@ -169,14 +169,14 @@ double IkePlanner::calcGridPosition(uint32_t node_position) { return node_positi
 
 bool IkePlanner::verifyNode(ike_nav::Node node)
 {
-  // if (node.x < min_x_)
-  //   return false;
-  // else if (node.y < min_y_)
-  //   return false;
-  // else if (node.x >= max_x_)
-  //   return false;
-  // else if (node.y >= min_y_)
-  //   return false;
+  if (node.x < min_x_)
+    return false;
+  else if (node.y < min_y_)
+    return false;
+  else if (node.x >= max_x_)
+    return false;
+  else if (node.y >= max_y_)
+    return false;
 
   if (obstacle_map_->data[calcGridIndex(node)]) return false;
 
@@ -186,9 +186,13 @@ bool IkePlanner::verifyNode(ike_nav::Node node)
 double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
 {
   auto w = 1.0;
-  double d = std::sqrt(std::pow(node1.x - node1.x, 2) + std::pow(node2.x - node2.y, 2));
-  RCLCPP_INFO(
-    this->get_logger(), "cost: %d, %d, %d, %d, %f", node1.x, node1.y, node2.x, node2.y, d);
+  double d = w * std::hypot(
+                   static_cast<double>(node1.x) - static_cast<double>(node2.x),
+                   static_cast<double>(node1.y) - static_cast<double>(node2.y));
+
+  // if Dijkstra's algorithm
+  // double d = 0;
+
   return d;
 }
 
