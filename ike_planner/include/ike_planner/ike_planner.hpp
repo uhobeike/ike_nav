@@ -49,13 +49,13 @@ protected:
   double calcGridPosition(uint32_t goal_node_position);
 
 private:
-  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   double resolution_, robot_radius_;
   uint32_t min_x_, min_y_, max_x_, max_y_;
   nav_msgs::msg::OccupancyGrid * obstacle_map_;
-  nav_msgs::msg::OccupancyGrid obstacle_map_debug_;
+  nav_msgs::msg::OccupancyGrid search_map_;
   uint32_t x_width_, y_width_;
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
 

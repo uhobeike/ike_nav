@@ -11,8 +11,9 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   declareParam();
   getParam();
 
-  map_pub_ =
-    this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
+  search_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "planner_searched_map", rclcpp::QoS(1).reliable());
+
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
 
@@ -23,7 +24,7 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   max_y_ = y_width_ = map.info.height;
   motion_ = getMotionModel();
   obstacle_map_ = &map;
-  obstacle_map_debug_ = map;
+  search_map_ = map;
 
   start_x_ = 8.1;
   start_y_ = 11.1;
@@ -65,18 +66,6 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
   auto goal_node = ike_nav::Node(calcXYIndex(gx), calcXYIndex(gy), 0.0, -1);
-
-  map_pub_->publish(obstacle_map_debug_);
-
-  sleep(1);
-
-  // check map calcGridIndex(start_node) calcGridIndex(goal_node)
-  obstacle_map_debug_.data[calcGridIndex(start_node)] = 100;
-  obstacle_map_debug_.data[calcGridIndex(goal_node)] = 100;
-
-  map_pub_->publish(obstacle_map_debug_);
-
-  sleep(1);
 
   std::map<uint32_t, ike_nav::Node> open_set, closed_set;
 
@@ -128,7 +117,7 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
       if (!verifyNode(node)) continue;
 
       // check motion
-      obstacle_map_debug_.data[n_id] = 50;
+      search_map_.data[n_id] = 50;
 
       if (closed_set.find(n_id) != closed_set.end()) continue;
       if (open_set.find(n_id) == open_set.end())
@@ -136,13 +125,6 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
       else {
         if (open_set[n_id].cost > node.cost) open_set.insert(std::make_pair(n_id, node));
       }
-    }
-
-    static int cnt = 0;
-    cnt++;
-    if (cnt == 1000) {
-      map_pub_->publish(obstacle_map_debug_);
-      cnt = 0;
     }
   }
 
@@ -159,22 +141,15 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
   auto parent_index = goal_node.parent_index;
 
   // check calcFinalPath
-  sleep(1);
-  obstacle_map_debug_.data = obstacle_map_->data;
-  map_pub_->publish(obstacle_map_debug_);
-  sleep(1);
 
   while (parent_index != -1) {
     auto n = closed_set[parent_index];
-
-    obstacle_map_debug_.data[calcGridIndex(n)] = 100;
-
     rx.push_back(calcGridPosition(n.x));
     ry.push_back(calcGridPosition(n.y));
     parent_index = n.parent_index;
   }
 
-  map_pub_->publish(obstacle_map_debug_);
+  if (publish_searched_map_) search_map_pub_->publish(search_map_);
 
   return std::make_pair(rx, ry);
 }
