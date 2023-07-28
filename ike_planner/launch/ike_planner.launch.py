@@ -8,24 +8,24 @@ from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
-    ike_map_server_dir = get_package_share_directory('ike_map_server')
+    ike_planner_dir = get_package_share_directory('ike_planner')
     params_file = os.path.join(
-        ike_map_server_dir, 'config', 'ike_map_server.param.yaml')
+        ike_planner_dir, 'config', 'ike_planner.param.yaml')
 
     container = Node(
-        name='ike_map_server_container',
+        name='ike_planner_container',
         package='rclcpp_components',
         executable='component_container',
         output='both',
     )
 
     load_composable_nodes = LoadComposableNodes(
-        target_container='ike_map_server_container',
+        target_container='ike_planner_container',
         composable_node_descriptions=[
             ComposableNode(
-                package='ike_map_server',
-                plugin='ike_nav::IkeMapServer',
-                name='ike_map_server',
+                package='ike_planner',
+                plugin='ike_nav::IkePlanner',
+                name='ike_planner',
                 parameters=[params_file],
                 extra_arguments=[{'use_intra_process_comms': True}],
             )

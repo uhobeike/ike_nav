@@ -1,0 +1,4 @@
+/**:
+  ros__parameters:
+    use_dijkstra: false
+    publish_searched_map: true
