@@ -7,6 +7,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_map.hpp"
+#include "ike_nav_msgs/srv/get_path.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <nav_msgs/msg/path.hpp>
 
@@ -33,21 +34,22 @@ public:
 
 protected:
   void initPublisher();
-  void initPlanner();
+  void initService();
   void declareParam();
   void getParam();
+
+  void initPlanner();
 
   nav_msgs::msg::OccupancyGrid getMap();
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
-  std::pair<std::vector<double>, std::vector<double>> planning(
-    double sx, double sy, double gx, double gy);
+  nav_msgs::msg::Path planning(double sx, double sy, double gx, double gy);
   uint32_t calcXYIndex(double positio);
   uint32_t calcGridIndex(ike_nav::Node node);
   double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
   bool verifyNode(ike_nav::Node node);
-  std::pair<std::vector<double>, std::vector<double>> calcFinalPath(
+  nav_msgs::msg::Path calcFinalPath(
     ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set);
   double calcGridPosition(uint32_t goal_node_position);
 
@@ -55,6 +57,7 @@ private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
+  rclcpp::Service<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_srv_;
 
   double resolution_, robot_radius_;
   uint32_t min_x_, min_y_, max_x_, max_y_;
@@ -62,8 +65,6 @@ private:
   nav_msgs::msg::OccupancyGrid search_map_;
   uint32_t x_width_, y_width_;
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
-
-  double start_x_, start_y_, goal_x_, goal_y_;
 
   bool use_dijkstra_, publish_searched_map_;
 };

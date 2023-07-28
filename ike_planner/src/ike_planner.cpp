@@ -11,19 +11,11 @@ namespace ike_nav
 IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner", options)
 {
   initPublisher();
+  initService();
   declareParam();
   getParam();
 
   initPlanner();
-
-  start_x_ = 8.1;
-  start_y_ = 11.1;
-  goal_x_ = 11.6;
-  goal_y_ = 8.7;
-
-  RCLCPP_INFO(this->get_logger(), "IkePlanner planning start");
-  planning(start_x_, start_y_, goal_x_, goal_y_);
-  RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
 }
 
 void IkePlanner::initPublisher()
@@ -32,6 +24,24 @@ void IkePlanner::initPublisher()
     "planner_searched_map", rclcpp::QoS(1).reliable());
   plan_path_pub_ =
     this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
+}
+
+void IkePlanner::initService()
+{
+  auto get_path = [&](
+                    const std::shared_ptr<rmw_request_id_t> request_header,
+                    const std::shared_ptr<ike_nav_msgs::srv::GetPath_Request> request,
+                    std::shared_ptr<ike_nav_msgs::srv::GetPath_Response> response) -> void {
+    (void)request_header;
+    // clang-format off
+    RCLCPP_INFO(this->get_logger(), "IkePlanner planning start");
+    response->path = planning(
+      request->start.pose.position.x, request->start.pose.position.y, 
+      request->goal.pose.position.x, request->goal.pose.position.y);
+    RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
+    // clang-format on
+  };
+  get_path_srv_ = create_service<ike_nav_msgs::srv::GetPath>("get_path", get_path);
 }
 
 void IkePlanner::initPlanner()
@@ -73,8 +83,7 @@ std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
     {1, 1, std::sqrt(2)}};
 }
 
-std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
-  double sx, double sy, double gx, double gy)
+nav_msgs::msg::Path IkePlanner::planning(double sx, double sy, double gx, double gy)
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
   auto goal_node = ike_nav::Node(calcXYIndex(gx), calcXYIndex(gy), 0.0, -1);
@@ -143,7 +152,7 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
   return calcFinalPath(goal_node, closed_set);
 }
 
-std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
+nav_msgs::msg::Path IkePlanner::calcFinalPath(
   ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set)
 {
   std::vector<double> rx, ry;
@@ -173,7 +182,7 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
   plan_path_pub_->publish(plan_path);
 
-  return std::make_pair(rx, ry);
+  return plan_path;
 }
 
 double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
