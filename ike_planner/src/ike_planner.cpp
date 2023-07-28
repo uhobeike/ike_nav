@@ -14,17 +14,7 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   declareParam();
   getParam();
 
-  auto map = nav_msgs::msg::OccupancyGrid();
-  map = getMap();
-
-  resolution_ = map.info.resolution;
-  robot_radius_ = 1.0;
-  min_x_ = min_y_ = 0;
-  max_x_ = x_width_ = map.info.width;
-  max_y_ = y_width_ = map.info.height;
-  motion_ = getMotionModel();
-  obstacle_map_ = &map;
-  search_map_ = map;
+  initPlanner();
 
   start_x_ = 8.1;
   start_y_ = 11.1;
@@ -44,7 +34,17 @@ void IkePlanner::initPublisher()
     this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
 }
 
-// void IkePlanner::initilizePlanner() {}
+void IkePlanner::initPlanner()
+{
+  obstacle_map_ = getMap();
+  resolution_ = obstacle_map_.info.resolution;
+  robot_radius_ = 1.0;
+  min_x_ = min_y_ = 0;
+  max_x_ = x_width_ = obstacle_map_.info.width;
+  max_y_ = y_width_ = obstacle_map_.info.height;
+  motion_ = getMotionModel();
+  search_map_ = obstacle_map_;
+}
 
 void IkePlanner::declareParam()
 {
@@ -187,7 +187,7 @@ bool IkePlanner::verifyNode(ike_nav::Node node)
   else if (node.y >= max_y_)
     return false;
 
-  if (obstacle_map_->data[calcGridIndex(node)]) return false;
+  if (obstacle_map_.data[calcGridIndex(node)]) return false;
 
   return true;
 }

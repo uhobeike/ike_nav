@@ -33,7 +33,7 @@ public:
 
 protected:
   void initPublisher();
-  // void initilizePlanner();
+  void initPlanner();
   void declareParam();
   void getParam();
 
@@ -58,7 +58,7 @@ private:
 
   double resolution_, robot_radius_;
   uint32_t min_x_, min_y_, max_x_, max_y_;
-  nav_msgs::msg::OccupancyGrid * obstacle_map_;
+  nav_msgs::msg::OccupancyGrid obstacle_map_;
   nav_msgs::msg::OccupancyGrid search_map_;
   uint32_t x_width_, y_width_;
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
