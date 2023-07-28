@@ -9,7 +9,9 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <exec_depend>ike_localization</exec_depend>
   <exec_depend>ike_map_server</exec_depend>
+  <exec_depend>ike_planner</exec_depend>
   <exec_depend>ike_nav_msgs</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
