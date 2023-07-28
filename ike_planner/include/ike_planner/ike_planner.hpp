@@ -31,6 +31,9 @@ public:
   explicit IkePlanner(const rclcpp::NodeOptions & options);
 
 protected:
+  void declareParam();
+  void getParam();
+
   nav_msgs::msg::OccupancyGrid getMap();
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
@@ -57,6 +60,8 @@ private:
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
 
   double start_x_, start_y_, goal_x_, goal_y_;
+
+  bool use_dijkstra_, publish_searched_map_;
 };
 
 }  // namespace ike_nav

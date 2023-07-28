@@ -8,6 +8,9 @@ namespace ike_nav
 
 IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner", options)
 {
+  declareParam();
+  getParam();
+
   map_pub_ =
     this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
   auto map = nav_msgs::msg::OccupancyGrid();
@@ -30,6 +33,17 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   RCLCPP_INFO(this->get_logger(), "IkePlanner planning start");
   planning(start_x_, start_y_, goal_x_, goal_y_);
   RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
+}
+
+void IkePlanner::declareParam()
+{
+  declare_parameter("use_dijkstra", false);
+  declare_parameter("publish_searched_map", true);
+}
+void IkePlanner::getParam()
+{
+  get_parameter("use_dijkstra", use_dijkstra_);
+  get_parameter("publish_searched_map", publish_searched_map_);
 }
 
 std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
@@ -191,7 +205,7 @@ double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
                    static_cast<double>(node1.y) - static_cast<double>(node2.y));
 
   // if Dijkstra's algorithm
-  // double d = 0;
+  if (use_dijkstra_) d = 0.0;
 
   return d;
 }
