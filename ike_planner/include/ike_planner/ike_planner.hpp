@@ -8,7 +8,6 @@
 
 #include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
-#include <nav_msgs/msg/path.hpp>
 
 namespace ike_nav
 {
@@ -40,17 +39,18 @@ protected:
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
-  void planning(double sx, double sy, double gx, double gy);
+  std::pair<std::vector<double>, std::vector<double>> planning(
+    double sx, double sy, double gx, double gy);
   uint32_t calcXYIndex(double positio);
   uint32_t calcGridIndex(ike_nav::Node node);
   double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
   bool verifyNode(ike_nav::Node node);
-  void calcFinalPath(ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set);
+  std::pair<std::vector<double>, std::vector<double>> calcFinalPath(
+    ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set);
   double calcGridPosition(uint32_t goal_node_position);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
-  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   double resolution_, robot_radius_;

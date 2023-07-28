@@ -3,8 +3,6 @@
 
 #include "ike_planner/ike_planner.hpp"
 
-#include <geometry_msgs/msg/pose_stamped.hpp>
-
 namespace ike_nav
 {
 
@@ -27,8 +25,6 @@ void IkePlanner::initPublisher()
 {
   search_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
     "planner_searched_map", rclcpp::QoS(1).reliable());
-  plan_path_pub_ =
-    this->create_publisher<nav_msgs::msg::Path>("plan_path", rclcpp::QoS(1).reliable());
 }
 
 void IkePlanner::initializePlanner()
@@ -59,7 +55,8 @@ std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
     {1, 1, std::sqrt(2)}};
 }
 
-void IkePlanner::planning(double sx, double sy, double gx, double gy)
+std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
+  double sx, double sy, double gx, double gy)
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
   auto goal_node = ike_nav::Node(calcXYIndex(gx), calcXYIndex(gy), 0.0, -1);
@@ -125,10 +122,10 @@ void IkePlanner::planning(double sx, double sy, double gx, double gy)
     }
   }
 
-  calcFinalPath(goal_node, closed_set);
+  return calcFinalPath(goal_node, closed_set);
 }
 
-void IkePlanner::calcFinalPath(
+std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
   ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set)
 {
   std::vector<double> rx, ry;
@@ -137,31 +134,19 @@ void IkePlanner::calcFinalPath(
 
   auto parent_index = goal_node.parent_index;
 
-  auto plan_path = nav_msgs::msg::Path();
-  auto pose_stamp = geometry_msgs::msg::PoseStamped();
-
   while (parent_index != -1) {
     auto n = closed_set[parent_index];
     rx.push_back(calcGridPosition(n.x));
     ry.push_back(calcGridPosition(n.y));
     parent_index = n.parent_index;
-
-    pose_stamp.pose.position.x = calcGridPosition(n.x);
-    pose_stamp.pose.position.y = calcGridPosition(n.y);
-    plan_path.poses.push_back(pose_stamp);
   }
 
-  plan_path.header.frame_id = "map";
-  plan_path.header.stamp = rclcpp::Time(0);
-
   search_map_pub_->publish(search_map_);
-  plan_path_pub_->publish(plan_path);
+
+  return std::make_pair(rx, ry);
 }
 
-double IkePlanner::calcGridPosition(uint32_t node_position)
-{
-  return static_cast<double>(node_position) * resolution_;
-}
+double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
 
 bool IkePlanner::verifyNode(ike_nav::Node node)
 {
