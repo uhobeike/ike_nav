@@ -16,12 +16,13 @@ namespace ike_nav
 
 struct Node
 {
-  uint32_t x, y, parent_index;
+  uint32_t x, y;
   double cost;
+  int32_t parent_index;
 
   Node() : x(0), y(0), cost(0.0) {}
   Node(uint32_t x, uint32_t y) : x(x), y(y), cost(0.0) {}
-  Node(uint32_t x, uint32_t y, double cost, uint32_t parent_index)
+  Node(uint32_t x, uint32_t y, double cost, int32_t parent_index)
   : x(x), y(y), cost(cost), parent_index(parent_index)
   {
   }

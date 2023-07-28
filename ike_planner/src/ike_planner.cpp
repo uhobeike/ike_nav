@@ -161,7 +161,6 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
 
   auto parent_index = goal_node.parent_index;
 
-  // check calcFinalPath
   auto plan_path = nav_msgs::msg::Path();
   auto pose_stamp = geometry_msgs::msg::PoseStamped();
 
