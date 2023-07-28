@@ -14,7 +14,8 @@ namespace ike_nav
 
 struct Node
 {
-  uint32_t x, y, cost, parent_index;
+  uint32_t x, y, parent_index;
+  double cost;
 
   Node() : x(0), y(0), cost(0.0) {}
   Node(uint32_t x, uint32_t y) : x(x), y(y), cost(0.0) {}
@@ -32,7 +33,7 @@ public:
 protected:
   nav_msgs::msg::OccupancyGrid getMap();
 
-  std::vector<std::tuple<double, double, uint8_t>> getMotionModel();
+  std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
   std::pair<std::vector<double>, std::vector<double>> planning(
     double sx, double sy, double gx, double gy);
@@ -41,7 +42,7 @@ protected:
   double calcHeurisic(ike_nav::Node node1, ike_nav::Node node2);
   bool verifyNode(ike_nav::Node node);
   std::pair<std::vector<double>, std::vector<double>> calcFinalPath(
-    ike_nav::Node goal_node, std::map<double, ike_nav::Node> closed_set);
+    ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set);
   double calcGridPosition(uint32_t goal_node_position);
 
 private:
@@ -51,8 +52,9 @@ private:
   double resolution_, robot_radius_;
   double min_x_, min_y_, max_x_, max_y_;
   nav_msgs::msg::OccupancyGrid * obstacle_map_;
+  nav_msgs::msg::OccupancyGrid obstacle_map_debug_;
   uint32_t x_width_, y_width_;
-  std::vector<std::tuple<double, double, uint8_t>> motion_;
+  std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
 
   double start_x_, start_y_, goal_x_, goal_y_;
 };

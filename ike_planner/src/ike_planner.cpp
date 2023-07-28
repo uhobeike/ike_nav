@@ -8,27 +8,34 @@ namespace ike_nav
 
 IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner", options)
 {
+  map_pub_ =
+    this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
   auto map = nav_msgs::msg::OccupancyGrid();
   map = getMap();
 
   resolution_ = map.info.resolution;
   robot_radius_ = 1.0;
   min_x_ = min_y_ = max_x_ = max_y_ = 0.0;
-  *obstacle_map_ = nav_msgs::msg::OccupancyGrid();
   x_width_ = map.info.width;
   y_width_ = map.info.height;
   motion_ = getMotionModel();
   obstacle_map_ = &map;
-  RCLCPP_INFO(this->get_logger(), "IkePlanner constructor done");
+  obstacle_map_debug_ = map;
 
-  planning(0.0, 0.0, 0.0, 0.0);
+  start_x_ = 8.1;
+  start_y_ = 11.1;
+  goal_x_ = 11.6;
+  goal_y_ = 8.7;
+
+  RCLCPP_INFO(this->get_logger(), "IkePlanner planning start");
+  planning(start_x_, start_y_, goal_x_, goal_y_);
   RCLCPP_INFO(this->get_logger(), "IkePlanner planning done");
 }
 
-std::vector<std::tuple<double, double, uint8_t>> IkePlanner::getMotionModel()
+std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
 {
-  //dx, dy, cost
-  return std::vector<std::tuple<double, double, uint8_t>>{
+  // dx, dy, cost
+  return std::vector<std::tuple<int32_t, int32_t, uint8_t>>{
     {1, 0, 1},
     {0, 1, 1},
     {-1, 0, 1},
@@ -43,9 +50,21 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
   double sx, double sy, double gx, double gy)
 {
   auto start_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
-  auto goal_node = ike_nav::Node(calcXYIndex(sx), calcXYIndex(sy), 0.0, -1);
+  auto goal_node = ike_nav::Node(calcXYIndex(gx), calcXYIndex(gy), 0.0, -1);
 
-  std::map<double, ike_nav::Node> open_set, closed_set;
+  map_pub_->publish(obstacle_map_debug_);
+
+  sleep(1);
+
+  // check map calcGridIndex(start_node) calcGridIndex(goal_node)
+  obstacle_map_debug_.data[calcGridIndex(start_node)] = 100;
+  obstacle_map_debug_.data[calcGridIndex(goal_node)] = 100;
+
+  map_pub_->publish(obstacle_map_debug_);
+
+  sleep(1);
+
+  std::map<uint32_t, ike_nav::Node> open_set, closed_set;
 
   open_set.insert(std::make_pair(calcGridIndex(start_node), start_node));
 
@@ -61,7 +80,7 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
       for (auto id_node_map : open_set) {
 	      id_cost_map.insert(std::make_pair(
 	        id_node_map.first, open_set[id_node_map.first].cost 
-            + calcHeurisic(goal_node, open_set[id_node_map.first])));
+            + calcHeurisic(goal_node, static_cast<ike_nav::Node>(open_set[id_node_map.first]))));
       }
 
       return std::min_element(
@@ -94,6 +113,9 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
 
       if (!verifyNode(node)) continue;
 
+      // check motion
+      obstacle_map_debug_.data[n_id] = 50;
+
       if (closed_set.find(n_id) != closed_set.end()) continue;
       if (open_set.find(n_id) == open_set.end())
         open_set.insert(std::make_pair(n_id, node));
@@ -101,13 +123,20 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::planning(
         if (open_set[n_id].cost > node.cost) open_set.insert(std::make_pair(n_id, node));
       }
     }
+
+    static int cnt = 0;
+    cnt++;
+    if (cnt == 1000) {
+      map_pub_->publish(obstacle_map_debug_);
+      cnt = 0;
+    }
   }
 
   return calcFinalPath(goal_node, closed_set);
 }
 
 std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
-  ike_nav::Node goal_node, std::map<double, ike_nav::Node> closed_set)
+  ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set)
 {
   std::vector<double> rx, ry;
   rx.push_back(calcGridPosition(goal_node.x));
@@ -115,12 +144,23 @@ std::pair<std::vector<double>, std::vector<double>> IkePlanner::calcFinalPath(
 
   auto parent_index = goal_node.parent_index;
 
+  // check calcFinalPath
+  sleep(1);
+  obstacle_map_debug_.data = obstacle_map_->data;
+  map_pub_->publish(obstacle_map_debug_);
+  sleep(1);
+
   while (parent_index != -1) {
     auto n = closed_set[parent_index];
+
+    obstacle_map_debug_.data[calcGridIndex(n)] = 100;
+
     rx.push_back(calcGridPosition(n.x));
     ry.push_back(calcGridPosition(n.y));
     parent_index = n.parent_index;
   }
+
+  map_pub_->publish(obstacle_map_debug_);
 
   return std::make_pair(rx, ry);
 }
@@ -129,18 +169,16 @@ double IkePlanner::calcGridPosition(uint32_t node_position) { return node_positi
 
 bool IkePlanner::verifyNode(ike_nav::Node node)
 {
-  if (node.x < min_x_)
-    return false;
-  else if (node.y < min_y_)
-    return false;
-  else if (node.x >= max_x_)
-    return false;
-  else if (node.y >= min_y_)
-    return false;
+  // if (node.x < min_x_)
+  //   return false;
+  // else if (node.y < min_y_)
+  //   return false;
+  // else if (node.x >= max_x_)
+  //   return false;
+  // else if (node.y >= min_y_)
+  //   return false;
 
-  if (obstacle_map_
-        ->data[node.x + (obstacle_map_->info.height - node.y - 1) * obstacle_map_->info.width])
-    return false;
+  if (obstacle_map_->data[calcGridIndex(node)]) return false;
 
   return true;
 }
@@ -148,8 +186,9 @@ bool IkePlanner::verifyNode(ike_nav::Node node)
 double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
 {
   auto w = 1.0;
-  auto d = w * std::hypot(node1.x - node2.x, node1.y - node2.y);
-
+  double d = std::sqrt(std::pow(node1.x - node1.x, 2) + std::pow(node2.x - node2.y, 2));
+  RCLCPP_INFO(
+    this->get_logger(), "cost: %d, %d, %d, %d, %f", node1.x, node1.y, node2.x, node2.y, d);
   return d;
 }
 
@@ -179,11 +218,6 @@ nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
   }
 
   return result_future.get()->map;
-
-  // map_pub_ =
-  //   this->create_publisher<nav_msgs::msg::OccupancyGrid>("get_map", rclcpp::QoS(1).reliable());
-
-  // map_pub_->publish(result->map);
 }
 
 }  // namespace ike_nav
