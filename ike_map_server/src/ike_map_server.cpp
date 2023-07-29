@@ -122,7 +122,17 @@ bool IkeMapServer::readPgm(Pgm & pgm)
     std::cerr << "Can only handle P5 format!\n";
     return false;
   }
-  file >> pgm.cols >> pgm.rows >> pgm.max_val;
+
+  std::string check_cols;
+  file >> check_cols;
+  if (check_cols == "#") {
+    file >> check_cols >> check_cols >> check_cols >> check_cols;
+    file >> pgm.cols >> pgm.rows >> pgm.max_val;
+  } else {
+    pgm.cols = std::stoi(check_cols);
+    file >> pgm.rows >> pgm.max_val;
+  }
+
   if (pgm.max_val > 255) {
     std::cerr << "Can only handle 8-bit pixels!\n";
     return false;
