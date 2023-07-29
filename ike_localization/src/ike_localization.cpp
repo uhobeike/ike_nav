@@ -4,22 +4,24 @@
 #include "ike_localization/ike_localization.hpp"
 
 #include "ike_localization/mcl/particle.hpp"
-#include "nav2_util/geometry_utils.hpp"
-#include "nav2_util/string_utils.hpp"
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/convert.h"
-#include "tf2/time.h"
-#include "tf2/utils.h"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/create_timer_ros.h"
-#include "tf2_ros/message_filter.h"
-#include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/transform_listener.h"
 
+#include <nav2_util/geometry_utils.hpp>
+#include <nav2_util/string_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include "nav_msgs/srv/get_map.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "ike_nav_msgs/srv/get_map.hpp"
+#include <nav_msgs/srv/get_map.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/convert.h>
+#include <tf2/time.h>
+#include <tf2/utils.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/create_timer_ros.h>
+#include <tf2_ros/message_filter.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <algorithm>
 #include <chrono>
@@ -41,6 +43,7 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
   initPubSub();
   setParam();
   getParam();
+  getMap();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
 
@@ -56,27 +59,46 @@ void IkeLocalization::initPubSub()
     create_publisher<std_msgs::msg::Float32>("marginal_likelihood", 2);
   mcl_pose_publisher_ = create_publisher<geometry_msgs::msg::PoseStamped>("mcl_pose", 2);
 
-  map_sub_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
-    "map", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable(),
-    std::bind(&IkeLocalization::receiveMap, this, std::placeholders::_1));
   scan_sub_ = create_subscription<sensor_msgs::msg::LaserScan>(
     "scan", 1, std::bind(&IkeLocalization::receiveScan, this, std::placeholders::_1));
   initial_pose_sub_ = create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
     "initialpose", 1, std::bind(&IkeLocalization::receiveInitialPose, this, std::placeholders::_1));
 
-  RCLCPP_INFO(get_logger(), "Done initPubSub done.");
+  RCLCPP_INFO(get_logger(), "Done initPubSub.");
+}
+
+void IkeLocalization::getMap()
+{
+  RCLCPP_INFO(get_logger(), "Run getMap.");
+
+  auto get_map = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
+  while (!get_map->wait_for_service(std::chrono::seconds(1))) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(this->get_logger(), "client interrupted while waiting for service to appear.");
+    }
+    RCLCPP_INFO(this->get_logger(), "waiting for service to appear...");
+  }
+  auto request = std::make_shared<ike_nav_msgs::srv::GetMap::Request>();
+  auto result_future = get_map->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) !=
+    rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "service call failed :(");
+    get_map->remove_pending_request(result_future);
+  }
+
+  map_ = result_future.get()->map;
+
+  RCLCPP_INFO(get_logger(), "Received map.");
+  map_receive_ = true;
+
+  RCLCPP_INFO(get_logger(), "Done getMap.");
 }
 
 void IkeLocalization::receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
   scan_ = *msg;
   scan_receive_ = true;
-}
-void IkeLocalization::receiveMap(nav_msgs::msg::OccupancyGrid::SharedPtr msg)
-{
-  map_ = *msg;
-  map_receive_ = true;
-  RCLCPP_INFO(get_logger(), "Received map.");
 }
 
 void IkeLocalization::receiveInitialPose(
