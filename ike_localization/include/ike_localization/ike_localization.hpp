@@ -40,7 +40,6 @@ public:
 
 private:
   // サブスクライバの登録
-  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::ConstSharedPtr map_sub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::ConstSharedPtr scan_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::ConstSharedPtr
     initial_pose_sub_;
@@ -59,7 +58,6 @@ private:
 
   void receiveInitialPose(
     geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);  // 初期位置の受取
-  void receiveMap(nav_msgs::msg::OccupancyGrid::SharedPtr msg);  // 尤度場作成用のマップの受取
   void receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg);  // LiDARからのデータの受取
 
   void initPubSub();  // パブリッシャ・サブスクライバ初期化
@@ -67,6 +65,7 @@ private:
   void getParam();    // パラメータを取得する
   void initTf();      // tf関連の初期化
   void initMcl(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose);  // MClの初期化
+  void getMap();       // サービス経由でmapを取得する
   void mcl_to_ros2();  // MClからROS 2の橋渡し的なことをする
   void setParticles(nav2_msgs::msg::ParticleCloud &
                       particles);  // MCLのパーティクルからROS 2のパーティクルに置き換える

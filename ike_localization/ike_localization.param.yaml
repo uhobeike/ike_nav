@@ -1,0 +1,18 @@
+/**:
+  ros__parameters:
+    loop_mcl_hz: 10.0
+
+    particle_size: 500
+
+    map_frame:    "map"
+    odom_frame:   "odom"
+    robot_frame:  "base_footprint"
+
+    alpha_trans_trans:    1.0
+    alpha_trans_rotate:   0.03
+    alpha_rotate_trans:   0.3
+    alpha_rotate_rotate:  0.03
+
+    likelihood_dist: 5.0
+    
+    publish_particles_scan_match_point: false

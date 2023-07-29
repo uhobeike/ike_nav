@@ -1,0 +1,36 @@
+<launch>
+  <arg name ="map_yaml" default="$(find-pkg-share turtlebot3_navigation2)/map/map.yaml"/>
+  <arg name ="rviz_config" default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
+
+  <node_container pkg="rclcpp_components" exec="component_container" name="ike_map_server" namespace="" args="">
+    <composable_node pkg="ike_map_server" plugin="ike_nav::IkeMapServer" name="ike_map_server" namespace="">
+      <param name="map_yaml_path"               value="$(var map_yaml)"/>
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
+  </node_container>
+
+  <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
+    <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
+      <param name="loop_mcl_hz"                         value="10.0"/>
+      <param name="particle_size"                       value="500"/>
+      <param name="map_frame"                           value="map"/>
+      <param name="odom_frame"                          value="odom"/>
+      <param name="robot_frame"                         value="base_footprint"/>
+      <param name="alpha_trans_trans"                   value="1.0"/>
+      <param name="alpha_trans_rotate"                  value="0.03"/>
+      <param name="alpha_rotate_trans"                  value="0.3"/>
+      <param name="alpha_rotate_rotate"                 value="0.03"/>
+      <param name="likelihood_dist"                     value="5.0"/>
+      <param name="publish_particles_scan_match_point"  value="false"/>
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
+    
+    <composable_node pkg="ike_planner" plugin="ike_nav::IkePlanner" name="ike_planner" namespace="">
+      <param name="use_dijkstra"                value="false"/>
+      <param name="publish_searched_map"        value="true"/>
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
+  </node_container>
+
+  <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
+</launch>
