@@ -60,11 +60,11 @@ private:
     geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);  // 初期位置の受取
   void receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg);  // LiDARからのデータの受取
 
-  void initPubSub();  // パブリッシャ・サブスクライバ初期化
-  void setParam();    // デフォルトパラメータの設定
-  void getParam();    // パラメータを取得する
-  void initTf();      // tf関連の初期化
-  void initMcl(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose);  // MClの初期化
+  void initPubSub();   // パブリッシャ・サブスクライバ初期化
+  void setParam();     // デフォルトパラメータの設定
+  void getParam();     // パラメータを取得する
+  void initTf();       // tf関連の初期化
+  void initMcl();      // MClの初期化
   void getMap();       // サービス経由でmapを取得する
   void mcl_to_ros2();  // MClからROS 2の橋渡し的なことをする
   void setParticles(nav2_msgs::msg::ParticleCloud &
@@ -113,6 +113,8 @@ private:
   bool initialpose_receive_;  // 初期位置を受け取ったかのフラグ
   bool scan_receive_;         // スキャンを受け取ったかのフラグ
   bool map_receive_;          // マップを受け取ったかのフラグ
+  bool init_tf_;              //tfの初期化を実行したかのフラグ
+  bool init_mcl_;             //MCLの初期化を実行したかのフラグ
 
   std::shared_ptr<mcl::Mcl> mcl_;  // ROS依存が無いMClオブジェクト
 
@@ -121,12 +123,13 @@ private:
 
   Particle maximum_likelihood_particle_;
 
-  // Mcl2用のパラメータ
-  std::string map_frame_, odom_frame_, robot_frame_;  // 各座標系
-  double alpha1_, alpha2_, alpha3_, alpha4_;          // 動作モデル用の誤差
-  int particle_size_;                                 // パーティクルのサイズ
-  double likelihood_dist_;                            // 尤度場の距離
-  std::chrono::milliseconds loop_mcl_ms_;             // MClの実行周期
+  // ike_localization用のパラメータ
+  std::chrono::milliseconds loop_mcl_ms_;                    // MClの実行周期
+  int particle_size_;                                        // パーティクルのサイズ
+  double initial_pose_x_, initial_pose_y_, initial_pose_a_;  // パーティクルの初期位置
+  std::string map_frame_, odom_frame_, robot_frame_;         // 各座標系
+  double alpha1_, alpha2_, alpha3_, alpha4_;                 // 動作モデル用の誤差
+  double likelihood_dist_;                                   // 尤度場の距離
   bool
     publish_particles_scan_match_point_;  // 各パーティクルのスキャンと尤度場のマッチポイントをパブリッシュするか
 };
