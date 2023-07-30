@@ -7,7 +7,6 @@
 
 #include <nav2_util/geometry_utils.hpp>
 #include <nav2_util/string_utils.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/srv/get_map.hpp>
@@ -44,6 +43,7 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
   setParam();
   getParam();
   getMap();
+  loopMcl();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
 
@@ -88,7 +88,6 @@ void IkeLocalization::getMap()
   }
 
   map_ = result_future.get()->map;
-
   RCLCPP_INFO(get_logger(), "Received map.");
   map_receive_ = true;
 
@@ -106,24 +105,9 @@ void IkeLocalization::receiveInitialPose(
 {
   RCLCPP_INFO(get_logger(), "Run receiveInitialPose");
 
-  if (not initialpose_receive_) {
-    if (scan_receive_ && map_receive_) {
-      initialpose_receive_ = true;
-
-      initTf();
-      initMcl(msg);
-      loopMcl();
-    } else {
-      if (not scan_receive_)
-        RCLCPP_WARN(get_logger(), "Not yet received scan. Therefore, MCL cannot be initiated.");
-      if (not map_receive_)
-        RCLCPP_WARN(get_logger(), "Not yet received map. Therefore, MCL cannot be initiated.");
-    }
-  } else {
-    mcl_->initParticles(
-      msg->pose.pose.position.x, msg->pose.pose.position.y, tf2::getYaw(msg->pose.pose.orientation),
-      particle_size_);
-  }
+  mcl_->initParticles(
+    msg->pose.pose.position.x, msg->pose.pose.position.y, tf2::getYaw(msg->pose.pose.orientation),
+    particle_size_);
 
   RCLCPP_INFO(get_logger(), "Done receiveInitialPose.");
 };
@@ -132,11 +116,17 @@ void IkeLocalization::setParam()
 {
   RCLCPP_INFO(get_logger(), "Run setParam.");
 
+  declare_parameter("loop_mcl_hz", 10.0);
+
+  declare_parameter("particle_size", 500);
+
   declare_parameter("map_frame", "map");
   declare_parameter("odom_frame", "odom");
   declare_parameter("robot_frame", "base_footprint");
 
-  declare_parameter("particle_size", 500);
+  declare_parameter("initial_pose_x", 0.0);
+  declare_parameter("initial_pose_y", 0.0);
+  declare_parameter("initial_pose_a", 0.0);
 
   declare_parameter("alpha_trans_trans", 1.0);
   declare_parameter("alpha_trans_rotate", 0.03);
@@ -144,8 +134,6 @@ void IkeLocalization::setParam()
   declare_parameter("alpha_rotate_rotate", 0.03);
 
   declare_parameter("likelihood_dist", 5.0);
-
-  declare_parameter("loop_mcl_hz", 10.0);
 
   declare_parameter("publish_particles_scan_match_point", false);
 
@@ -155,11 +143,18 @@ void IkeLocalization::getParam()
 {
   RCLCPP_INFO(get_logger(), "Run getParam.");
 
+  int loop_mcl_hz = 1000 / get_parameter("loop_mcl_hz").get_value<double>();
+  loop_mcl_ms_ = std::chrono::milliseconds{loop_mcl_hz};
+
+  particle_size_ = get_parameter("particle_size").get_value<int>();
+
+  initial_pose_x_ = get_parameter("initial_pose_x").get_value<double>();
+  initial_pose_y_ = get_parameter("initial_pose_y").get_value<double>();
+  initial_pose_a_ = get_parameter("initial_pose_a").get_value<double>();
+
   map_frame_ = get_parameter("map_frame").get_value<std::string>();
   odom_frame_ = get_parameter("odom_frame").get_value<std::string>();
   robot_frame_ = get_parameter("robot_frame").get_value<std::string>();
-
-  particle_size_ = get_parameter("particle_size").get_value<int>();
 
   alpha1_ = get_parameter("alpha_trans_trans").get_value<double>();
   alpha2_ = get_parameter("alpha_trans_rotate").get_value<double>();
@@ -167,9 +162,6 @@ void IkeLocalization::getParam()
   alpha4_ = get_parameter("alpha_rotate_rotate").get_value<double>();
 
   likelihood_dist_ = get_parameter("likelihood_dist").get_value<double>();
-
-  int loop_mcl_hz = 1000 / get_parameter("loop_mcl_hz").get_value<double>();
-  loop_mcl_ms_ = std::chrono::milliseconds{loop_mcl_hz};
 
   publish_particles_scan_match_point_ =
     get_parameter("publish_particles_scan_match_point").get_value<bool>();
@@ -193,6 +185,7 @@ void IkeLocalization::initTf()
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(shared_from_this());
   latest_tf_ = tf2::Transform::getIdentity();
+  init_tf_ = true;
 
   RCLCPP_INFO(get_logger(), "Done initTf.");
 }
@@ -200,7 +193,7 @@ void IkeLocalization::initTf()
 // https://github.com/ros-planning/navigation2/blob/ef4de1527997c3bd813afe0c6296ff65e05700e0/nav2_amcl/src/amcl_node.cpp#L975-L1016
 void IkeLocalization::transformMapToOdom()
 {
-  RCLCPP_INFO(get_logger(), "Run initTf.");
+  RCLCPP_INFO(get_logger(), "Run transformMapToOdom.");
 
   geometry_msgs::msg::PoseStamped odom_to_map;
   try {
@@ -233,6 +226,8 @@ void IkeLocalization::transformMapToOdom()
   tmp_tf_stamped.child_frame_id = odom_frame_;
   tf2::impl::Converter<false, true>::convert(latest_tf_.inverse(), tmp_tf_stamped.transform);
   tf_broadcaster_->sendTransform(tmp_tf_stamped);
+
+  RCLCPP_INFO(get_logger(), "Done transformMapToOdom.");
 }
 
 void IkeLocalization::getCurrentRobotPose(geometry_msgs::msg::PoseStamped & current_pose)
@@ -340,23 +335,22 @@ visualization_msgs::msg::MarkerArray IkeLocalization::createSphereMarkerArray(
   return marker_array;
 }
 
-void IkeLocalization::initMcl(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose)
+void IkeLocalization::initMcl()
 {
   RCLCPP_INFO(get_logger(), "Run initMcl.");
 
   mcl_.reset();
   mcl_ = std::make_shared<mcl::Mcl>(
-    pose->pose.pose.position.x, pose->pose.pose.position.y,
-    tf2::getYaw(pose->pose.pose.orientation), alpha1_, alpha2_, alpha3_, alpha4_, particle_size_,
-    likelihood_dist_, map_.info.width, map_.info.height, map_.info.resolution,
+    initial_pose_x_, initial_pose_y_, initial_pose_a_, alpha1_, alpha2_, alpha3_, alpha4_,
+    particle_size_, likelihood_dist_, map_.info.width, map_.info.height, map_.info.resolution,
     map_.info.origin.position.x, map_.info.origin.position.y, map_.data, scan_.angle_min,
     scan_.angle_max, scan_.angle_increment, scan_.range_min, scan_.range_max);
 
   mcl_->observation_model_->likelihood_field_->getLikelihoodField(map_.data);
   likelihood_map_pub_->publish(map_);
+  mcl_->initParticles(initial_pose_x_, initial_pose_y_, initial_pose_a_, particle_size_);
 
-  getCurrentRobotPose(current_pose_);
-  past_pose_ = current_pose_;
+  init_mcl_ = true;
 
   RCLCPP_INFO(get_logger(), "Done initMcl.");
 }
@@ -380,7 +374,7 @@ void IkeLocalization::mcl_to_ros2()
 void IkeLocalization::loopMcl()
 {
   mcl_loop_timer_ = create_wall_timer(loop_mcl_ms_, [this]() {
-    if (rclcpp::ok() && initialpose_receive_) {
+    if (rclcpp::ok() && scan_receive_ && map_receive_ && init_tf_ && init_mcl_) {
       RCLCPP_INFO(get_logger(), "Run loopMcl.");
       getCurrentRobotPose(current_pose_);
 
@@ -401,6 +395,17 @@ void IkeLocalization::loopMcl()
       past_pose_ = current_pose_;
 
       mcl_to_ros2();
+    } else {
+      if (!init_tf_) initTf();
+      if (init_tf_) {
+        getCurrentRobotPose(current_pose_);
+        past_pose_ = current_pose_;
+      }
+      if (map_receive_ && !init_mcl_) initMcl();
+      if (not scan_receive_)
+        RCLCPP_WARN(get_logger(), "Not yet received scan. Therefore, MCL cannot be initiated.");
+      if (not map_receive_)
+        RCLCPP_WARN(get_logger(), "Not yet received map. Therefore, MCL cannot be initiated.");
     }
   });
 }

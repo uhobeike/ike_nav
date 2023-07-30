@@ -4,6 +4,10 @@
 
     particle_size: 500
 
+    initial_pose_x: 0.0
+    initial_pose_y: 0.0
+    initial_pose_a: 0.0
+
     map_frame:    "map"
     odom_frame:   "odom"
     robot_frame:  "base_footprint"
