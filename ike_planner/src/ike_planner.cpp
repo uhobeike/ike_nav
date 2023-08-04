@@ -89,8 +89,9 @@ nav_msgs::msg::Path IkePlanner::planning(double sx, double sy, double gx, double
   auto goal_node = ike_nav::Node(calcXYIndex(gx), calcXYIndex(gy), 0.0, -1);
 
   std::map<uint32_t, ike_nav::Node> open_set, closed_set;
-
   open_set.insert(std::make_pair(calcGridIndex(start_node), start_node));
+
+  search_map_ = obstacle_map_;
 
   while (rclcpp::ok()) {
     if (open_set.size() == 0) {
