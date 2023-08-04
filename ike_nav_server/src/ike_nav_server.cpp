@@ -13,6 +13,7 @@ namespace ike_nav
 
 IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_server", options)
 {
+  initTf();
   initServiceClient();
   initLoopTimer();
 
@@ -21,6 +22,14 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
 
   goal_.pose.position.x = 11.6;
   goal_.pose.position.y = 8.7;
+}
+
+void IkeNavServer::initTf()
+{
+  tf_buffer_.reset();
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
+  // tf_buffer_->setUsingDedicatedThread(true);
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
 void IkeNavServer::initServiceClient()
@@ -54,6 +63,12 @@ void IkeNavServer::asyncGetPath(
   auto future_result = get_path_client_->async_send_request(request, response_received_callback);
 }
 
+void IkeNavServer::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose)
+{
+  geometry_msgs::msg::PoseStamped pose;
+  if (nav2_util::getCurrentPose(pose, *tf_buffer_)) map_frame_robot_pose = pose;
+}
+
 void IkeNavServer::loop()
 {
   std::chrono::system_clock::time_point start, end;
@@ -61,6 +76,7 @@ void IkeNavServer::loop()
 
   start = std::chrono::system_clock::now();
 
+  getMapFrameRobotPose(start_);
   asyncGetPath(start_, goal_);
 
   end = std::chrono::system_clock::now();
