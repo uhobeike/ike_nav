@@ -87,8 +87,7 @@ void IkeNavServer::loop()
   std::cout << std::ctime(&time_stamp);
 
   auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-  auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(time).count() % 1000000000;
-  RCLCPP_INFO(this->get_logger(), "exe_time: %ld.%09ld[s]", msec, nsec);
+  RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
 }
 
 }  // namespace ike_nav
