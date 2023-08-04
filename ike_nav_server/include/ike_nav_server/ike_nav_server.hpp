@@ -45,4 +45,4 @@ private:
 
 }  // namespace ike_nav
 
-#endif  // IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
+#endif  // IKE_NAV_SERVER__IKE_NAV_SERVER_HPP_
