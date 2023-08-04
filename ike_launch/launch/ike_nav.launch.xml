@@ -33,6 +33,10 @@
       <param name="publish_searched_map"        value="true"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
+
+    <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
   </node_container>
 
   <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
