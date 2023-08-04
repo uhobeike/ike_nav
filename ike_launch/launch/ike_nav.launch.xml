@@ -34,7 +34,11 @@
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
 
-    <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
+    <!-- <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node> -->
+
+    <composable_node pkg="ike_controller" plugin="ike_nav::IkeController" name="ike_controller" namespace="">
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
   </node_container>
