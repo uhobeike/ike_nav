@@ -6,14 +6,17 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
+find_package(Ceres REQUIRED)
 
 ament_auto_find_build_dependencies()
+
+include_directories(${CERESS_INCLUDE_DIRS})
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/ike_controller.cpp
 )
 
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} ${CERES_LIBRARIES})
 
 rclcpp_components_register_nodes(${PROJECT_NAME}
   PLUGIN "ike_nav::IkeController"

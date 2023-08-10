@@ -3,10 +3,20 @@
 
 #include "ike_controller/ike_controller.hpp"
 
+#include <ceres/ceres.h>
+#include <glog/logging.h>
+
 #include <memory>
 #include <utility>
 
+using ceres::CostFunction;
+using ceres::DynamicAutoDiffCostFunction;
+using ceres::Problem;
+using ceres::Solve;
+
 using namespace std::chrono_literals;
+
+constexpr int MAX_PREDICTIVE_HORIZON_NUM = 100;
 
 namespace ike_nav
 {
@@ -59,6 +69,7 @@ void IkeController::asyncGetPath(
   using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedFuture;
   auto response_received_callback = [this](ServiceResponseFuture future) {
     auto result = future.get();
+    path_ = result->path;
   };
   auto future_result = get_path_client_->async_send_request(request, response_received_callback);
 }
@@ -67,6 +78,66 @@ void IkeController::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_f
 {
   geometry_msgs::msg::PoseStamped pose;
   if (nav2_util::getCurrentPose(pose, *tf_buffer_)) map_frame_robot_pose = pose;
+}
+
+void IkeController::ModelPredictiveControl()
+{
+  RCLCPP_INFO(this->get_logger(), "MPC start.");
+
+  constexpr double dt = 1;
+  constexpr int predictive_horizon_num = 40;
+
+  constexpr double lower_bound_linear_velocity = 0.0;
+  constexpr double lower_bound_angular_velocity = -M_PI;
+  constexpr double upper_bound_linear_velocity = 1.0;
+  constexpr double upper_bound_angular_velocity = M_PI;
+
+  std::vector<double> path_x;
+  std::vector<double> path_y;
+
+  for (const auto & pose_stamped : path_.poses) {
+    path_x.push_back(pose_stamped.pose.position.x);
+    path_y.push_back(pose_stamped.pose.position.y);
+    RCLCPP_INFO(
+      this->get_logger(), "pose %f, %f", pose_stamped.pose.position.x,
+      pose_stamped.pose.position.y);
+  }
+
+  auto * cost_function =
+    new ceres::DynamicAutoDiffCostFunction<ObjectiveFunction, MAX_PREDICTIVE_HORIZON_NUM>(
+      new ObjectiveFunction(path_x, path_y, dt, predictive_horizon_num));
+
+  cost_function->SetNumResiduals(predictive_horizon_num);
+  cost_function->AddParameterBlock(predictive_horizon_num);
+  cost_function->AddParameterBlock(predictive_horizon_num);
+
+  std::vector<double> v_in, w_in, v_out, w_out;
+  std::vector<std::vector<double> *> vectors = {&v_in, &w_in, &v_out, &w_out};
+  for (auto vec : vectors) vec->assign(predictive_horizon_num, 0.0);
+
+  Problem problem;
+  problem.AddResidualBlock(cost_function, nullptr, v_out.data(), w_out.data());
+
+  for (int i = 0; i < predictive_horizon_num; ++i) {
+    problem.SetParameterLowerBound(v_out.data(), i, lower_bound_linear_velocity);
+    problem.SetParameterLowerBound(w_out.data(), i, lower_bound_angular_velocity);
+    problem.SetParameterUpperBound(v_out.data(), i, upper_bound_linear_velocity);
+    problem.SetParameterUpperBound(w_out.data(), i, upper_bound_angular_velocity);
+  }
+
+  Solver::Options options;
+  options.max_num_iterations = 100;
+  options.linear_solver_type = ceres::DENSE_QR;
+  options.minimizer_progress_to_stdout = false;
+
+  Solver::Summary summary;
+  Solve(options, &problem, &summary);
+
+  std::cout << summary.BriefReport() << "\n";
+
+  RCLCPP_INFO(this->get_logger(), "%s", summary.BriefReport().c_str());
+
+  RCLCPP_INFO(this->get_logger(), "MPC done.");
 }
 
 void IkeController::loop()
@@ -78,6 +149,8 @@ void IkeController::loop()
 
   getMapFrameRobotPose(start_);
   asyncGetPath(start_, goal_);
+
+  if (path_.poses.size() != 0) ModelPredictiveControl();
 
   end = std::chrono::system_clock::now();
 
