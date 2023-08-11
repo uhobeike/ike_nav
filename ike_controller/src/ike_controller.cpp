@@ -5,7 +5,6 @@
 
 #include <ceres/ceres.h>
 #include <glog/logging.h>
-#include <tf2/utils.h>
 
 #include <memory>
 #include <utility>
@@ -24,24 +23,9 @@ namespace ike_nav
 
 IkeController::IkeController(const rclcpp::NodeOptions & options) : Node("ike_controller", options)
 {
-  initTf();
   initPublisher();
-  initServiceClient();
-  initLoopTimer();
-
-  start_.pose.position.x = 8.1;
-  start_.pose.position.y = 11.1;
-
-  goal_.pose.position.x = 11.6;
-  goal_.pose.position.y = 8.7;
-}
-
-void IkeController::initTf()
-{
-  tf_buffer_.reset();
-  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
-  // tf_buffer_->setUsingDedicatedThread(true);
-  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+  initService();
+  setMpcParameters();
 }
 
 void IkeController::initPublisher()
@@ -50,48 +34,10 @@ void IkeController::initPublisher()
     this->create_publisher<nav_msgs::msg::Path>("predictive_horizon", rclcpp::QoS(1).reliable());
 }
 
-void IkeController::initServiceClient()
+void IkeController::initService() {}
+
+void IkeController::setMpcParameters()
 {
-  get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
-}
-
-void IkeController::initLoopTimer()
-{
-  loop_timer_ = create_wall_timer(100ms, std::bind(&IkeController::loop, this));
-}
-
-void IkeController::asyncGetPath(
-  geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal)
-{
-  while (!get_path_client_->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
-      return;
-    }
-    RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
-  }
-  auto request = std::make_shared<ike_nav_msgs::srv::GetPath::Request>();
-  request->start = start;
-  request->goal = goal;
-
-  using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedFuture;
-  auto response_received_callback = [this](ServiceResponseFuture future) {
-    auto result = future.get();
-    path_ = result->path;
-  };
-  auto future_result = get_path_client_->async_send_request(request, response_received_callback);
-}
-
-void IkeController::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose)
-{
-  geometry_msgs::msg::PoseStamped pose;
-  if (nav2_util::getCurrentPose(pose, *tf_buffer_)) map_frame_robot_pose = pose;
-}
-
-void IkeController::ModelPredictiveControl()
-{
-  RCLCPP_INFO(this->get_logger(), "MPC start.");
-
   // MPC Parameters
   constexpr double dt = 1;
   constexpr int predictive_horizon_num = 10;
@@ -100,33 +46,66 @@ void IkeController::ModelPredictiveControl()
   constexpr double upper_bound_linear_velocity = 1.0;
   constexpr double upper_bound_angular_velocity = M_PI;
 
+  dt_ = dt;
+  predictive_horizon_num_ = predictive_horizon_num;
+  lower_bound_linear_velocity_ = lower_bound_linear_velocity;
+  lower_bound_angular_velocity_ = lower_bound_angular_velocity;
+  upper_bound_linear_velocity_ = upper_bound_linear_velocity;
+  upper_bound_angular_velocity_ = upper_bound_angular_velocity;
+}
+
+void IkeController::ModelPredictiveControl()
+{
+  RCLCPP_INFO(this->get_logger(), "ModelPredictiveControl start.");
+
+  nav_msgs::msg::Path path;
+  std::tuple<double, double, double> pose;
+
+  auto path_xy = convertPathXY(path);
+  auto action = optimization(pose, path_xy);
+  auto predictive_horizon = getPredictiveHorizon(pose, action);
+  publishPredictiveHorizon(predictive_horizon);
+
+  RCLCPP_INFO(this->get_logger(), "ModelPredictiveControl done.");
+}
+
+std::pair<std::vector<double>, std::vector<double>> IkeController::convertPathXY(
+  const nav_msgs::msg::Path & path)
+{
   std::vector<double> path_x, path_y;
-  for (const auto & pose_stamped : path_.poses) {
+  for (const auto & pose_stamped : path.poses) {
     path_x.push_back(pose_stamped.pose.position.x);
     path_y.push_back(pose_stamped.pose.position.y);
   }
 
+  return std::make_pair(path_x, path_y);
+}
+
+std::pair<std::vector<double>, std::vector<double>> IkeController::optimization(
+  const std::tuple<double, double, double> & robot_pose,
+  const std::pair<std::vector<double>, std::vector<double>> & path)
+{
   auto * cost_function =
     new ceres::DynamicAutoDiffCostFunction<ObjectiveFunction, MAX_PREDICTIVE_HORIZON_NUM>(
       new ObjectiveFunction(
-        start_.pose.position.x, start_.pose.position.y, tf2::getYaw(start_.pose.orientation),
-        path_x, path_y, dt, predictive_horizon_num));
+        std::get<0>(robot_pose), std::get<1>(robot_pose), std::get<2>(robot_pose),
+        std::get<0>(path), std::get<1>(path), dt_, predictive_horizon_num_));
 
-  cost_function->SetNumResiduals(predictive_horizon_num);
-  cost_function->AddParameterBlock(predictive_horizon_num);
-  cost_function->AddParameterBlock(predictive_horizon_num);
+  cost_function->SetNumResiduals(predictive_horizon_num_);
+  cost_function->AddParameterBlock(predictive_horizon_num_);
+  cost_function->AddParameterBlock(predictive_horizon_num_);
 
   std::vector<double> v_in, w_in, v_out, w_out;
   std::vector<std::vector<double> *> vectors = {&v_in, &w_in, &v_out, &w_out};
-  for (auto vec : vectors) vec->assign(predictive_horizon_num, 0.0);
+  for (auto vec : vectors) vec->assign(predictive_horizon_num_, 0.0);
 
   Problem problem;
   problem.AddResidualBlock(cost_function, nullptr, v_out.data(), w_out.data());
-  for (int i = 0; i < predictive_horizon_num; ++i) {
-    problem.SetParameterLowerBound(v_out.data(), i, lower_bound_linear_velocity);
-    problem.SetParameterLowerBound(w_out.data(), i, lower_bound_angular_velocity);
-    problem.SetParameterUpperBound(v_out.data(), i, upper_bound_linear_velocity);
-    problem.SetParameterUpperBound(w_out.data(), i, upper_bound_angular_velocity);
+  for (int i = 0; i < predictive_horizon_num_; ++i) {
+    problem.SetParameterLowerBound(v_out.data(), i, lower_bound_linear_velocity_);
+    problem.SetParameterLowerBound(w_out.data(), i, lower_bound_angular_velocity_);
+    problem.SetParameterUpperBound(v_out.data(), i, upper_bound_linear_velocity_);
+    problem.SetParameterUpperBound(w_out.data(), i, upper_bound_angular_velocity_);
   }
 
   Solver::Options options;
@@ -137,28 +116,33 @@ void IkeController::ModelPredictiveControl()
   Solver::Summary summary;
   Solve(options, &problem, &summary);
 
-  std::cout << summary.BriefReport() << "\n";
-
   RCLCPP_INFO(this->get_logger(), "%s", summary.BriefReport().c_str());
 
+  return std::make_pair(v_out, w_out);
+}
+
+std::pair<std::vector<double>, std::vector<double>> IkeController::getPredictiveHorizon(
+  const std::tuple<double, double, double> & robot_pose,
+  const std::pair<std::vector<double>, std::vector<double>> & action)
+{
   std::vector<double> predictive_horizon_x, predictive_horizon_y;
   std::vector<double> ths;
 
-  predictive_horizon_x.push_back(start_.pose.position.x);
-  predictive_horizon_y.push_back(start_.pose.position.y);
-  ths.push_back(tf2::getYaw(start_.pose.orientation));
+  predictive_horizon_x.push_back(std::get<0>(robot_pose));
+  predictive_horizon_y.push_back(std::get<1>(robot_pose));
+  ths.push_back(std::get<2>(robot_pose));
 
-  for (int i = 0; i < predictive_horizon_num; i++) {
+  for (int i = 0; i < predictive_horizon_num_; i++) {
     // clang-format off
     double  x =
           predictive_horizon_x[i] + 
-            v_out[i] * cos(ths[i]) * dt;
+            action.first[i] * cos(ths[i]) * dt_;
     double  y = 
           predictive_horizon_y[i] +
-            v_out[i] * sin(ths[i]) * dt;
+            action.first[i] * sin(ths[i]) * dt_;
     double  th = 
           ths[i] + 
-            w_out[i] * dt;
+            action.second[i] * dt_;
     // clang-format on
 
     predictive_horizon_x.push_back(x);
@@ -166,46 +150,27 @@ void IkeController::ModelPredictiveControl()
     ths.push_back(th);
   }
 
-  if (predictive_horizon_x.size() != predictive_horizon_y.size()) {
+  return std::make_pair(predictive_horizon_x, predictive_horizon_y);
+}
+
+void IkeController::publishPredictiveHorizon(
+  const std::pair<std::vector<double>, std::vector<double>> & predictive_horizon)
+{
+  if (predictive_horizon.first.size() != predictive_horizon.second.size()) {
     RCLCPP_ERROR(this->get_logger(), "Different array sizes.");
   }
 
   nav_msgs::msg::Path path;
   path.header.frame_id = "map";
   path.header.stamp = rclcpp::Time();
-  path.poses.resize(predictive_horizon_x.size());
+  path.poses.resize(predictive_horizon.first.size());
 
-  for (size_t i = 0; i < predictive_horizon_x.size(); ++i) {
-    path.poses[i].pose.position.x = predictive_horizon_x[i];
-    path.poses[i].pose.position.y = predictive_horizon_y[i];
+  for (size_t i = 0; i < predictive_horizon.first.size(); ++i) {
+    path.poses[i].pose.position.x = predictive_horizon.first[i];
+    path.poses[i].pose.position.y = predictive_horizon.second[i];
   }
 
   predictive_horizon_pub_->publish(path);
-
-  RCLCPP_INFO(this->get_logger(), "MPC done.");
-}
-
-void IkeController::loop()
-{
-  std::chrono::system_clock::time_point start, end;
-  std::time_t time_stamp;
-
-  start = std::chrono::system_clock::now();
-
-  getMapFrameRobotPose(start_);
-  asyncGetPath(start_, goal_);
-
-  if (path_.poses.size() != 0) ModelPredictiveControl();
-
-  end = std::chrono::system_clock::now();
-
-  auto time = end - start;
-
-  time_stamp = std::chrono::system_clock::to_time_t(start);
-  std::cout << std::ctime(&time_stamp);
-
-  auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-  RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
 }
 
 }  // namespace ike_nav

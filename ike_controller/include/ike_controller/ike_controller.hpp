@@ -17,6 +17,7 @@
 #include <tf2_ros/transform_listener.h>
 
 using ceres::Solver;
+
 namespace ike_nav
 {
 class IkeController : public rclcpp::Node
@@ -25,31 +26,35 @@ public:
   explicit IkeController(const rclcpp::NodeOptions & options);
 
 protected:
-  void initTf();
   void initPublisher();
-  void initServiceClient();
-  void initLoopTimer();
-
-  void asyncGetPath(geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal);
-
-  void getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose);
+  void initService();
 
   void ModelPredictiveControl();
+  void setMpcParameters();
+  std::pair<std::vector<double>, std::vector<double>> convertPathXY(
+    const nav_msgs::msg::Path & path);
+  std::pair<std::vector<double>, std::vector<double>> optimization(
+    const std::tuple<double, double, double> & robot_pose,
+    const std::pair<std::vector<double>, std::vector<double>> & path);
+  std::pair<std::vector<double>, std::vector<double>> getPredictiveHorizon(
+    const std::tuple<double, double, double> & robot_pose,
+    const std::pair<std::vector<double>, std::vector<double>> & action);
 
-  void loop();
+  void publishPredictiveHorizon(
+    const std::pair<std::vector<double>, std::vector<double>> & predictive_horizon);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr predictive_horizon_pub_;
 
-  rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_client_;
-
-  rclcpp::TimerBase::SharedPtr loop_timer_;
-
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
-
   geometry_msgs::msg::PoseStamped start_, goal_;
   nav_msgs::msg::Path path_;
+
+  double dt_;
+  int predictive_horizon_num_;
+  double lower_bound_linear_velocity_;
+  double lower_bound_angular_velocity_;
+  double upper_bound_linear_velocity_;
+  double upper_bound_angular_velocity_;
 };
 
 struct ObjectiveFunction
