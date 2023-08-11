@@ -199,8 +199,8 @@ geometry_msgs::msg::TwistStamped IkeController::convertTwist(
   geometry_msgs::msg::TwistStamped twist;
   twist.header.frame_id = "";
   twist.header.stamp = rclcpp::Time();
-  twist.twist.linear.x = action.first[0];
-  twist.twist.angular.z = action.second[0];
+  twist.twist.linear.x = action.first[1];
+  twist.twist.angular.z = action.second[1];
 
   return twist;
 }
