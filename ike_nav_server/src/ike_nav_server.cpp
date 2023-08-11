@@ -35,6 +35,7 @@ void IkeNavServer::initTf()
 void IkeNavServer::initServiceClient()
 {
   get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
+  get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
 }
 
 void IkeNavServer::initLoopTimer()
@@ -59,8 +60,30 @@ void IkeNavServer::asyncGetPath(
   using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedFuture;
   auto response_received_callback = [this](ServiceResponseFuture future) {
     auto result = future.get();
+    path_ = result->path;
   };
   auto future_result = get_path_client_->async_send_request(request, response_received_callback);
+}
+void IkeNavServer::asyncGetTwist(
+  const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path)
+{
+  while (!get_path_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+  }
+  auto request = std::make_shared<ike_nav_msgs::srv::GetTwist::Request>();
+  request->robot_pose = robot_pose;
+  request->path = path;
+
+  using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetTwist>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+    twist_ = result->twist.twist;
+  };
+  auto future_result = get_twist_client_->async_send_request(request, response_received_callback);
 }
 
 void IkeNavServer::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose)
@@ -78,6 +101,7 @@ void IkeNavServer::loop()
 
   getMapFrameRobotPose(start_);
   asyncGetPath(start_, goal_);
+  if (path_.poses.size() > 0) asyncGetTwist(start_, path_);
 
   end = std::chrono::system_clock::now();
 
