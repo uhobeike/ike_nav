@@ -1,4 +1,4 @@
 geometry_msgs/PoseStamped robot_pose
 nav_msgs/Path path
 ---
-geometry_msgs/Twist action
+geometry_msgs/TwistStamped twist
