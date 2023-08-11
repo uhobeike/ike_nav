@@ -6,6 +6,7 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetAction.srv"
   "srv/GetMap.srv"
   "srv/GetPath.srv"
   DEPENDENCIES builtin_interfaces std_msgs nav_msgs
