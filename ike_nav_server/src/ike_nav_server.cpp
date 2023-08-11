@@ -14,6 +14,7 @@ namespace ike_nav
 IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_server", options)
 {
   initTf();
+  initPublisher();
   initServiceClient();
   initLoopTimer();
 
@@ -31,6 +32,12 @@ void IkeNavServer::initTf()
   // tf_buffer_->setUsingDedicatedThread(true);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
+
+void IkeNavServer::initPublisher()
+{
+  cmd_vel_pub_ =
+    this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).reliable());
+};
 
 void IkeNavServer::initServiceClient()
 {
@@ -82,6 +89,7 @@ void IkeNavServer::asyncGetTwist(
   auto response_received_callback = [this](ServiceResponseFuture future) {
     auto result = future.get();
     twist_ = result->twist.twist;
+    cmd_vel_pub_->publish(twist_);
   };
   auto future_result = get_twist_client_->async_send_request(request, response_received_callback);
 }

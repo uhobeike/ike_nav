@@ -25,6 +25,7 @@ public:
 
 protected:
   void initTf();
+  void initPublisher();
   void initServiceClient();
   void initLoopTimer();
 
@@ -37,6 +38,7 @@ protected:
   void loop();
 
 private:
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
   rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_client_;
   rclcpp::Client<ike_nav_msgs::srv::GetTwist>::SharedPtr get_twist_client_;
 
