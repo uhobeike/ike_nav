@@ -4,17 +4,14 @@
 #ifndef IKE_CONTROLLER__IKE_CONTROLLER_HPP_
 #define IKE_CONTROLLER__IKE_CONTROLLER_HPP_
 
-#include <Eigen/Dense>
-#include <nav2_util/robot_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include "ike_nav_msgs/srv/get_path.hpp"
+#include "ike_nav_msgs/srv/get_twist.hpp"
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/path.hpp>
 
 #include <ceres/ceres.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
 
 using ceres::Solver;
 
@@ -29,7 +26,8 @@ protected:
   void initPublisher();
   void initService();
 
-  void ModelPredictiveControl();
+  geometry_msgs::msg::TwistStamped ModelPredictiveControl(
+    const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path);
   void setMpcParameters();
   std::pair<std::vector<double>, std::vector<double>> convertPathXY(
     const nav_msgs::msg::Path & path);
@@ -43,8 +41,12 @@ protected:
   void publishPredictiveHorizon(
     const std::pair<std::vector<double>, std::vector<double>> & predictive_horizon);
 
+  geometry_msgs::msg::TwistStamped convertTwist(
+    const std::pair<std::vector<double>, std::vector<double>> & action);
+
 private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr predictive_horizon_pub_;
+  rclcpp::Service<ike_nav_msgs::srv::GetTwist>::SharedPtr get_twist_srv_;
 
   geometry_msgs::msg::PoseStamped start_, goal_;
   nav_msgs::msg::Path path_;
@@ -55,6 +57,7 @@ private:
   double lower_bound_angular_velocity_;
   double upper_bound_linear_velocity_;
   double upper_bound_angular_velocity_;
+  int max_num_iterations_;
 };
 
 struct ObjectiveFunction

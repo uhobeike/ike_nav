@@ -3,8 +3,7 @@
 
 #include "ike_controller/ike_controller.hpp"
 
-#include <ceres/ceres.h>
-#include <glog/logging.h>
+#include <tf2/utils.h>
 
 #include <memory>
 #include <utility>
@@ -34,7 +33,19 @@ void IkeController::initPublisher()
     this->create_publisher<nav_msgs::msg::Path>("predictive_horizon", rclcpp::QoS(1).reliable());
 }
 
-void IkeController::initService() {}
+void IkeController::initService()
+{
+  auto get_twist = [&](
+                     const std::shared_ptr<rmw_request_id_t> request_header,
+                     const std::shared_ptr<ike_nav_msgs::srv::GetTwist_Request> request,
+                     std::shared_ptr<ike_nav_msgs::srv::GetTwist_Response> response) -> void {
+    (void)request_header;
+    RCLCPP_INFO(this->get_logger(), "IkeController Model Predictive Control start");
+    response->twist = ModelPredictiveControl(request->robot_pose, request->path);
+    RCLCPP_INFO(this->get_logger(), "IkeController Model Predictive Control done");
+  };
+  get_twist_srv_ = create_service<ike_nav_msgs::srv::GetTwist>("get_twist", get_twist);
+}
 
 void IkeController::setMpcParameters()
 {
@@ -45,6 +56,7 @@ void IkeController::setMpcParameters()
   constexpr double lower_bound_angular_velocity = -M_PI;
   constexpr double upper_bound_linear_velocity = 1.0;
   constexpr double upper_bound_angular_velocity = M_PI;
+  constexpr int max_num_iterations = 100;
 
   dt_ = dt;
   predictive_horizon_num_ = predictive_horizon_num;
@@ -52,21 +64,27 @@ void IkeController::setMpcParameters()
   lower_bound_angular_velocity_ = lower_bound_angular_velocity;
   upper_bound_linear_velocity_ = upper_bound_linear_velocity;
   upper_bound_angular_velocity_ = upper_bound_angular_velocity;
+  max_num_iterations_ = max_num_iterations;
 }
 
-void IkeController::ModelPredictiveControl()
+geometry_msgs::msg::TwistStamped IkeController::ModelPredictiveControl(
+  const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path)
 {
   RCLCPP_INFO(this->get_logger(), "ModelPredictiveControl start.");
 
-  nav_msgs::msg::Path path;
-  std::tuple<double, double, double> pose;
+  std::tuple<double, double, double> robot_pose_tuple = {
+    robot_pose.pose.position.x, robot_pose.pose.position.y,
+    tf2::getYaw(robot_pose.pose.orientation)};
 
   auto path_xy = convertPathXY(path);
-  auto action = optimization(pose, path_xy);
-  auto predictive_horizon = getPredictiveHorizon(pose, action);
+  auto action = optimization(robot_pose_tuple, path_xy);
+  auto predictive_horizon = getPredictiveHorizon(robot_pose_tuple, action);
   publishPredictiveHorizon(predictive_horizon);
+  auto twist = convertTwist(action);
 
   RCLCPP_INFO(this->get_logger(), "ModelPredictiveControl done.");
+
+  return twist;
 }
 
 std::pair<std::vector<double>, std::vector<double>> IkeController::convertPathXY(
@@ -109,7 +127,7 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimization(
   }
 
   Solver::Options options;
-  options.max_num_iterations = 100;
+  options.max_num_iterations = max_num_iterations_;
   options.linear_solver_type = ceres::DENSE_QR;
   options.minimizer_progress_to_stdout = false;
 
@@ -171,6 +189,18 @@ void IkeController::publishPredictiveHorizon(
   }
 
   predictive_horizon_pub_->publish(path);
+}
+
+geometry_msgs::msg::TwistStamped IkeController::convertTwist(
+  const std::pair<std::vector<double>, std::vector<double>> & action)
+{
+  geometry_msgs::msg::TwistStamped twist;
+  twist.header.frame_id = "";
+  twist.header.stamp = rclcpp::Time();
+  twist.twist.linear.x = action.first[0];
+  twist.twist.angular.z = action.second[0];
+
+  return twist;
 }
 
 }  // namespace ike_nav
