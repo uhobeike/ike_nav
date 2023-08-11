@@ -5,6 +5,7 @@
 
 #include <ceres/ceres.h>
 #include <glog/logging.h>
+#include <tf2/utils.h>
 
 #include <memory>
 #include <utility>
@@ -91,28 +92,25 @@ void IkeController::ModelPredictiveControl()
 {
   RCLCPP_INFO(this->get_logger(), "MPC start.");
 
+  // MPC Parameters
   constexpr double dt = 1;
   constexpr int predictive_horizon_num = 10;
-
   constexpr double lower_bound_linear_velocity = 0.0;
   constexpr double lower_bound_angular_velocity = -M_PI;
   constexpr double upper_bound_linear_velocity = 1.0;
   constexpr double upper_bound_angular_velocity = M_PI;
 
-  std::vector<double> path_x;
-  std::vector<double> path_y;
-
+  std::vector<double> path_x, path_y;
   for (const auto & pose_stamped : path_.poses) {
     path_x.push_back(pose_stamped.pose.position.x);
     path_y.push_back(pose_stamped.pose.position.y);
-    RCLCPP_INFO(
-      this->get_logger(), "pose %f, %f", pose_stamped.pose.position.x,
-      pose_stamped.pose.position.y);
   }
 
   auto * cost_function =
     new ceres::DynamicAutoDiffCostFunction<ObjectiveFunction, MAX_PREDICTIVE_HORIZON_NUM>(
-      new ObjectiveFunction(path_x, path_y, dt, predictive_horizon_num));
+      new ObjectiveFunction(
+        start_.pose.position.x, start_.pose.position.y, tf2::getYaw(start_.pose.orientation),
+        path_x, path_y, dt, predictive_horizon_num));
 
   cost_function->SetNumResiduals(predictive_horizon_num);
   cost_function->AddParameterBlock(predictive_horizon_num);
@@ -124,7 +122,6 @@ void IkeController::ModelPredictiveControl()
 
   Problem problem;
   problem.AddResidualBlock(cost_function, nullptr, v_out.data(), w_out.data());
-
   for (int i = 0; i < predictive_horizon_num; ++i) {
     problem.SetParameterLowerBound(v_out.data(), i, lower_bound_linear_velocity);
     problem.SetParameterLowerBound(w_out.data(), i, lower_bound_angular_velocity);
@@ -144,13 +141,12 @@ void IkeController::ModelPredictiveControl()
 
   RCLCPP_INFO(this->get_logger(), "%s", summary.BriefReport().c_str());
 
-  std::vector<double> predictive_horizon_x;
-  std::vector<double> predictive_horizon_y;
+  std::vector<double> predictive_horizon_x, predictive_horizon_y;
   std::vector<double> ths;
 
-  predictive_horizon_x.push_back((double)8.0);
-  predictive_horizon_y.push_back((double)9.5);
-  ths.push_back((double)0.0);
+  predictive_horizon_x.push_back(start_.pose.position.x);
+  predictive_horizon_y.push_back(start_.pose.position.y);
+  ths.push_back(tf2::getYaw(start_.pose.orientation));
 
   for (int i = 0; i < predictive_horizon_num; i++) {
     // clang-format off

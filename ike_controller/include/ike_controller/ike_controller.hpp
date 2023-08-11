@@ -55,17 +55,24 @@ private:
 struct ObjectiveFunction
 {
   ObjectiveFunction(
-    std::vector<double> path_x, std::vector<double> path_y, double dt, int predictive_horizon_num)
-  : path_x_(path_x), path_y_(path_y), dt_(dt), predictive_horizon_num_(predictive_horizon_num)
+    double init_pose_x, double init_pose_y, double init_pose_th, std::vector<double> path_x,
+    std::vector<double> path_y, double dt, int predictive_horizon_num)
+  : init_pose_x_(init_pose_x),
+    init_pose_y_(init_pose_y),
+    init_pose_th_(init_pose_th),
+    path_x_(path_x),
+    path_y_(path_y),
+    dt_(dt),
+    predictive_horizon_num_(predictive_horizon_num)
   {
   }
 
   template <typename T>
   bool operator()(T const * const * parameters, T * residual) const
   {
-    std::vector<T> xs(predictive_horizon_num_ + 1, (T)8.0);
-    std::vector<T> ys(predictive_horizon_num_ + 1, (T)9.5);
-    std::vector<T> ths(predictive_horizon_num_ + 1, (T)0.0);
+    std::vector<T> xs(predictive_horizon_num_ + 1, (T)init_pose_x_);
+    std::vector<T> ys(predictive_horizon_num_ + 1, (T)init_pose_y_);
+    std::vector<T> ths(predictive_horizon_num_ + 1, (T)init_pose_th_);
 
     for (int i = 0; i < predictive_horizon_num_; i++) {
       // clang-format off
@@ -93,6 +100,7 @@ struct ObjectiveFunction
   }
 
 private:
+  double init_pose_x_, init_pose_y_, init_pose_th_;
   std::vector<double> path_x_;
   std::vector<double> path_y_;
   double dt_;
