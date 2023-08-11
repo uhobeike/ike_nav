@@ -24,6 +24,7 @@ namespace ike_nav
 IkeController::IkeController(const rclcpp::NodeOptions & options) : Node("ike_controller", options)
 {
   initTf();
+  initPublisher();
   initServiceClient();
   initLoopTimer();
 
@@ -40,6 +41,12 @@ void IkeController::initTf()
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   // tf_buffer_->setUsingDedicatedThread(true);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+}
+
+void IkeController::initPublisher()
+{
+  predictive_horizon_pub_ =
+    this->create_publisher<nav_msgs::msg::Path>("predictive_horizon", rclcpp::QoS(1).reliable());
 }
 
 void IkeController::initServiceClient()
@@ -85,7 +92,7 @@ void IkeController::ModelPredictiveControl()
   RCLCPP_INFO(this->get_logger(), "MPC start.");
 
   constexpr double dt = 1;
-  constexpr int predictive_horizon_num = 40;
+  constexpr int predictive_horizon_num = 10;
 
   constexpr double lower_bound_linear_velocity = 0.0;
   constexpr double lower_bound_angular_velocity = -M_PI;
@@ -136,6 +143,48 @@ void IkeController::ModelPredictiveControl()
   std::cout << summary.BriefReport() << "\n";
 
   RCLCPP_INFO(this->get_logger(), "%s", summary.BriefReport().c_str());
+
+  std::vector<double> predictive_horizon_x;
+  std::vector<double> predictive_horizon_y;
+  std::vector<double> ths;
+
+  predictive_horizon_x.push_back((double)8.0);
+  predictive_horizon_y.push_back((double)9.5);
+  ths.push_back((double)0.0);
+
+  for (int i = 0; i < predictive_horizon_num; i++) {
+    // clang-format off
+    double  x =
+          predictive_horizon_x[i] + 
+            v_out[i] * cos(ths[i]) * dt;
+    double  y = 
+          predictive_horizon_y[i] +
+            v_out[i] * sin(ths[i]) * dt;
+    double  th = 
+          ths[i] + 
+            w_out[i] * dt;
+    // clang-format on
+
+    predictive_horizon_x.push_back(x);
+    predictive_horizon_y.push_back(y);
+    ths.push_back(th);
+  }
+
+  if (predictive_horizon_x.size() != predictive_horizon_y.size()) {
+    RCLCPP_ERROR(this->get_logger(), "Different array sizes.");
+  }
+
+  nav_msgs::msg::Path path;
+  path.header.frame_id = "map";
+  path.header.stamp = rclcpp::Time();
+  path.poses.resize(predictive_horizon_x.size());
+
+  for (size_t i = 0; i < predictive_horizon_x.size(); ++i) {
+    path.poses[i].pose.position.x = predictive_horizon_x[i];
+    path.poses[i].pose.position.y = predictive_horizon_y[i];
+  }
+
+  predictive_horizon_pub_->publish(path);
 
   RCLCPP_INFO(this->get_logger(), "MPC done.");
 }
