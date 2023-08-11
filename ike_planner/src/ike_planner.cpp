@@ -5,6 +5,8 @@
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
+#include <algorithm>
+
 namespace ike_nav
 {
 
@@ -180,6 +182,7 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
   plan_path.header.stamp = rclcpp::Time(0);
 
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
+  std::reverse(plan_path.poses.begin(), plan_path.poses.end());
   plan_path_pub_->publish(plan_path);
 
   return plan_path;

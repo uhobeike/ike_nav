@@ -8,6 +8,7 @@ ament_auto_find_build_dependencies()
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetMap.srv"
   "srv/GetPath.srv"
+  "srv/GetTwist.srv"
   DEPENDENCIES builtin_interfaces std_msgs nav_msgs
 )
 
