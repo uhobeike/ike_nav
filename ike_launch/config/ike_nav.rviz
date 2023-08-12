@@ -7,9 +7,9 @@ Panels:
         - /Global Options1
         - /ike_map_server1
         - /ike_localization1
-        - /ike_controller1
+        - /ike_costmap_2d1
         - /ike_planner1
-        - /ike_controller2
+        - /ike_controller1
       Splitter Ratio: 0.5647059082984924
     Tree Height: 1252
   - Class: rviz_common/Selection
@@ -172,7 +172,7 @@ Visualization Manager:
           Use Timestamp: false
           Value: true
       Enabled: true
-      Name: ike_controller
+      Name: ike_costmap_2d
     - Class: rviz_common/Group
       Displays:
         - Alpha: 0.699999988079071
