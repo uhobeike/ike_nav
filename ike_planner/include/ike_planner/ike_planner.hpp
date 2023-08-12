@@ -6,7 +6,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "ike_nav_msgs/srv/get_map.hpp"
+#include "ike_nav_msgs/srv/get_cost_map2_d.hpp"
 #include "ike_nav_msgs/srv/get_path.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <nav_msgs/msg/path.hpp>
@@ -41,7 +41,7 @@ protected:
 
   void initPlanner();
 
-  nav_msgs::msg::OccupancyGrid getMap();
+  nav_msgs::msg::OccupancyGrid getCostMap2D();
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
@@ -57,7 +57,7 @@ protected:
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
-  rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
+  rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_map_srv_;
   rclcpp::Service<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_srv_;
 
   double resolution_, robot_radius_;

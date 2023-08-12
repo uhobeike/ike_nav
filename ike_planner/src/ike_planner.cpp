@@ -49,7 +49,7 @@ void IkePlanner::initService()
 void IkePlanner::initPlanner()
 {
   RCLCPP_INFO(this->get_logger(), "IkePlanner initialized");
-  obstacle_map_ = getMap();
+  obstacle_map_ = getCostMap2D();
   resolution_ = obstacle_map_.info.resolution;
   robot_radius_ = 1.0;
   min_x_ = min_y_ = 0;
@@ -226,16 +226,16 @@ uint32_t IkePlanner::calcXYIndex(double position)
 
 uint32_t IkePlanner::calcGridIndex(ike_nav::Node node) { return node.y * x_width_ + node.x; }
 
-nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
+nav_msgs::msg::OccupancyGrid IkePlanner::getCostMap2D()
 {
-  auto get_map = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
+  auto get_map = this->create_client<ike_nav_msgs::srv::GetCostMap2D>("get_costmap_2d");
   while (!get_map->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(this->get_logger(), "client interrupted while waiting for service to appear.");
     }
     RCLCPP_INFO(this->get_logger(), "waiting for service to appear...");
   }
-  auto request = std::make_shared<ike_nav_msgs::srv::GetMap::Request>();
+  auto request = std::make_shared<ike_nav_msgs::srv::GetCostMap2D::Request>();
   auto result_future = get_map->async_send_request(request);
   if (
     rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) !=
@@ -244,7 +244,7 @@ nav_msgs::msg::OccupancyGrid IkePlanner::getMap()
     get_map->remove_pending_request(result_future);
   }
 
-  return result_future.get()->map;
+  return result_future.get()->costmap_2d;
 }
 
 }  // namespace ike_nav
