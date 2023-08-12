@@ -11,10 +11,6 @@ namespace ike_nav
 IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_costmap_2d", options)
 {
   initPublisher();
-
-  auto costmap_2d_layers = createCostMap2DLayers(getMap());
-
-  publishCostMap2DLayers(costmap_2d_layers);
 }
 
 void IkeCostMap2D::initPublisher()
@@ -25,6 +21,26 @@ void IkeCostMap2D::initPublisher()
     "inflation_layer", rclcpp::QoS(1).reliable());
   // obstacle_layer_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
   //   "obstacle_layer", rclcpp::QoS(1).reliable());
+}
+
+void IkeCostMap2D::initService()
+{
+  auto get_costmap_2d =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<ike_nav_msgs::srv::GetCostMap2D_Request> request,
+      std::shared_ptr<ike_nav_msgs::srv::GetCostMap2D_Response> response) -> void {
+    (void)request_header;
+
+    auto costmap_2d_layers = createCostMap2DLayers(getMap());
+
+    publishCostMap2DLayers(costmap_2d_layers);
+
+    response->costmap_2d = costmap_2d_layers["inflation_layer"];
+    response->success = true;
+    response->message = "Called /get_costmap_2d. Send map done.";
+  };
+  get_costmap_2d_srv_ = create_service<ike_nav_msgs::srv::GetMap>("get_costmap_2d", get_costmap_2d);
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
