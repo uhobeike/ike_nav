@@ -36,10 +36,12 @@ private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr static_layer_pub_;
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr inflation_layer_pub_;
   // rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr obstacle_layer_pub_;
-  rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_costmap_2d_srv_;
+  rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_srv_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   std::map<std::string, nav_msgs::msg::OccupancyGrid> costmap_2d_layers_;
+
+  nav_msgs::msg::OccupancyGrid map_;
 };
 
 }  // namespace ike_nav

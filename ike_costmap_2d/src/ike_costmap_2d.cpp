@@ -11,6 +11,8 @@ namespace ike_nav
 IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_costmap_2d", options)
 {
   initPublisher();
+  initService();
+  map_ = getMap();
 }
 
 void IkeCostMap2D::initPublisher()
@@ -32,7 +34,7 @@ void IkeCostMap2D::initService()
       std::shared_ptr<ike_nav_msgs::srv::GetCostMap2D_Response> response) -> void {
     (void)request_header;
 
-    auto costmap_2d_layers = createCostMap2DLayers(getMap());
+    auto costmap_2d_layers = createCostMap2DLayers(map_);
 
     publishCostMap2DLayers(costmap_2d_layers);
 
@@ -40,7 +42,8 @@ void IkeCostMap2D::initService()
     response->success = true;
     response->message = "Called /get_costmap_2d. Send map done.";
   };
-  get_costmap_2d_srv_ = create_service<ike_nav_msgs::srv::GetMap>("get_costmap_2d", get_costmap_2d);
+  get_costmap_2d_srv_ =
+    create_service<ike_nav_msgs::srv::GetCostMap2D>("get_costmap_2d", get_costmap_2d);
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
