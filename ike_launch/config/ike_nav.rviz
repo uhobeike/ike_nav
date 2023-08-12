@@ -7,8 +7,9 @@ Panels:
         - /Global Options1
         - /ike_map_server1
         - /ike_localization1
-        - /ike_planner1
         - /ike_controller1
+        - /ike_planner1
+        - /ike_controller2
       Splitter Ratio: 0.5647059082984924
     Tree Height: 865
   - Class: rviz_common/Selection
@@ -125,8 +126,6 @@ Visualization Manager:
               Value: true
             imu_link:
               Value: true
-            map:
-              Value: true
             odom:
               Value: true
             wheel_left_link:
@@ -139,24 +138,57 @@ Visualization Manager:
           Show Axes: true
           Show Names: false
           Tree:
-            map:
-              odom:
-                base_footprint:
-                  base_link:
-                    base_scan:
-                      {}
-                    caster_back_link:
-                      {}
-                    imu_link:
-                      {}
-                    wheel_left_link:
-                      {}
-                    wheel_right_link:
-                      {}
+            {}
           Update Interval: 0
           Value: true
       Enabled: true
       Name: ike_localization
+    - Class: rviz_common/Group
+      Displays:
+        - Alpha: 0.699999988079071
+          Class: rviz_default_plugins/Map
+          Color Scheme: map
+          Draw Behind: false
+          Enabled: true
+          Name: Static Layer
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /static_layer
+          Update Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /static_layer_updates
+          Use Timestamp: false
+          Value: true
+        - Alpha: 0.699999988079071
+          Class: rviz_default_plugins/Map
+          Color Scheme: map
+          Draw Behind: false
+          Enabled: true
+          Name: Inflation Layer
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /inflation_layer
+          Update Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /inflation_layer_updates
+          Use Timestamp: false
+          Value: true
+      Enabled: true
+      Name: ike_controller
     - Class: rviz_common/Group
       Displays:
         - Alpha: 0.699999988079071
