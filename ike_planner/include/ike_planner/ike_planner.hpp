@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef IKE_IKE_PLANNER__IKE_PLANNER_HPP_
-#define IKE_IKE_PLANNER__IKE_IKE_PLANNER_HPP_
+#ifndef IKE_PLANNER__IKE_PLANNER_HPP_
+#define IKE_PLANNER__IKE_PLANNER_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 
