@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <exec_depend>ike_controller</exec_depend>
   <exec_depend>ike_localization</exec_depend>
   <exec_depend>ike_map_server</exec_depend>
   <exec_depend>ike_planner</exec_depend>

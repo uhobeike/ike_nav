@@ -11,12 +11,13 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
-  <exec_depend>ike_localization</exec_depend>
-  <exec_depend>ike_map_server</exec_depend>
-  <exec_depend>ike_planner</exec_depend>
-  <depend>nav2_util</depend>
+  <depend>ike_controller</depend>
+  <depend>ike_localization</depend>
+  <depend>ike_map_server</depend>
   <depend>ike_nav_msgs</depend>
+  <depend>ike_planner</depend>
   <depend>geometry_msgs</depend>
+  <depend>nav2_util</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
