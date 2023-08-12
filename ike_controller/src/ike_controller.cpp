@@ -141,53 +141,60 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimization(
   return std::make_pair(v_out, w_out);
 }
 
-std::pair<std::vector<double>, std::vector<double>> IkeController::getPredictiveHorizon(
+std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
+IkeController::getPredictiveHorizon(
   const std::tuple<double, double, double> & robot_pose,
   const std::pair<std::vector<double>, std::vector<double>> & action)
 {
-  std::vector<double> predictive_horizon_x, predictive_horizon_y;
-  std::vector<double> ths;
+  std::vector<double> predictive_horizon_x, predictive_horizon_y, predictive_horizon_ths;
 
   predictive_horizon_x.push_back(std::get<0>(robot_pose));
   predictive_horizon_y.push_back(std::get<1>(robot_pose));
-  ths.push_back(std::get<2>(robot_pose));
+  predictive_horizon_ths.push_back(std::get<2>(robot_pose));
 
   for (int i = 0; i < predictive_horizon_num_; i++) {
     // clang-format off
     double  x =
           predictive_horizon_x[i] + 
-            action.first[i] * cos(ths[i]) * dt_;
+            action.first[i] * cos(predictive_horizon_ths[i]) * dt_;
     double  y = 
           predictive_horizon_y[i] +
-            action.first[i] * sin(ths[i]) * dt_;
+            action.first[i] * sin(predictive_horizon_ths[i]) * dt_;
     double  th = 
-          ths[i] + 
+          predictive_horizon_ths[i] + 
             action.second[i] * dt_;
     // clang-format on
 
     predictive_horizon_x.push_back(x);
     predictive_horizon_y.push_back(y);
-    ths.push_back(th);
+    predictive_horizon_ths.push_back(th);
   }
 
-  return std::make_pair(predictive_horizon_x, predictive_horizon_y);
+  return std::make_tuple(predictive_horizon_x, predictive_horizon_y, predictive_horizon_ths);
 }
 
 void IkeController::publishPredictiveHorizon(
-  const std::pair<std::vector<double>, std::vector<double>> & predictive_horizon)
+  const std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> &
+    predictive_horizon)
 {
-  if (predictive_horizon.first.size() != predictive_horizon.second.size()) {
+  auto x_size = std::get<0>(predictive_horizon).size();
+  auto y_size = std::get<1>(predictive_horizon).size();
+  auto th_size = std::get<2>(predictive_horizon).size();
+
+  if (x_size != y_size || y_size != th_size) {
     RCLCPP_ERROR(this->get_logger(), "Different array sizes.");
   }
 
   nav_msgs::msg::Path path;
   path.header.frame_id = "map";
   path.header.stamp = rclcpp::Time();
-  path.poses.resize(predictive_horizon.first.size());
+  path.poses.resize(x_size);
 
-  for (size_t i = 0; i < predictive_horizon.first.size(); ++i) {
-    path.poses[i].pose.position.x = predictive_horizon.first[i];
-    path.poses[i].pose.position.y = predictive_horizon.second[i];
+  for (size_t i = 0; i < x_size; ++i) {
+    path.poses[i].pose.position.x = std::get<0>(predictive_horizon)[i];
+    path.poses[i].pose.position.y = std::get<1>(predictive_horizon)[i];
+    path.poses[i].pose.orientation.w = cos(std::get<2>(predictive_horizon)[i] / 2.0);
+    path.poses[i].pose.orientation.z = sin(std::get<2>(predictive_horizon)[i] / 2.0);
   }
 
   predictive_horizon_pub_->publish(path);
