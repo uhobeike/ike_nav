@@ -34,12 +34,13 @@ protected:
   std::pair<std::vector<double>, std::vector<double>> optimization(
     const std::tuple<double, double, double> & robot_pose,
     const std::pair<std::vector<double>, std::vector<double>> & path);
-  std::pair<std::vector<double>, std::vector<double>> getPredictiveHorizon(
+  std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getPredictiveHorizon(
     const std::tuple<double, double, double> & robot_pose,
     const std::pair<std::vector<double>, std::vector<double>> & action);
 
   void publishPredictiveHorizon(
-    const std::pair<std::vector<double>, std::vector<double>> & predictive_horizon);
+    const std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> &
+      predictive_horizon);
 
   geometry_msgs::msg::TwistStamped convertTwist(
     const std::pair<std::vector<double>, std::vector<double>> & action);
