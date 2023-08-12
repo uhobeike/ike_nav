@@ -9,6 +9,12 @@
     </composable_node>
   </node_container>
 
+  <node_container pkg="rclcpp_components" exec="component_container" name="ike_costmap_2d" namespace="" args="">
+    <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
+  </node_container>
+  
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
     <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
       <param name="loop_mcl_hz"                         value="10.0"/>
@@ -27,7 +33,7 @@
       <param name="publish_particles_scan_match_point"  value="false"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
-    
+
     <composable_node pkg="ike_planner" plugin="ike_nav::IkePlanner" name="ike_planner" namespace="">
       <param name="use_dijkstra"                value="false"/>
       <param name="publish_searched_map"        value="true"/>
@@ -41,7 +47,6 @@
     <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
-
   </node_container>
 
   <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>

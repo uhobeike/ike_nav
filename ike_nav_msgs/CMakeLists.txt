@@ -6,6 +6,7 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetCostMap2D.srv"
   "srv/GetMap.srv"
   "srv/GetPath.srv"
   "srv/GetTwist.srv"
