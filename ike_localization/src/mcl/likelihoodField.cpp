@@ -30,8 +30,8 @@ LikelihoodField::~LikelihoodField(){};
 
 void LikelihoodField::createLikelihoodField()
 {
-  for (uint32_t y = 0; y < width_ / 2; y++)
-    for (uint32_t x = 0; x < height_ / 2; x++)
+  for (uint32_t y = 0; y < width_; y++)
+    for (uint32_t x = 0; x < height_; x++)
       if (data_[width_ * (height_ - y - 1) + x] == 100) {
         calculateLikelihood(x, y);
       }
