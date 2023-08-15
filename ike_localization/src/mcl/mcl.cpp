@@ -58,26 +58,23 @@ void Mcl::initParticles(
             << "\n";
 }
 
-void Mcl::getMaximumLikelihoodParticle(Particle & particle)
+void Mcl::getMeanParticle(Particle & particle)
 {
-  double max_likelihood;
-  bool once_flag = true;
-  for (auto particle : particles_) {
-    if (once_flag) max_likelihood = particle.weight;
-    once_flag = false;
-
-    max_likelihood = std::max(max_likelihood, particle.weight);
+  Particle mean_pose;
+  double euler_sin = 0.;
+  double euler_cos = 0.;
+  for (auto p : particles_) {
+    mean_pose.pose.position.x += p.pose.position.x;
+    mean_pose.pose.position.y += p.pose.position.y;
+    euler_sin += std::sin(p.pose.euler.yaw);
+    euler_cos += std::cos(p.pose.euler.yaw);
   }
 
-  std::vector<Particle> maximum_likelihood_particles;
-  int cnt = 0;
-  for (auto particle : particles_)
-    if (particle.weight >= max_likelihood) {
-      maximum_likelihood_particles.push_back(particle);
-      cnt++;
-    }
+  mean_pose.pose.position.x /= particles_.size();
+  mean_pose.pose.position.y /= particles_.size();
+  mean_pose.pose.euler.yaw = std::atan2(euler_sin, euler_cos);
 
-  particle = maximum_likelihood_particles[0];
+  particle = mean_pose;
 }
 
 void Mcl::release_pointers()
