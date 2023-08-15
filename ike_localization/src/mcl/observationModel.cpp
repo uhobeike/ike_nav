@@ -57,12 +57,17 @@ void ObservationModel::update(std::vector<Particle> & particles, std::vector<flo
 
   particles_scan_match_point_.clear();
   double sum_score = 0.;
+  // std::string w;
   for (auto & p : particles) {
     auto particle_weight = calculateParticleWeight(p);
-
-    p.weight *= particle_weight;
+    // w += std::to_string(std::abs(particle_weight));
+    // w += ", ";
+    p.weight *= std::abs(particle_weight);
     sum_score += particle_weight;
   }
+
+  // std::cerr << w << "\n";
+
   marginal_likelihood_ = sum_score / (particles.size() * scan_.ranges.size());
 
   std::cout << "Done ObservationModel::update."
@@ -97,23 +102,16 @@ double ObservationModel::calculateParticleWeight(const Particle p)
 
 double ObservationModel::getProbFromLikelihoodMap(double x, double y)
 {
+  // std::cout << "Run ObservationModel::getProbFromLikelihoodMap."
+  //           << "\n";
+
+  int grid_x = x / likelihood_field_->resolution_;
+  int grid_y = y / likelihood_field_->resolution_;
+
   // std::cout << "Done ObservationModel::getProbFromLikelihoodMap."
   //           << "\n";
-  return likelihood_field_->data_
-           [likelihood_field_->width_ *
-              (likelihood_field_->height_ -
-               (floor(std::negate<double>()(y) / likelihood_field_->resolution_) +
-                (likelihood_field_->width_ * 0.5) -
-                (fabs(
-                  fabs(likelihood_field_->origin_y_ / likelihood_field_->resolution_) -
-                  fabs(likelihood_field_->width_) * 0.5))) -
-               1) +
-            (likelihood_field_->height_ * 0.5) +
-            (fabs(
-              fabs(likelihood_field_->origin_x_ / likelihood_field_->resolution_) -
-              fabs(likelihood_field_->height_) * 0.5)) +
-            floor(x / likelihood_field_->resolution_)] *
-         0.01;
+
+  return likelihood_field_->data_[grid_y * likelihood_field_->width_ + grid_x];
 }
 
 }  // namespace mcl
