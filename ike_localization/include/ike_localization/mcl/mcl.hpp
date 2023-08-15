@@ -36,8 +36,8 @@ public:
 
   void initParticles(
     double ini_pose_x, double ini_pose_y, double ini_pose_yaw,
-    int particle_size);  // パーティクルの初期化をする
-  void getMaximumLikelihoodParticle(Particle & particle);  // 最尤なパーティクルを渡す
+    int particle_size);                       // パーティクルの初期化をする
+  void getMeanParticle(Particle & particle);  // 最尤なパーティクルを渡す
   inline float getMarginalLikelihood()
   {
     return observation_model_->marginal_likelihood_;

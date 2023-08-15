@@ -217,7 +217,7 @@ void IkeLocalization::transformMapToOdom()
   }
 
   auto stamp = tf2_ros::fromMsg(scan_.header.stamp);
-  tf2::TimePoint transform_tolerance_ = stamp + tf2::durationFromSec(1.0);
+  tf2::TimePoint transform_tolerance_ = stamp + tf2::durationFromSec(0.0);
 
   tf2::impl::Converter<true, false>::convert(odom_to_map.pose, latest_tf_);
   geometry_msgs::msg::TransformStamped tmp_tf_stamped;
@@ -391,7 +391,7 @@ void IkeLocalization::loopMcl()
 
       mcl_->resampling_->resampling(mcl_->particles_);
 
-      mcl_->getMaximumLikelihoodParticle(maximum_likelihood_particle_);
+      mcl_->getMeanParticle(maximum_likelihood_particle_);
       past_pose_ = current_pose_;
 
       mcl_to_ros2();
