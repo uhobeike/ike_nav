@@ -16,7 +16,7 @@ LikelihoodField::LikelihoodField(
   resolution_(resolution),
   origin_x_(origin_x),
   origin_y_(origin_y),
-  data_(data)
+  data_(data.begin(), data.end())
 {
   std::cout << "Create LikelihoodField."
             << "\n";
@@ -35,6 +35,12 @@ void LikelihoodField::createLikelihoodField()
       if (data_[width_ * (height_ - y - 1) + x] == 100) {
         calculateLikelihood(x, y);
       }
+
+  for (auto & data : data_) {
+    data /= 100;
+    if (data < 1.0e-10) data = 1.0e-10;
+    if (data == 0) data = 1.0e-10;
+  }
 }
 
 void LikelihoodField::calculateLikelihood(uint32_t map_x, uint32_t map_y)
@@ -68,6 +74,19 @@ double LikelihoodField::calculateProb(double stochastic_variable, double likelih
 
 double LikelihoodField::normalizePdf(double max_pdf, double pdf) { return (pdf / max_pdf) * 100; }
 
-void LikelihoodField::getLikelihoodField(std::vector<int8_t> & data) { data = data_; }
+void LikelihoodField::getLikelihoodField(std::vector<int8_t> & data)
+{
+  // to do fix
+
+  auto copy_data = data_;
+
+  for (auto & data : copy_data) {
+    data = data * 100;
+  }
+
+  std::vector<int8_t> int_data(copy_data.begin(), copy_data.end());
+
+  data = int_data;
+}
 
 }  // namespace mcl
