@@ -103,7 +103,7 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
   const nav_msgs::msg::OccupancyGrid & map)
 {
   auto inflation_layer = map;
-  auto inflation_radius = 8.0;
+  auto inflation_radius = 10.0;
 
   for (uint32_t map_y = 0; map_y < inflation_layer.info.width; map_y++)
     for (uint32_t map_x = 0; map_x < inflation_layer.info.height; map_x++)

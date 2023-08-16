@@ -201,7 +201,7 @@ bool IkePlanner::verifyNode(ike_nav::Node node)
   else if (node.y >= max_y_)
     return false;
 
-  if (obstacle_map_.data[calcGridIndex(node)]) return false;
+  if (obstacle_map_.data[calcGridIndex(node)] == 100) return false;
 
   return true;
 }
@@ -211,7 +211,8 @@ double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
   auto w = 1.0;
   double d = w * std::hypot(
                    static_cast<double>(node1.x) - static_cast<double>(node2.x),
-                   static_cast<double>(node1.y) - static_cast<double>(node2.y));
+                   static_cast<double>(node1.y) - static_cast<double>(node2.y)) +
+             obstacle_map_.data[calcGridIndex(node2)];
 
   // if Dijkstra's algorithm
   if (use_dijkstra_) d = 0.0;
@@ -244,17 +245,7 @@ nav_msgs::msg::OccupancyGrid IkePlanner::getCostMap2D()
     get_map->remove_pending_request(result_future);
   }
 
-  // to do fix
-  auto map = result_future.get()->costmap_2d;
-
-  for (auto & data : map.data) {
-    if (data == -1 || data == 0 || data == 100) {
-    } else {
-      data = 0;
-    }
-  }
-
-  return map;
+  return result_future.get()->costmap_2d;
 }
 
 }  // namespace ike_nav
