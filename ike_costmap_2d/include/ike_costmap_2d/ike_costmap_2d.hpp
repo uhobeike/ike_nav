@@ -27,6 +27,8 @@ protected:
     const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createStaticLayer(const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createInflationLayer(const nav_msgs::msg::OccupancyGrid & map);
+  double calculateCost(double stochastic_variable, double inflation_radius);
+  double normalizeCost(double max_cost, double cost);
 
   nav_msgs::msg::OccupancyGrid getMap();
 
