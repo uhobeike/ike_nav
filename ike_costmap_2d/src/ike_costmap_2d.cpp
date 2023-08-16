@@ -36,14 +36,29 @@ void IkeCostMap2D::initService()
 
     auto costmap_2d_layers = createCostMap2DLayers(map_);
 
-    publishCostMap2DLayers(costmap_2d_layers);
-
     response->costmap_2d = costmap_2d_layers["inflation_layer"];
     response->success = true;
     response->message = "Called /get_costmap_2d. Send map done.";
   };
   get_costmap_2d_srv_ =
     create_service<ike_nav_msgs::srv::GetCostMap2D>("get_costmap_2d", get_costmap_2d);
+
+  auto publish_costmap_2d =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    auto costmap_2d_layers = createCostMap2DLayers(map_);
+
+    publishCostMap2DLayers(costmap_2d_layers);
+
+    response->success = true;
+    response->message = "Called /publish_costmap_2d. Send map done.";
+  };
+  publish_map_srv_ =
+    create_service<std_srvs::srv::Trigger>("publish_costmap_2d", publish_costmap_2d);
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
