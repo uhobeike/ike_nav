@@ -244,7 +244,17 @@ nav_msgs::msg::OccupancyGrid IkePlanner::getCostMap2D()
     get_map->remove_pending_request(result_future);
   }
 
-  return result_future.get()->costmap_2d;
+  // to do fix
+  auto map = result_future.get()->costmap_2d;
+
+  for (auto & data : map.data) {
+    if (data == -1 || data == 0 || data == 100) {
+    } else {
+      data = 0;
+    }
+  }
+
+  return map;
 }
 
 }  // namespace ike_nav
