@@ -20,8 +20,9 @@ public:
   void resampling(std::vector<Particle> & particles);  // リサンプリングをする
 
   void systematicSampling(std::vector<Particle> & particles);  // 系統サンプリングをする
-  double calculateSystematicSamplingStep(
-    double particles_weight_median);  // 系統サンプリング用のstepを計算する
+  double calculateSystematicSamplingStart(
+    double random_max);  // 系統サンプリング用のランダムなstartを計算する
+  double calculateSystematicSamplingStep();  // 系統サンプリング用のstepを計算する
   void normalize(std::vector<Particle> & particles);  // パーティクルの重みを正規化をする
 
   std::random_device seed_gen_;

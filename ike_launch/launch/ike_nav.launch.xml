@@ -26,10 +26,10 @@
       <param name="odom_frame"                          value="odom"/>
       <param name="robot_frame"                         value="base_footprint"/>
       <param name="alpha_trans_trans"                   value="1.0"/>
-      <param name="alpha_trans_rotate"                  value="0.03"/>
-      <param name="alpha_rotate_trans"                  value="0.3"/>
-      <param name="alpha_rotate_rotate"                 value="0.03"/>
-      <param name="likelihood_dist"                     value="5.0"/>
+      <param name="alpha_trans_rotate"                  value="0.2"/>
+      <param name="alpha_rotate_trans"                  value="0.2"/>
+      <param name="alpha_rotate_rotate"                 value="0.2"/>
+      <param name="likelihood_dist"                     value="10.0"/>
       <param name="publish_particles_scan_match_point"  value="false"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
