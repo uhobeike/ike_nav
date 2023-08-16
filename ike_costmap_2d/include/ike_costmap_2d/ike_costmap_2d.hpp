@@ -9,6 +9,7 @@
 #include "ike_nav_msgs/srv/get_cost_map2_d.hpp"
 #include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/msg/occupancy_grid.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 namespace ike_nav
 {
@@ -37,6 +38,7 @@ private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr inflation_layer_pub_;
   // rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr obstacle_layer_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_srv_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
 
   std::map<std::string, nav_msgs::msg::OccupancyGrid> costmap_2d_layers_;

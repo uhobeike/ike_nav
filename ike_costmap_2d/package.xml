@@ -14,6 +14,7 @@
   <depend>geometry_msgs</depend>
   <depend>ike_map_server</depend>
   <depend>ike_nav_msgs</depend>
+  <depend>std_srvs</depend>
   <depend>nav_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
