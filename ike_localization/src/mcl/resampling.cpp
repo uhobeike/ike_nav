@@ -8,7 +8,7 @@
 
 namespace mcl
 {
-Resampling::Resampling(int particle_size) : engine_(seed_gen_()), particle_size_(particle_size){};
+Resampling::Resampling(int particle_size) : particle_size_(particle_size){};
 Resampling::~Resampling(){};
 
 void Resampling::resampling(std::vector<Particle> & particles)
@@ -16,8 +16,8 @@ void Resampling::resampling(std::vector<Particle> & particles)
   std::cout << "Run Resampling::resampling."
             << "\n";
 
-  systematicSampling(particles);
   normalize(particles);
+  systematicSampling(particles);
 
   std::cout << "Done Resampling::resampling."
             << "\n";
@@ -32,33 +32,36 @@ void Resampling::systematicSampling(std::vector<Particle> & particles)
     particles_weight_sum_tmp += p.weight;
     particles_weight_sum.push_back(particles_weight_sum_tmp);
   }
-  double systematic_sampling_step =
-    calculateSystematicSamplingStep(particles_weight_sum.back() / particles.size());
 
-  uint32_t index = 0;
+  // clang-format off
+  int index = 0;
+  double step = 0.;
   std::vector<Particle> new_particles;
+  double systematic_sampling_start = calculateSystematicSamplingStart(1. / static_cast<double>(particle_size_));
+  double systematic_sampling_step = calculateSystematicSamplingStep();
   while (new_particles.size() <= particle_size_) {
-    if (systematic_sampling_step < particles_weight_sum[index]) {
-      // if (particles[index].weight < 0.3) {
-      //   ++index;
-      //   continue;
-      // }
+    if (systematic_sampling_start + step < particles_weight_sum[index]) {
       new_particles.push_back(particles[index]);
-      ++systematic_sampling_step;
+      step += systematic_sampling_step;
     } else {
-      new_particles.push_back(particles[index]);
-      ++index;
+      index++;
     }
   }
+  // clang-format on
 
   std::copy(std::begin(new_particles), std::end(new_particles), std::begin(particles));
 }
 
-double Resampling::calculateSystematicSamplingStep(double particles_weight_median)
+double Resampling::calculateSystematicSamplingStart(double random_max)
 {
-  std::uniform_real_distribution<> real_number_generator(0, particles_weight_median);
+  std::uniform_real_distribution<> real_number_generator(0, random_max);
 
   return real_number_generator(engine_);
+}
+
+double Resampling::calculateSystematicSamplingStep()
+{
+  return 1. / static_cast<double>(particle_size_);
 }
 
 void Resampling::normalize(std::vector<Particle> & particles)
