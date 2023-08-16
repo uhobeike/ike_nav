@@ -118,17 +118,32 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
 
         for (auto y = sub_map_y_start - inflation_radius; y < sub_map_y_end; y++)
           for (auto x = sub_map_x_start - inflation_radius; x < sub_map_x_end; x++)
-            if (hypot(x - map_x, y - map_y) < inflation_radius) {
-              inflation_layer
-                .data[inflation_layer.info.width * (inflation_layer.info.height - y - 1) + x] = 99;
-            }
+            if (hypot(x - map_x, y - map_y) < inflation_radius)
+              if (
+                normalizeCost(
+                  calculateCost(0., inflation_radius),
+                  calculateCost(hypot(x - map_x, y - map_y), inflation_radius)) >
+                inflation_layer
+                  .data[inflation_layer.info.width * (inflation_layer.info.height - y - 1) + x])
+                inflation_layer
+                  .data[inflation_layer.info.width * (inflation_layer.info.height - y - 1) + x] =
+                  normalizeCost(
+                    calculateCost(0., inflation_radius),
+                    calculateCost(hypot(x - map_x, y - map_y), inflation_radius));
       }
-
-  for (auto & map_data : inflation_layer.data)
-    if (map_data == 99) map_data = 100;
 
   return inflation_layer;
 };
+
+double IkeCostMap2D::calculateCost(double stochastic_variable, double inflation_radius)
+{
+  double sigma = inflation_radius / 3.;
+  double cost = 1. / std::sqrt(2. * M_PI * sigma * sigma) *
+                std::exp(-stochastic_variable * stochastic_variable / (2. * sigma * sigma));
+  return cost;
+}
+
+double IkeCostMap2D::normalizeCost(double max_pdf, double pdf) { return (pdf / max_pdf) * 100.; }
 
 void IkeCostMap2D::publishCostMap2DLayers(
   std::map<std::string, nav_msgs::msg::OccupancyGrid> & costmap_2d_layers)
