@@ -44,6 +44,7 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
   getParam();
   getMap();
   loopMcl();
+  initService();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
 
@@ -65,6 +66,29 @@ void IkeLocalization::initPubSub()
     "initialpose", 1, std::bind(&IkeLocalization::receiveInitialPose, this, std::placeholders::_1));
 
   RCLCPP_INFO(get_logger(), "Done initPubSub.");
+}
+
+void IkeLocalization::initService()
+{
+  auto publish_likelihoodfield_map =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    if (init_likelihood_map_) {
+      likelihood_map_pub_->publish(map_);
+      response->success = true;
+      response->message = "Called /publish_likelihoodfield_map. Publish map done.";
+    } else {
+      response->success = false;
+      response->message =
+        "Called /publish_likelihoodfield_map.  LikelihoodField Map has not been created yet.";
+    }
+  };
+  publish_likelihoodfield_map_srv_ = create_service<std_srvs::srv::Trigger>(
+    "publish_likelihoodfield_map", publish_likelihoodfield_map);
 }
 
 void IkeLocalization::getMap()
@@ -351,6 +375,7 @@ void IkeLocalization::initMcl()
   mcl_->initParticles(initial_pose_x_, initial_pose_y_, initial_pose_a_, particle_size_);
 
   init_mcl_ = true;
+  init_likelihood_map_ = true;
 
   RCLCPP_INFO(get_logger(), "Done initMcl.");
 }

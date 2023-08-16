@@ -20,6 +20,7 @@
 #include <sensor_msgs/msg/temperature.hpp>
 #include <std_msgs/msg/float32.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <std_srvs/srv/trigger.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
 #include <atomic>
@@ -52,6 +53,9 @@ private:
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr marginal_likelihood_publisher_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mcl_pose_publisher_;
 
+  // サービスサーバの登録
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_likelihoodfield_map_srv_;
+
   rclcpp::TimerBase::SharedPtr mcl_loop_timer_;  // MClのループ用のタイマー
 
   rclcpp::Clock ros_clock_;  // 時間を取得する用
@@ -61,6 +65,7 @@ private:
   void receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg);  // LiDARからのデータの受取
 
   void initPubSub();   // パブリッシャ・サブスクライバ初期化
+  void initService();  // サービスサーバの初期化
   void setParam();     // デフォルトパラメータの設定
   void getParam();     // パラメータを取得する
   void initTf();       // tf関連の初期化
@@ -115,6 +120,7 @@ private:
   bool map_receive_;          // マップを受け取ったかのフラグ
   bool init_tf_;              //tfの初期化を実行したかのフラグ
   bool init_mcl_;             //MCLの初期化を実行したかのフラグ
+  bool init_likelihood_map_;  // 尤度場を作成したかのフラグ
 
   std::shared_ptr<mcl::Mcl> mcl_;  // ROS依存が無いMClオブジェクト
 
