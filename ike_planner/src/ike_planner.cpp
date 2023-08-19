@@ -177,16 +177,72 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
     pose_stamp.pose.position.y = calcGridPosition(n.y);
     plan_path.poses.push_back(pose_stamp);
   }
+  std::reverse(plan_path.poses.begin(), plan_path.poses.end());
 
   plan_path.header.frame_id = "map";
   plan_path.header.stamp = rclcpp::Time(0);
 
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
-  std::reverse(plan_path.poses.begin(), plan_path.poses.end());
+  smoothPath(plan_path);
   plan_path_pub_->publish(plan_path);
 
   return plan_path;
 }
+
+void IkePlanner::smoothPath(nav_msgs::msg::Path & path)
+{
+  updata_path_weight_ = 0.05;
+  smooth_path_weight_ = 0.8;
+  iteration_delta_threshold_ = 1.e-6;
+
+  auto delta = iteration_delta_threshold_;
+  auto new_path = path;
+  auto path_dimension = 2;
+
+  while (delta >= iteration_delta_threshold_) {
+    delta = 0.;
+    for (size_t i = 1; i < new_path.poses.size() - 1; ++i) {
+      for (size_t j = 1; j <= path_dimension; ++j) {
+        if (j == 1) {
+          auto original_data = path.poses[i].pose.position.x;
+          auto smoothed_data = new_path.poses[i].pose.position.x;
+          auto smoothed_prev_data = new_path.poses[i - 1].pose.position.x;
+          auto smoothed_next_data = new_path.poses[i + 1].pose.position.x;
+
+          auto before_smoothed_data = smoothed_data;
+
+          smoothed_data +=
+            updata_path_weight_ * (original_data - smoothed_data) +
+            smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
+
+          new_path.poses[i].pose.position.x = smoothed_data;
+
+          delta += abs(smoothed_data - before_smoothed_data);
+        }
+        if (j == 2) {
+          auto original_data = path.poses[i].pose.position.y;
+          auto smoothed_data = new_path.poses[i].pose.position.y;
+          auto smoothed_prev_data = new_path.poses[i - 1].pose.position.y;
+          auto smoothed_next_data = new_path.poses[i + 1].pose.position.y;
+
+          auto before_smoothed_data = smoothed_data;
+
+          smoothed_data +=
+            updata_path_weight_ * (original_data - smoothed_data) +
+            smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
+
+          new_path.poses[i].pose.position.y = smoothed_data;
+
+          delta += abs(smoothed_data - before_smoothed_data);
+        }
+      }
+    }
+  }
+
+  path = new_path;
+}
+
+// nav_msgs::msg::Path smoothOptimization(nav_msgs::msg::Path & path) {}
 
 double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
 

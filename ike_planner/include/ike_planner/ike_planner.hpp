@@ -54,6 +54,9 @@ protected:
     ike_nav::Node goal_node, std::map<uint32_t, ike_nav::Node> closed_set);
   double calcGridPosition(uint32_t goal_node_position);
 
+  void smoothPath(nav_msgs::msg::Path & path);
+  // nav_msgs::msg::Path smoothOptimization(nav_msgs::msg::Path & path);
+
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
@@ -68,6 +71,10 @@ private:
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
 
   bool use_dijkstra_, publish_searched_map_;
+  double updata_path_weight_, smooth_path_weight_, iteration_delta_threshold_;
+
+  // todo
+  double max_smooth_path_iteration_;
 };
 
 }  // namespace ike_nav
