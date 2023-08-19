@@ -79,7 +79,7 @@ geometry_msgs::msg::TwistStamped IkeController::ModelPredictiveControl(
     tf2::getYaw(robot_pose.pose.orientation)};
 
   auto path_xy = convertPathXY(path);
-  auto action = optimization(robot_pose_tuple, path_xy);
+  auto action = optimize(robot_pose_tuple, path_xy);
   auto predictive_horizon = getPredictiveHorizon(robot_pose_tuple, action);
   publishPredictiveHorizon(predictive_horizon);
   auto twist = convertTwist(action);
@@ -101,7 +101,7 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::convertPathXY
   return std::make_pair(path_x, path_y);
 }
 
-std::pair<std::vector<double>, std::vector<double>> IkeController::optimization(
+std::pair<std::vector<double>, std::vector<double>> IkeController::optimize(
   const std::tuple<double, double, double> & robot_pose,
   const std::pair<std::vector<double>, std::vector<double>> & path)
 {
