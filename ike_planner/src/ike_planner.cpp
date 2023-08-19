@@ -64,11 +64,20 @@ void IkePlanner::declareParam()
 {
   declare_parameter("use_dijkstra", false);
   declare_parameter("publish_searched_map", true);
+
+  declare_parameter("update_path_weight", 0.05);
+  declare_parameter("smooth_path_weight", 0.8);
+  declare_parameter("iteration_delta_threshold", 1.e-6);
 }
+
 void IkePlanner::getParam()
 {
   get_parameter("use_dijkstra", use_dijkstra_);
   get_parameter("publish_searched_map", publish_searched_map_);
+
+  get_parameter("update_path_weight", update_path_weight_);
+  get_parameter("smooth_path_weight", smooth_path_weight_);
+  get_parameter("iteration_delta_threshold", iteration_delta_threshold_);
 }
 
 std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
@@ -191,12 +200,7 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
 
 void IkePlanner::smoothPath(nav_msgs::msg::Path & path)
 {
-  updata_path_weight_ = 0.05;
-  smooth_path_weight_ = 0.8;
-  iteration_delta_threshold_ = 1.e-6;
-
   auto smoothed_path = smoothOptimization(path);
-
   path = smoothed_path;
 }
 
@@ -229,9 +233,8 @@ double IkePlanner::calcNewPositionXY(
   auto before_smoothed_data = smoothed_data;
 
   smoothed_data +=
-    updata_path_weight_ * (original_data - smoothed_data) +
+    update_path_weight_ * (original_data - smoothed_data) +
     smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
-
   delta += abs(smoothed_data - before_smoothed_data);
 
   return smoothed_data;

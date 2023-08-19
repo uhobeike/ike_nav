@@ -74,7 +74,7 @@ private:
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> motion_;
 
   bool use_dijkstra_, publish_searched_map_;
-  double updata_path_weight_, smooth_path_weight_, iteration_delta_threshold_;
+  double update_path_weight_, smooth_path_weight_, iteration_delta_threshold_;
 
   // todo
   double max_smooth_path_iteration_;
