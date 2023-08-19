@@ -55,7 +55,10 @@ protected:
   double calcGridPosition(uint32_t goal_node_position);
 
   void smoothPath(nav_msgs::msg::Path & path);
-  // nav_msgs::msg::Path smoothOptimization(nav_msgs::msg::Path & path);
+  nav_msgs::msg::Path smoothOptimization(nav_msgs::msg::Path & path);
+  double calcNewPositionXY(
+    double & delta, double original_data, double smoothed_data, double smoothed_prev_data,
+    double smoothed_next_data);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;

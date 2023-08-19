@@ -195,54 +195,47 @@ void IkePlanner::smoothPath(nav_msgs::msg::Path & path)
   smooth_path_weight_ = 0.8;
   iteration_delta_threshold_ = 1.e-6;
 
-  auto delta = iteration_delta_threshold_;
+  auto smoothed_path = smoothOptimization(path);
+
+  path = smoothed_path;
+}
+
+nav_msgs::msg::Path IkePlanner::smoothOptimization(nav_msgs::msg::Path & path)
+{
   auto new_path = path;
-  auto path_dimension = 2;
+  auto delta = iteration_delta_threshold_;
+  double original_data, smoothed_data, smoothed_prev_data, smoothed_next_data, before_smoothed_data;
 
   while (delta >= iteration_delta_threshold_) {
     delta = 0.;
     for (size_t i = 1; i < new_path.poses.size() - 1; ++i) {
-      for (size_t j = 1; j <= path_dimension; ++j) {
-        if (j == 1) {
-          auto original_data = path.poses[i].pose.position.x;
-          auto smoothed_data = new_path.poses[i].pose.position.x;
-          auto smoothed_prev_data = new_path.poses[i - 1].pose.position.x;
-          auto smoothed_next_data = new_path.poses[i + 1].pose.position.x;
+      new_path.poses[i].pose.position.x = calcNewPositionXY(
+        delta, path.poses[i].pose.position.x, new_path.poses[i].pose.position.x,
+        new_path.poses[i - 1].pose.position.x, new_path.poses[i + 1].pose.position.x);
 
-          auto before_smoothed_data = smoothed_data;
-
-          smoothed_data +=
-            updata_path_weight_ * (original_data - smoothed_data) +
-            smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
-
-          new_path.poses[i].pose.position.x = smoothed_data;
-
-          delta += abs(smoothed_data - before_smoothed_data);
-        }
-        if (j == 2) {
-          auto original_data = path.poses[i].pose.position.y;
-          auto smoothed_data = new_path.poses[i].pose.position.y;
-          auto smoothed_prev_data = new_path.poses[i - 1].pose.position.y;
-          auto smoothed_next_data = new_path.poses[i + 1].pose.position.y;
-
-          auto before_smoothed_data = smoothed_data;
-
-          smoothed_data +=
-            updata_path_weight_ * (original_data - smoothed_data) +
-            smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
-
-          new_path.poses[i].pose.position.y = smoothed_data;
-
-          delta += abs(smoothed_data - before_smoothed_data);
-        }
-      }
+      new_path.poses[i].pose.position.y = calcNewPositionXY(
+        delta, path.poses[i].pose.position.y, new_path.poses[i].pose.position.y,
+        new_path.poses[i - 1].pose.position.y, new_path.poses[i + 1].pose.position.y);
     }
   }
 
-  path = new_path;
+  return new_path;
 }
 
-// nav_msgs::msg::Path smoothOptimization(nav_msgs::msg::Path & path) {}
+double IkePlanner::calcNewPositionXY(
+  double & delta, double original_data, double smoothed_data, double smoothed_prev_data,
+  double smoothed_next_data)
+{
+  auto before_smoothed_data = smoothed_data;
+
+  smoothed_data +=
+    updata_path_weight_ * (original_data - smoothed_data) +
+    smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
+
+  delta += abs(smoothed_data - before_smoothed_data);
+
+  return smoothed_data;
+}
 
 double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
 
