@@ -37,6 +37,9 @@
     <composable_node pkg="ike_planner" plugin="ike_nav::IkePlanner" name="ike_planner" namespace="">
       <param name="use_dijkstra"                value="false"/>
       <param name="publish_searched_map"        value="true"/>
+      <param name="update_path_weight"          value="0.05"/>
+      <param name="smooth_path_weight"          value="0.8"/>
+      <param name="iteration_delta_threshold"   value="1.e-6"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
 

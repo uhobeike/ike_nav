@@ -31,7 +31,7 @@ protected:
   void setMpcParameters();
   std::pair<std::vector<double>, std::vector<double>> convertPathXY(
     const nav_msgs::msg::Path & path);
-  std::pair<std::vector<double>, std::vector<double>> optimization(
+  std::pair<std::vector<double>, std::vector<double>> optimize(
     const std::tuple<double, double, double> & robot_pose,
     const std::pair<std::vector<double>, std::vector<double>> & path);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getPredictiveHorizon(

@@ -64,11 +64,20 @@ void IkePlanner::declareParam()
 {
   declare_parameter("use_dijkstra", false);
   declare_parameter("publish_searched_map", true);
+
+  declare_parameter("update_path_weight", 0.05);
+  declare_parameter("smooth_path_weight", 0.8);
+  declare_parameter("iteration_delta_threshold", 1.e-6);
 }
+
 void IkePlanner::getParam()
 {
   get_parameter("use_dijkstra", use_dijkstra_);
   get_parameter("publish_searched_map", publish_searched_map_);
+
+  get_parameter("update_path_weight", update_path_weight_);
+  get_parameter("smooth_path_weight", smooth_path_weight_);
+  get_parameter("iteration_delta_threshold", iteration_delta_threshold_);
 }
 
 std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
@@ -177,15 +186,58 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
     pose_stamp.pose.position.y = calcGridPosition(n.y);
     plan_path.poses.push_back(pose_stamp);
   }
+  std::reverse(plan_path.poses.begin(), plan_path.poses.end());
 
   plan_path.header.frame_id = "map";
   plan_path.header.stamp = rclcpp::Time(0);
 
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
-  std::reverse(plan_path.poses.begin(), plan_path.poses.end());
+  smoothPath(plan_path);
   plan_path_pub_->publish(plan_path);
 
   return plan_path;
+}
+
+void IkePlanner::smoothPath(nav_msgs::msg::Path & path)
+{
+  auto smoothed_path = smoothOptimization(path);
+  path = smoothed_path;
+}
+
+nav_msgs::msg::Path IkePlanner::smoothOptimization(nav_msgs::msg::Path & path)
+{
+  auto new_path = path;
+  auto delta = iteration_delta_threshold_;
+  double original_data, smoothed_data, smoothed_prev_data, smoothed_next_data, before_smoothed_data;
+
+  while (delta >= iteration_delta_threshold_) {
+    delta = 0.;
+    for (size_t i = 1; i < new_path.poses.size() - 1; ++i) {
+      new_path.poses[i].pose.position.x = calcNewPositionXY(
+        delta, path.poses[i].pose.position.x, new_path.poses[i].pose.position.x,
+        new_path.poses[i - 1].pose.position.x, new_path.poses[i + 1].pose.position.x);
+
+      new_path.poses[i].pose.position.y = calcNewPositionXY(
+        delta, path.poses[i].pose.position.y, new_path.poses[i].pose.position.y,
+        new_path.poses[i - 1].pose.position.y, new_path.poses[i + 1].pose.position.y);
+    }
+  }
+
+  return new_path;
+}
+
+double IkePlanner::calcNewPositionXY(
+  double & delta, double original_data, double smoothed_data, double smoothed_prev_data,
+  double smoothed_next_data)
+{
+  auto before_smoothed_data = smoothed_data;
+
+  smoothed_data +=
+    update_path_weight_ * (original_data - smoothed_data) +
+    smooth_path_weight_ * (smoothed_next_data + smoothed_prev_data - (2. * smoothed_data));
+  delta += abs(smoothed_data - before_smoothed_data);
+
+  return smoothed_data;
 }
 
 double IkePlanner::calcGridPosition(uint32_t node_position) { return node_position * resolution_; }
