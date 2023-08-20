@@ -16,7 +16,7 @@ Panels:
     Name: Selection
   - Class: rviz_common/Tool Properties
     Expanded:
-      - /Publish Point1
+      - /2D Goal Pose1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
   - Class: rviz_common/Views
@@ -150,44 +150,13 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: true
-            base_footprint:
-              Value: true
-            base_link:
-              Value: true
-            base_scan:
-              Value: true
-            caster_back_link:
-              Value: true
-            imu_link:
-              Value: true
-            map:
-              Value: true
-            odom:
-              Value: true
-            wheel_left_link:
-              Value: true
-            wheel_right_link:
-              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: false
           Tree:
-            map:
-              odom:
-                base_footprint:
-                  base_link:
-                    base_scan:
-                      {}
-                    caster_back_link:
-                      {}
-                    imu_link:
-                      {}
-                    wheel_left_link:
-                      {}
-                    wheel_right_link:
-                      {}
+            {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -345,15 +314,13 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /initialpose
-    - Class: rviz_default_plugins/PublishPoint
-      Single click: true
+    - Class: rviz_default_plugins/SetGoal
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /clicked_point
-    - Class: nav2_rviz_plugins/GoalTool
+        Value: goal_pose
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
