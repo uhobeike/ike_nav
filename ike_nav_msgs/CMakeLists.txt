@@ -6,11 +6,12 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/NavigateToGoal.action"
   "srv/GetCostMap2D.srv"
   "srv/GetMap.srv"
   "srv/GetPath.srv"
   "srv/GetTwist.srv"
-  DEPENDENCIES builtin_interfaces std_msgs nav_msgs
+  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs nav_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
