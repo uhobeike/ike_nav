@@ -31,7 +31,9 @@ public:
 protected:
   void initTf();
   void initPublisher();
+  void initSubscription();
   void initActionServer();
+  void initActionClient();
   void initServiceClient();
 
   void asyncGetPath(geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal);
@@ -53,7 +55,9 @@ protected:
 
 private:
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_sub_;
   rclcpp_action::Server<NavigateToGoal>::SharedPtr navigate_to_goal_action_server_;
+  rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
   rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_client_;
   rclcpp::Client<ike_nav_msgs::srv::GetTwist>::SharedPtr get_twist_client_;
 

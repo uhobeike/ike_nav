@@ -15,8 +15,10 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
 {
   initTf();
   initPublisher();
+  initSubscription();
   initServiceClient();
   initActionServer();
+  initActionClient();
 }
 
 void IkeNavServer::initTf()
@@ -33,6 +35,27 @@ void IkeNavServer::initPublisher()
     this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).reliable());
 };
 
+void IkeNavServer::initSubscription()
+{
+  auto goal_pose_callback = [this](geometry_msgs::msg::PoseStamped msg) -> void {
+    if (!navigate_to_goal_action_client_->wait_for_action_server(10s)) {
+      RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+      return;
+    }
+
+    auto goal_msg = NavigateToGoal::Goal();
+    goal_msg.pose = msg;
+
+    RCLCPP_INFO(this->get_logger(), "Sending goal");
+
+    auto send_goal_options = rclcpp_action::Client<NavigateToGoal>::SendGoalOptions();
+    auto goal_handle_future =
+      navigate_to_goal_action_client_->async_send_goal(goal_msg, send_goal_options);
+  };
+  goal_pose_sub_ =
+    this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 1, goal_pose_callback);
+}
+
 void IkeNavServer::initActionServer()
 {
   using namespace std::placeholders;
@@ -44,6 +67,13 @@ void IkeNavServer::initActionServer()
     std::bind(&IkeNavServer::handle_cancel, this, _1),
     std::bind(&IkeNavServer::handle_accepted, this, _1));
 }
+
+void IkeNavServer::initActionClient()
+{
+  navigate_to_goal_action_client_ = rclcpp_action::create_client<NavigateToGoal>(
+    this->get_node_base_interface(), this->get_node_graph_interface(),
+    this->get_node_logging_interface(), this->get_node_waitables_interface(), "navigate_to_goal");
+};
 
 void IkeNavServer::initServiceClient()
 {
