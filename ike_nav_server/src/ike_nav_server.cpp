@@ -17,6 +17,7 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
   initPublisher();
   initServiceClient();
   initActionServer();
+  initTimer();
 }
 
 void IkeNavServer::initTf()
@@ -33,6 +34,12 @@ void IkeNavServer::initPublisher()
     this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).reliable());
 };
 
+void IkeNavServer::initServiceClient()
+{
+  get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
+  get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
+}
+
 void IkeNavServer::initActionServer()
 {
   using namespace std::placeholders;
@@ -45,10 +52,10 @@ void IkeNavServer::initActionServer()
     std::bind(&IkeNavServer::handle_accepted, this, _1));
 }
 
-void IkeNavServer::initServiceClient()
+void IkeNavServer::initTimer()
 {
-  get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
-  get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
+  stop_velocity_publish_timer_ = this->create_wall_timer(
+    100ms, [this]() { cmd_vel_pub_->publish(geometry_msgs::msg::Twist()); });
 }
 
 rclcpp_action::GoalResponse IkeNavServer::handle_goal(
@@ -71,6 +78,8 @@ rclcpp_action::CancelResponse IkeNavServer::handle_cancel(
 
 void IkeNavServer::handle_accepted(const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
 {
+  stop_velocity_publish_timer_->cancel();
+
   using namespace std::placeholders;
 
   std::thread{std::bind(&IkeNavServer::execute, this, _1), goal_handle}.detach();
@@ -174,13 +183,15 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     if (goal_handle->is_canceling()) {
       goal_handle->canceled(result);
       RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
-      return;
+      stop_velocity_publish_timer_->reset();
+      break;
     }
 
     if (checkGoalReached(start_, goal->pose, distance_remaining)) {
       result->goal_reached = true;
       RCLCPP_INFO(this->get_logger(), "Goal Reached");
-      cmd_vel_pub_->publish(geometry_msgs::msg::Twist());
+      stop_velocity_publish_timer_->reset();
+      goal_handle->succeed(result);
       break;
     }
 
@@ -188,8 +199,6 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
 
     loop_rate.sleep();
   }
-
-  if (result->goal_reached) goal_handle->succeed(result);
 
   RCLCPP_INFO(this->get_logger(), "Done navigate_to_goal");
 }
