@@ -16,10 +16,7 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
   initTf();
   initPublisher();
   initServiceClient();
-  initLoopTimer();
-
-  goal_.pose.position.x = 11.6;
-  goal_.pose.position.y = 8.7;
+  initActionServer();
 }
 
 void IkeNavServer::initTf()
@@ -36,16 +33,48 @@ void IkeNavServer::initPublisher()
     this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).reliable());
 };
 
+void IkeNavServer::initActionServer()
+{
+  using namespace std::placeholders;
+
+  navigate_to_goal_action_server_ = rclcpp_action::create_server<NavigateToGoal>(
+    this->get_node_base_interface(), this->get_node_clock_interface(),
+    this->get_node_logging_interface(), this->get_node_waitables_interface(), "navigate_to_goal",
+    std::bind(&IkeNavServer::handle_goal, this, _1, _2),
+    std::bind(&IkeNavServer::handle_cancel, this, _1),
+    std::bind(&IkeNavServer::handle_accepted, this, _1));
+}
+
 void IkeNavServer::initServiceClient()
 {
   get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
   get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
 }
 
-void IkeNavServer::initLoopTimer()
+rclcpp_action::GoalResponse IkeNavServer::handle_goal(
+  const rclcpp_action::GoalUUID & uuid,
+  [[maybe_unused]] std::shared_ptr<const NavigateToGoal::Goal> goal)
 {
-  loop_timer_ = create_wall_timer(100ms, std::bind(&IkeNavServer::loop, this));
-}
+  RCLCPP_INFO(this->get_logger(), "Received navigate_to_goal request");
+  (void)uuid;
+
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+};
+
+rclcpp_action::CancelResponse IkeNavServer::handle_cancel(
+  const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
+{
+  RCLCPP_INFO(this->get_logger(), "Received navigate_to_goal request to cancel");
+  (void)goal_handle;
+  return rclcpp_action::CancelResponse::ACCEPT;
+};
+
+void IkeNavServer::handle_accepted(const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
+{
+  using namespace std::placeholders;
+
+  std::thread{std::bind(&IkeNavServer::execute, this, _1), goal_handle}.detach();
+};
 
 void IkeNavServer::asyncGetPath(
   geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal)
@@ -100,26 +129,69 @@ void IkeNavServer::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_fr
   }
 }
 
-void IkeNavServer::loop()
+bool IkeNavServer::checkGoalReached(
+  const geometry_msgs::msg::PoseStamped & start, const geometry_msgs::msg::PoseStamped & goal,
+  float & distance_remaining)
 {
-  std::chrono::system_clock::time_point start, end;
-  std::time_t time_stamp;
+  distance_remaining = std::hypot(
+    start.pose.position.x - goal.pose.position.x, start.pose.position.y - goal.pose.position.y);
 
-  start = std::chrono::system_clock::now();
+  if (distance_remaining < 0.5) return true;
 
-  getMapFrameRobotPose(start_);
-  if (get_robot_pose_) asyncGetPath(start_, goal_);
-  if (path_.poses.size() > 0) asyncGetTwist(start_, path_);
+  return false;
+}
 
-  end = std::chrono::system_clock::now();
+void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
+{
+  RCLCPP_INFO(this->get_logger(), "Executing navigate_to_goal");
 
-  auto time = end - start;
+  rclcpp::Rate loop_rate(5);
+  const auto goal = goal_handle->get_goal();
+  auto feedback = std::make_shared<NavigateToGoal::Feedback>();
+  auto & distance_remaining = feedback->distance_remaining;
+  auto result = std::make_shared<NavigateToGoal::Result>();
 
-  time_stamp = std::chrono::system_clock::to_time_t(start);
-  std::cout << std::ctime(&time_stamp);
+  while (rclcpp::ok()) {
+    std::chrono::system_clock::time_point start, end;
+    std::time_t time_stamp;
 
-  auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-  RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
+    start = std::chrono::system_clock::now();
+
+    getMapFrameRobotPose(start_);
+    if (get_robot_pose_) asyncGetPath(start_, goal->pose);
+    if (path_.poses.size() > 0) asyncGetTwist(start_, path_);
+
+    end = std::chrono::system_clock::now();
+
+    auto time = end - start;
+
+    time_stamp = std::chrono::system_clock::to_time_t(start);
+    std::cout << std::ctime(&time_stamp);
+
+    auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+    RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
+
+    if (goal_handle->is_canceling()) {
+      goal_handle->canceled(result);
+      RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
+      return;
+    }
+
+    if (checkGoalReached(start_, goal->pose, distance_remaining)) {
+      result->goal_reached = true;
+      RCLCPP_INFO(this->get_logger(), "Goal Reached");
+      cmd_vel_pub_->publish(geometry_msgs::msg::Twist());
+      break;
+    }
+
+    goal_handle->publish_feedback(feedback);
+
+    loop_rate.sleep();
+  }
+
+  if (result->goal_reached) goal_handle->succeed(result);
+
+  RCLCPP_INFO(this->get_logger(), "Done navigate_to_goal");
 }
 
 }  // namespace ike_nav
