@@ -50,6 +50,8 @@ private:
   geometry_msgs::msg::PoseStamped start_, goal_;
   nav_msgs::msg::Path path_;
   geometry_msgs::msg::Twist twist_;
+
+  bool get_robot_pose_;
 };
 
 }  // namespace ike_nav

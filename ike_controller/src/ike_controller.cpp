@@ -52,8 +52,8 @@ void IkeController::initService()
 void IkeController::setMpcParameters()
 {
   // MPC Parameters
-  constexpr double dt = 1;
-  constexpr int predictive_horizon_num = 10;
+  constexpr double dt = 1.0;
+  int predictive_horizon_num = 10;
   constexpr double lower_bound_linear_velocity = 0.0;
   constexpr double lower_bound_angular_velocity = -M_PI;
   constexpr double upper_bound_linear_velocity = 1.0;
@@ -70,9 +70,17 @@ void IkeController::setMpcParameters()
 }
 
 geometry_msgs::msg::TwistStamped IkeController::ModelPredictiveControl(
-  const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path)
+  const geometry_msgs::msg::PoseStamped & robot_pose, nav_msgs::msg::Path & path)
 {
   RCLCPP_INFO(this->get_logger(), "ModelPredictiveControl start.");
+
+  nav_msgs::msg::Path skip_path;
+
+  int interval = 2;
+  for (size_t i = 0; i < path.poses.size(); i += interval) {
+    skip_path.poses.push_back(path.poses[i]);
+  }
+  path = skip_path;
 
   std::tuple<double, double, double> robot_pose_tuple = {
     robot_pose.pose.position.x, robot_pose.pose.position.y,
@@ -105,6 +113,10 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimize(
   const std::tuple<double, double, double> & robot_pose,
   const std::pair<std::vector<double>, std::vector<double>> & path)
 {
+  // if (path.first.size() < predictive_horizon_num_) {
+  //   predictive_horizon_num_ = path.first.size();
+  // }
+
   auto * cost_function =
     new ceres::DynamicAutoDiffCostFunction<ObjectiveFunction, MAX_PREDICTIVE_HORIZON_NUM>(
       new ObjectiveFunction(
@@ -206,6 +218,8 @@ geometry_msgs::msg::TwistStamped IkeController::convertTwist(
   geometry_msgs::msg::TwistStamped twist;
   twist.header.frame_id = "";
   twist.header.stamp = rclcpp::Time();
+
+  // todo fix
   twist.twist.linear.x = action.first[1];
   twist.twist.angular.z = action.second[1];
 

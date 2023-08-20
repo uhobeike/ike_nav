@@ -208,7 +208,6 @@ nav_msgs::msg::Path IkePlanner::smoothOptimization(nav_msgs::msg::Path & path)
 {
   auto new_path = path;
   auto delta = iteration_delta_threshold_;
-  double original_data, smoothed_data, smoothed_prev_data, smoothed_next_data, before_smoothed_data;
 
   while (delta >= iteration_delta_threshold_) {
     delta = 0.;

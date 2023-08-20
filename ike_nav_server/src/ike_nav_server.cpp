@@ -18,9 +18,6 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
   initServiceClient();
   initLoopTimer();
 
-  start_.pose.position.x = 8.1;
-  start_.pose.position.y = 11.1;
-
   goal_.pose.position.x = 11.6;
   goal_.pose.position.y = 8.7;
 }
@@ -97,7 +94,10 @@ void IkeNavServer::asyncGetTwist(
 void IkeNavServer::getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose)
 {
   geometry_msgs::msg::PoseStamped pose;
-  if (nav2_util::getCurrentPose(pose, *tf_buffer_)) map_frame_robot_pose = pose;
+  if (nav2_util::getCurrentPose(pose, *tf_buffer_)) {
+    map_frame_robot_pose = pose;
+    get_robot_pose_ = true;
+  }
 }
 
 void IkeNavServer::loop()
@@ -108,7 +108,7 @@ void IkeNavServer::loop()
   start = std::chrono::system_clock::now();
 
   getMapFrameRobotPose(start_);
-  asyncGetPath(start_, goal_);
+  if (get_robot_pose_) asyncGetPath(start_, goal_);
   if (path_.poses.size() > 0) asyncGetTwist(start_, path_);
 
   end = std::chrono::system_clock::now();
