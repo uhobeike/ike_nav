@@ -112,7 +112,9 @@ void IkeNavServer::handle_accepted(const std::shared_ptr<GoalHandleNavigateToGoa
 
   using namespace std::placeholders;
 
-  std::thread{std::bind(&IkeNavServer::execute, this, _1), goal_handle}.detach();
+  auto thread = std::thread{std::bind(&IkeNavServer::execute, this, _1), goal_handle};
+  thread_id_.push_back(thread.get_id());
+  thread.detach();
 };
 
 void IkeNavServer::asyncGetPath(
@@ -136,6 +138,7 @@ void IkeNavServer::asyncGetPath(
   };
   auto future_result = get_path_client_->async_send_request(request, response_received_callback);
 }
+
 void IkeNavServer::asyncGetTwist(
   const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path)
 {
@@ -175,7 +178,21 @@ bool IkeNavServer::checkGoalReached(
   distance_remaining = std::hypot(
     start.pose.position.x - goal.pose.position.x, start.pose.position.y - goal.pose.position.y);
 
-  if (distance_remaining < 0.5) return true;
+  if (distance_remaining < 0.2) return true;
+
+  return false;
+}
+
+bool IkeNavServer::checkShouldExitThisThread()
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  if (thread_id_.size() > 1) {
+    if (*thread_id_.begin() == std::this_thread::get_id()) {
+      thread_id_.erase(thread_id_.begin());
+      return true;
+    }
+  }
 
   return false;
 }
@@ -189,10 +206,10 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
   auto feedback = std::make_shared<NavigateToGoal::Feedback>();
   auto & distance_remaining = feedback->distance_remaining;
   auto result = std::make_shared<NavigateToGoal::Result>();
+  auto should_exit_this_thread = false;
 
   while (rclcpp::ok()) {
     std::chrono::system_clock::time_point start, end;
-    std::time_t time_stamp;
 
     start = std::chrono::system_clock::now();
 
@@ -203,10 +220,6 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     end = std::chrono::system_clock::now();
 
     auto time = end - start;
-
-    time_stamp = std::chrono::system_clock::to_time_t(start);
-    std::cout << std::ctime(&time_stamp);
-
     auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
     RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
 
@@ -215,6 +228,14 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
       RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
       stop_velocity_publish_timer_->reset();
       return;
+    }
+
+    // todo fix related to https://github.com/ros2/ros2/issues/1253
+    if (checkShouldExitThisThread()) {
+      result->goal_reached = false;
+      should_exit_this_thread = true;
+      RCLCPP_INFO(this->get_logger(), "Drop this thread as other thread have started up");
+      break;
     }
 
     if (checkGoalReached(start_, goal->pose, distance_remaining)) {
@@ -230,6 +251,7 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
   }
 
   if (result->goal_reached) goal_handle->succeed(result);
+  if (should_exit_this_thread) goal_handle->succeed(result);
 
   RCLCPP_INFO(this->get_logger(), "Done navigate_to_goal");
 }
