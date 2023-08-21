@@ -175,7 +175,7 @@ bool IkeNavServer::checkGoalReached(
   distance_remaining = std::hypot(
     start.pose.position.x - goal.pose.position.x, start.pose.position.y - goal.pose.position.y);
 
-  if (distance_remaining < 0.5) return true;
+  if (distance_remaining < 0.2) return true;
 
   return false;
 }
@@ -192,7 +192,6 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
 
   while (rclcpp::ok()) {
     std::chrono::system_clock::time_point start, end;
-    std::time_t time_stamp;
 
     start = std::chrono::system_clock::now();
 
@@ -203,10 +202,6 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     end = std::chrono::system_clock::now();
 
     auto time = end - start;
-
-    time_stamp = std::chrono::system_clock::to_time_t(start);
-    std::cout << std::ctime(&time_stamp);
-
     auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
     RCLCPP_INFO(this->get_logger(), "exe_time: %ld[ms]", msec);
 
