@@ -27,6 +27,9 @@ protected:
     const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createStaticLayer(const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createInflationLayer(const nav_msgs::msg::OccupancyGrid & map);
+  void calculateInflation(
+    nav_msgs::msg::OccupancyGrid & map, const double & inflation_radius, const uint32_t & map_x,
+    const uint32_t & map_y);
   double calculateCost(double stochastic_variable, double inflation_radius);
   double normalizeCost(double max_cost, double cost);
 
@@ -38,7 +41,7 @@ protected:
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr static_layer_pub_;
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr inflation_layer_pub_;
-  // rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr obstacle_layer_pub_;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr obstacle_layer_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
