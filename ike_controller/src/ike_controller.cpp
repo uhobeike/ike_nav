@@ -220,8 +220,8 @@ geometry_msgs::msg::TwistStamped IkeController::convertTwist(
   twist.header.stamp = rclcpp::Time();
 
   // todo fix
-  twist.twist.linear.x = action.first[1];
-  twist.twist.angular.z = action.second[1];
+  twist.twist.linear.x = action.first[0] + action.first[1];
+  twist.twist.angular.z = action.second[0] + action.second[1];
 
   return twist;
 }
