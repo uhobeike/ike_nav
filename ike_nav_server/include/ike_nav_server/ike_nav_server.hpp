@@ -53,6 +53,7 @@ protected:
   bool checkGoalReached(
     const geometry_msgs::msg::PoseStamped & start, const geometry_msgs::msg::PoseStamped & goal,
     float & distance_remaining);
+  bool checkShouldExitThisThread();
 
 private:
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
@@ -72,6 +73,9 @@ private:
   geometry_msgs::msg::Twist twist_;
 
   bool get_robot_pose_;
+
+  std::vector<std::thread::id> thread_id_;
+  std::mutex mutex_;
 };
 
 }  // namespace ike_nav
