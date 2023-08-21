@@ -35,6 +35,7 @@ protected:
   void initActionServer();
   void initActionClient();
   void initServiceClient();
+  void initTimer();
 
   void asyncGetPath(geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal);
   void asyncGetTwist(
@@ -60,6 +61,8 @@ private:
   rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
   rclcpp::Client<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_client_;
   rclcpp::Client<ike_nav_msgs::srv::GetTwist>::SharedPtr get_twist_client_;
+
+  rclcpp::TimerBase::SharedPtr stop_velocity_publish_timer_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

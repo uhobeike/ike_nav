@@ -19,6 +19,7 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
   initServiceClient();
   initActionServer();
   initActionClient();
+  initTimer();
 }
 
 void IkeNavServer::initTf()
@@ -81,6 +82,12 @@ void IkeNavServer::initServiceClient()
   get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
 }
 
+void IkeNavServer::initTimer()
+{
+  stop_velocity_publish_timer_ = this->create_wall_timer(
+    100ms, [this]() { cmd_vel_pub_->publish(geometry_msgs::msg::Twist()); });
+}
+
 rclcpp_action::GoalResponse IkeNavServer::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
   [[maybe_unused]] std::shared_ptr<const NavigateToGoal::Goal> goal)
@@ -101,6 +108,8 @@ rclcpp_action::CancelResponse IkeNavServer::handle_cancel(
 
 void IkeNavServer::handle_accepted(const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
 {
+  stop_velocity_publish_timer_->cancel();
+
   using namespace std::placeholders;
 
   std::thread{std::bind(&IkeNavServer::execute, this, _1), goal_handle}.detach();
@@ -204,13 +213,14 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     if (goal_handle->is_canceling()) {
       goal_handle->canceled(result);
       RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
+      stop_velocity_publish_timer_->reset();
       return;
     }
 
     if (checkGoalReached(start_, goal->pose, distance_remaining)) {
       result->goal_reached = true;
       RCLCPP_INFO(this->get_logger(), "Goal Reached");
-      cmd_vel_pub_->publish(geometry_msgs::msg::Twist());
+      stop_velocity_publish_timer_->reset();
       break;
     }
 
