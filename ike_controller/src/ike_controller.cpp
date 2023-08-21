@@ -113,8 +113,11 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimize(
   const std::tuple<double, double, double> & robot_pose,
   const std::pair<std::vector<double>, std::vector<double>> & path)
 {
+  // todo fix
   if (path.first.size() < static_cast<long unsigned int>(predictive_horizon_num_)) {
     predictive_horizon_num_ = path.first.size();
+  } else {
+    predictive_horizon_num_ = 10;
   }
 
   auto * cost_function =
