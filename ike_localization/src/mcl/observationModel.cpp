@@ -57,16 +57,11 @@ void ObservationModel::update(std::vector<Particle> & particles, std::vector<flo
 
   particles_scan_match_point_.clear();
   double sum_score = 0.;
-  // std::string w;
   for (auto & p : particles) {
     auto particle_weight = calculateParticleWeight(p);
-    // w += std::to_string(std::abs(particle_weight));
-    // w += ", ";
     p.weight *= std::abs(particle_weight);
     sum_score += particle_weight;
   }
-
-  // std::cerr << w << "\n";
 
   marginal_likelihood_ = sum_score / (particles.size() * scan_.ranges.size());
 
