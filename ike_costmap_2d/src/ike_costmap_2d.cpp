@@ -39,6 +39,9 @@ void IkeCostMap2D::initPublisher()
     "inflation_layer", rclcpp::QoS(1).reliable());
   obstacle_layer_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
     "obstacle_layer", rclcpp::QoS(1).reliable());
+
+  costmap_2d_pub_ =
+    this->create_publisher<nav_msgs::msg::OccupancyGrid>("costmap_2d", rclcpp::QoS(1).reliable());
 }
 
 void IkeCostMap2D::initSubscription()
@@ -176,6 +179,8 @@ void IkeCostMap2D::createObstacleLayer()
 
         calculateInflation(
           costmap_2d_layers_["obstacle_layer"], inflation_radius, hit_xy.first, hit_xy.second);
+
+        costmap_2d_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
       }
     }
   }
@@ -259,7 +264,11 @@ void IkeCostMap2D::publishCostMap2DLayers(
 
   static_layer_pub_->publish(costmap_2d_layers["static_layer"]);
   inflation_layer_pub_->publish(costmap_2d_layers["inflation_layer"]);
-  obstacle_layer_pub_->publish(costmap_2d_layers["obstacle_layer"]);
+
+  if (get_map_ && get_scan_ && get_lidar_pose_) {
+    costmap_2d_layers["obstacle_layer"].header.stamp = rclcpp::Time();
+    obstacle_layer_pub_->publish(costmap_2d_layers["obstacle_layer"]);
+  }
 }
 
 }  // namespace ike_nav
