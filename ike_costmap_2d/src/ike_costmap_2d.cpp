@@ -100,7 +100,7 @@ void IkeCostMap2D::initTimer()
   using namespace std::chrono_literals;
 
   create_obstacle_layer_timer_ =
-    this->create_wall_timer(100ms, std::bind(&IkeCostMap2D::createObstacleLayer, this));
+    this->create_wall_timer(500ms, std::bind(&IkeCostMap2D::createObstacleLayer, this));
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
