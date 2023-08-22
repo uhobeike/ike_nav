@@ -64,7 +64,7 @@ void IkeCostMap2D::initServiceServer()
       std::shared_ptr<ike_nav_msgs::srv::GetCostMap2D_Response> response) -> void {
     (void)request_header;
 
-    costmap_2d_layers_ = createCostMap2DLayers(map_);
+    createCostMap2DLayers(map_);
 
     if (costmap_2d_layers_.find("obstacle_layer") != costmap_2d_layers_.end()) {
       response->costmap_2d = costmap_2d_layers_["obstacle_layer"];
@@ -84,8 +84,7 @@ void IkeCostMap2D::initServiceServer()
       std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
     (void)request_header;
 
-    costmap_2d_layers_ = createCostMap2DLayers(map_);
-
+    createCostMap2DLayers(map_);
     publishCostMap2DLayers(costmap_2d_layers_);
 
     response->success = true;
@@ -126,15 +125,10 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
   return result_future.get()->map;
 }
 
-std::map<std::string, nav_msgs::msg::OccupancyGrid> IkeCostMap2D::createCostMap2DLayers(
-  const nav_msgs::msg::OccupancyGrid & map)
+void IkeCostMap2D::createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map)
 {
-  std::map<std::string, nav_msgs::msg::OccupancyGrid> costmap_2d_layers;
-
   costmap_2d_layers_["static_layer"] = createStaticLayer(map);
   costmap_2d_layers_["inflation_layer"] = createInflationLayer(map);
-
-  return costmap_2d_layers_;
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::createStaticLayer(
@@ -180,6 +174,7 @@ void IkeCostMap2D::createObstacleLayer()
         calculateInflation(
           costmap_2d_layers_["obstacle_layer"], inflation_radius, hit_xy.first, hit_xy.second);
 
+        costmap_2d_layers_["obstacle_layer"].header.stamp = rclcpp::Time();
         costmap_2d_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
       }
     }
@@ -189,14 +184,14 @@ void IkeCostMap2D::createObstacleLayer()
 std::vector<std::pair<uint32_t, uint32_t>> IkeCostMap2D::calculateHitPoint(
   sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose)
 {
-  // auto obstacle_range = 5.;
+  auto obstacle_range = 3.;
 
   std::vector<std::pair<uint32_t, uint32_t>> hits_xy;
   double scan_angle_increment = scan_.angle_increment;
   for (auto scan_range : scan.ranges) {
     // todo fix
     ++scan_angle_increment;
-    if (scan_range == INFINITY || scan_range == NAN) continue;
+    if (scan_range == INFINITY || scan_range == NAN || scan_range > obstacle_range) continue;
 
     auto hit_x =
       lidar_pose.pose.position.x +

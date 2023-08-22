@@ -31,8 +31,7 @@ protected:
   void initServiceServer();
   void initTimer();
 
-  std::map<std::string, nav_msgs::msg::OccupancyGrid> createCostMap2DLayers(
-    const nav_msgs::msg::OccupancyGrid & map);
+  void createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createStaticLayer(const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createInflationLayer(const nav_msgs::msg::OccupancyGrid & map);
   void createObstacleLayer();
