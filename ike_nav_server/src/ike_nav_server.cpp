@@ -78,8 +78,8 @@ void IkeNavServer::initActionClient()
 
 void IkeNavServer::initServiceClient()
 {
-  get_path_client_ = create_client<ike_nav_msgs::srv::GetPath>("get_path");
-  get_twist_client_ = create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
+  get_path_client_ = this->create_client<ike_nav_msgs::srv::GetPath>("get_path");
+  get_twist_client_ = this->create_client<ike_nav_msgs::srv::GetTwist>("get_twist");
 }
 
 void IkeNavServer::initTimer()
