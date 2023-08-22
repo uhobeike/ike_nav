@@ -35,13 +35,15 @@ public:
 
 protected:
   void initPublisher();
-  void initService();
+  void initSubscriber();
+  void initServiceServer();
+  void initServiceClient();
   void declareParam();
   void getParam();
 
   void initPlanner();
 
-  nav_msgs::msg::OccupancyGrid getCostMap2D();
+  nav_msgs::msg::OccupancyGrid syncGetCostMap2D();
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
@@ -63,8 +65,9 @@ protected:
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr search_map_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
-  rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_map_srv_;
+  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_2d_sub_;
   rclcpp::Service<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_srv_;
+  rclcpp::Client<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_map_srv_;
 
   double resolution_, robot_radius_;
   uint32_t min_x_, min_y_, max_x_, max_y_;

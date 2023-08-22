@@ -150,13 +150,44 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: true
+            base_footprint:
+              Value: true
+            base_link:
+              Value: true
+            base_scan:
+              Value: true
+            caster_back_link:
+              Value: true
+            imu_link:
+              Value: true
+            map:
+              Value: true
+            odom:
+              Value: true
+            wheel_left_link:
+              Value: true
+            wheel_right_link:
+              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: false
           Tree:
-            {}
+            map:
+              odom:
+                base_footprint:
+                  base_link:
+                    base_scan:
+                      {}
+                    caster_back_link:
+                      {}
+                    imu_link:
+                      {}
+                    wheel_left_link:
+                      {}
+                    wheel_right_link:
+                      {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -203,6 +234,27 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /inflation_layer_updates
+          Use Timestamp: false
+          Value: true
+        - Alpha: 0.10000000149011612
+          Class: rviz_default_plugins/Map
+          Color Scheme: costmap
+          Draw Behind: false
+          Enabled: true
+          Name: Obstacle Layer
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /obstacle_layer
+          Update Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /obstacle_layer_updates
           Use Timestamp: false
           Value: true
       Enabled: true
