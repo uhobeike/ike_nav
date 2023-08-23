@@ -5,6 +5,7 @@
 #define IKE_LOCALIZATION__IKE_LOCALIZATION_HPP_
 
 #include "ike_localization/mcl/mcl.hpp"
+#include "ike_localization_parameter/ike_localization_parameter.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
@@ -39,34 +40,13 @@ public:
   explicit IkeLocalization(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
   ~IkeLocalization();
 
-private:
-  // サブスクライバの登録
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::ConstSharedPtr scan_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::ConstSharedPtr
-    initial_pose_sub_;
-
-  // パブリッシャの登録
-  rclcpp::Publisher<nav2_msgs::msg::ParticleCloud>::SharedPtr particle_cloud_pub_;
-  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr likelihood_map_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr
-    particles_scan_match_point_publisher_;
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr marginal_likelihood_publisher_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mcl_pose_publisher_;
-
-  // サービスサーバの登録
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_likelihoodfield_map_srv_;
-
-  rclcpp::TimerBase::SharedPtr mcl_loop_timer_;  // MClのループ用のタイマー
-
-  rclcpp::Clock ros_clock_;  // 時間を取得する用
-
+protected:
   void receiveInitialPose(
     geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);  // 初期位置の受取
   void receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg);  // LiDARからのデータの受取
 
   void initPubSub();   // パブリッシャ・サブスクライバ初期化
   void initService();  // サービスサーバの初期化
-  void setParam();     // デフォルトパラメータの設定
   void getParam();     // パラメータを取得する
   void initTf();       // tf関連の初期化
   void initMcl();      // MClの初期化
@@ -107,6 +87,31 @@ private:
 
   void loopMcl();  // MClのループ
 
+private:
+  // サブスクライバの登録
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::ConstSharedPtr scan_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::ConstSharedPtr
+    initial_pose_sub_;
+
+  // パブリッシャの登録
+  rclcpp::Publisher<nav2_msgs::msg::ParticleCloud>::SharedPtr particle_cloud_pub_;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr likelihood_map_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr
+    particles_scan_match_point_publisher_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr marginal_likelihood_publisher_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mcl_pose_publisher_;
+
+  // サービスサーバの登録
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_likelihoodfield_map_srv_;
+
+  rclcpp::TimerBase::SharedPtr mcl_loop_timer_;  // MClのループ用のタイマー
+
+  rclcpp::Clock ros_clock_;  // 時間を取得する用
+
+  // パラメータの取得用
+  std::shared_ptr<ike_localization::ParamListener> param_listener_;
+  ike_localization::Params params_;
+
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -130,7 +135,7 @@ private:
   Particle maximum_likelihood_particle_;
 
   // ike_localization用のパラメータ
-  std::chrono::milliseconds loop_mcl_ms_;                    // MClの実行周期
+  int loop_mcl_ms_;                                          // MClの実行周期
   int particle_size_;                                        // パーティクルのサイズ
   double initial_pose_x_, initial_pose_y_, initial_pose_a_;  // パーティクルの初期位置
   std::string map_frame_, odom_frame_, robot_frame_;         // 各座標系
