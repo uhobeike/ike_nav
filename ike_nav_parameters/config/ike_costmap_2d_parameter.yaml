@@ -19,7 +19,6 @@ ike_costmap_2d:
       description: "",
     }
 
-
   publish_costmap_2d_hz: {
     type: double,
     default_value: 2.0,
