@@ -16,7 +16,7 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   initSubscriber();
   initServiceServer();
   initServiceClient();
-  declareParam();
+
   getParam();
 
   initPlanner();
@@ -76,24 +76,18 @@ void IkePlanner::initPlanner()
   RCLCPP_INFO(this->get_logger(), "IkePlanner initialized done");
 }
 
-void IkePlanner::declareParam()
-{
-  declare_parameter("use_dijkstra", false);
-  declare_parameter("publish_searched_map", true);
-
-  declare_parameter("update_path_weight", 0.05);
-  declare_parameter("smooth_path_weight", 0.8);
-  declare_parameter("iteration_delta_threshold", 1.e-6);
-}
-
 void IkePlanner::getParam()
 {
-  get_parameter("use_dijkstra", use_dijkstra_);
-  get_parameter("publish_searched_map", publish_searched_map_);
+  this->param_listener_ =
+    std::make_shared<ike_planner::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
 
-  get_parameter("update_path_weight", update_path_weight_);
-  get_parameter("smooth_path_weight", smooth_path_weight_);
-  get_parameter("iteration_delta_threshold", iteration_delta_threshold_);
+  use_dijkstra_ = this->params_.use_dijkstra;
+  publish_searched_map_ = this->params_.publish_searched_map;
+
+  update_path_weight_ = this->params_.update_path_weight;
+  smooth_path_weight_ = this->params_.smooth_path_weight;
+  iteration_delta_threshold_ = this->params_.iteration_delta_threshold;
 }
 
 std::vector<std::tuple<int32_t, int32_t, uint8_t>> IkePlanner::getMotionModel()
