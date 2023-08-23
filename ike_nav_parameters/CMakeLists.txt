@@ -8,7 +8,9 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-find_package(generate_parameter_library REQUIRED)
+generate_parameter_library(ike_localization_parameter
+  config/ike_localization_parameter.yaml
+)
 
 generate_parameter_library(ike_planner_parameter
   config/ike_planner_parameter.yaml
