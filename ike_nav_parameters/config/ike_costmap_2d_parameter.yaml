@@ -1,0 +1,27 @@
+ike_costmap_2d:
+  inflation_layer:
+    inflation_radius: {
+      type: double,
+      default_value: 10.0,
+      description: "",
+    }
+
+  obstacle_layer:
+    inflation_radius: {
+      type: double,
+      default_value: 10.0,
+      description: "",
+    }
+
+    obstacle_range: {
+      type: double,
+      default_value: 3.0,
+      description: "",
+    }
+
+
+  publish_costmap_2d_hz: {
+    type: double,
+    default_value: 2.0,
+    description: "",
+  }

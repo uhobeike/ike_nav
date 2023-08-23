@@ -8,6 +8,10 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+generate_parameter_library(ike_costmap_2d_parameter
+  config/ike_costmap_2d_parameter.yaml
+)
+
 generate_parameter_library(ike_localization_parameter
   config/ike_localization_parameter.yaml
 )
