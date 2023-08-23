@@ -1,0 +1,6 @@
+ike_map_server:
+  map_yaml_path: {
+    type: string,
+    default_value: "/opt/ros/humble/share/turtlebot3_navigation2/map/map.yaml",
+    description: "",
+  }

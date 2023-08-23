@@ -16,6 +16,8 @@
   <depend>std_srvs</depend>
   <depend>yaml-cpp</depend>
 
+  <depend>ike_nav_parameters</depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
