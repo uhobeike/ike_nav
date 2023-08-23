@@ -1,0 +1,43 @@
+ike_controller:
+  mpc:
+    delta_time: {
+      type: double,
+      default_value: 1.0,
+      description: "",
+    }
+
+    predictive_horizon_num: {
+      type: int,
+      default_value: 10,
+      description: "",
+    }
+
+    lower_bound_linear_velocity: {
+      type: double,
+      default_value: 0.0,
+      description: "",
+    }
+
+    lower_bound_angular_velocity: {
+      type: double,
+      default_value: -3.14159265358979323846,
+      description: "",
+    }
+
+    upper_bound_linear_velocity: {
+      type: double,
+      default_value: 1.0,
+      description: "",
+    }
+
+    upper_bound_angular_velocity: {
+      type: double,
+      default_value: 3.14159265358979323846,
+      description: "",
+    }
+
+    max_num_iterations: {
+      type: int,
+      default_value: 100,
+      description: "",
+    }

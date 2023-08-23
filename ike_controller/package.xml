@@ -24,6 +24,8 @@
   <depend>ike_nav_msgs</depend>
   <depend>geometry_msgs</depend>
 
+  <depend>ike_nav_parameters</depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
