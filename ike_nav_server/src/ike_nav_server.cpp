@@ -13,6 +13,8 @@ namespace ike_nav
 
 IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_server", options)
 {
+  getParam();
+
   initTf();
   initPublisher();
   initSubscription();
@@ -20,6 +22,17 @@ IkeNavServer::IkeNavServer(const rclcpp::NodeOptions & options) : Node("ike_nav_
   initActionServer();
   initActionClient();
   initTimer();
+}
+
+void IkeNavServer::getParam()
+{
+  this->param_listener_ =
+    std::make_shared<ike_nav_server::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  ike_nav_server_loop_hz_ = this->params_.ike_nav_server_loop_hz;
+  goal_tolerance_xy_ = this->params_.goal_tolerance_xy;
+  publish_stop_velocity_ms_ = 1 / this->params_.publish_stop_velocity_hz * 1000.;
 }
 
 void IkeNavServer::initTf()
@@ -85,7 +98,8 @@ void IkeNavServer::initServiceClient()
 void IkeNavServer::initTimer()
 {
   stop_velocity_publish_timer_ = this->create_wall_timer(
-    100ms, [this]() { cmd_vel_pub_->publish(geometry_msgs::msg::Twist()); });
+    std::chrono::milliseconds{publish_stop_velocity_ms_},
+    [this]() { cmd_vel_pub_->publish(geometry_msgs::msg::Twist()); });
 }
 
 rclcpp_action::GoalResponse IkeNavServer::handle_goal(
@@ -178,7 +192,7 @@ bool IkeNavServer::checkGoalReached(
   distance_remaining = std::hypot(
     start.pose.position.x - goal.pose.position.x, start.pose.position.y - goal.pose.position.y);
 
-  if (distance_remaining < 0.2) return true;
+  if (distance_remaining < goal_tolerance_xy_) return true;
 
   return false;
 }
@@ -201,7 +215,7 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
 {
   RCLCPP_INFO(this->get_logger(), "Executing navigate_to_goal");
 
-  rclcpp::Rate loop_rate(5);
+  rclcpp::Rate loop_rate(ike_nav_server_loop_hz_);
   const auto goal = goal_handle->get_goal();
   auto feedback = std::make_shared<NavigateToGoal::Feedback>();
   auto & distance_remaining = feedback->distance_remaining;

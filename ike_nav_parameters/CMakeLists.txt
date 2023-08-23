@@ -24,6 +24,10 @@ generate_parameter_library(ike_map_server_parameter
   config/ike_map_server_parameter.yaml
 )
 
+generate_parameter_library(ike_nav_server_parameter
+  config/ike_nav_server_parameter.yaml
+)
+
 generate_parameter_library(ike_planner_parameter
   config/ike_planner_parameter.yaml
 )

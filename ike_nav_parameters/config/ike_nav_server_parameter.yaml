@@ -1,0 +1,18 @@
+ike_nav_server:
+  ike_nav_server_loop_hz: {
+    type: double,
+    default_value: 10.0,
+    description: "",
+  }
+
+  goal_tolerance_xy: {
+    type: double,
+    default_value: 0.2,
+    description: "",
+  }
+
+  publish_stop_velocity_hz: {
+    type: double,
+    default_value: 10.0,
+    description: "",
+  }
