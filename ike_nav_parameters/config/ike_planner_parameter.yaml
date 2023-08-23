@@ -1,0 +1,30 @@
+ike_planner:
+  use_dijkstra: {
+    type: bool,
+    default_value: false,
+    description: "Whether to use dijkstra or not",
+  }
+
+  publish_searched_map: {
+    type: bool,
+    default_value: false,
+    description: "Whether to publish searched_map or not",
+  }
+
+  update_path_weight: {
+    type: double,
+    default_value: 0.05,
+    description: "How much to shift the data for smoothing",
+  }
+
+  smooth_path_weight: {
+    type: double,
+    default_value: 0.8,
+    description: "How smooth the path is.",
+  }
+
+  iteration_delta_threshold: {
+    type: double,
+    default_value: 1.e-6,
+    description: "How much optimization is done until a threshold is reached",
+  }

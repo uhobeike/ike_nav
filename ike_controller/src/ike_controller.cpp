@@ -24,9 +24,26 @@ namespace ike_nav
 
 IkeController::IkeController(const rclcpp::NodeOptions & options) : Node("ike_controller", options)
 {
+  getParam();
+
   initPublisher();
   initService();
   setMpcParameters();
+}
+
+void IkeController::getParam()
+{
+  this->param_listener_ =
+    std::make_shared<ike_controller::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  dt_ = this->params_.mpc.delta_time;
+  predictive_horizon_num_ = this->params_.mpc.predictive_horizon_num;
+  lower_bound_linear_velocity_ = this->params_.mpc.lower_bound_linear_velocity;
+  lower_bound_angular_velocity_ = this->params_.mpc.lower_bound_angular_velocity;
+  upper_bound_linear_velocity_ = this->params_.mpc.upper_bound_linear_velocity;
+  upper_bound_angular_velocity_ = this->params_.mpc.upper_bound_angular_velocity;
+  max_num_iterations_ = this->params_.mpc.max_num_iterations;
 }
 
 void IkeController::initPublisher()

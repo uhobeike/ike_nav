@@ -4,6 +4,8 @@
 #ifndef IKE_COSTMAP_2D__IKE_COSTMAP_2D_HPP_
 #define IKE_COSTMAP_2D__IKE_COSTMAP_2D_HPP_
 
+#include "ike_costmap_2d_parameter/ike_costmap_2d_parameter.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_cost_map2_d.hpp"
@@ -25,6 +27,8 @@ public:
   explicit IkeCostMap2D(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initTf();
   void initPublisher();
   void initSubscription();
@@ -64,6 +68,9 @@ private:
 
   rclcpp::TimerBase::SharedPtr create_obstacle_layer_timer_;
 
+  std::shared_ptr<ike_costmap_2d::ParamListener> param_listener_;
+  ike_costmap_2d::Params params_;
+
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
@@ -73,6 +80,10 @@ private:
   sensor_msgs::msg::LaserScan scan_;
 
   bool get_map_, get_scan_, get_lidar_pose_;
+
+  double obstacle_layer_inflation_radius_, inflation_layer_inflation_radius_;
+  double obstacle_layer_obstacle_range_;
+  u_int32_t publish_costmap_2d_ms_;
 };
 
 }  // namespace ike_nav

@@ -4,6 +4,8 @@
 #ifndef IKE_CONTROLLER__IKE_CONTROLLER_HPP_
 #define IKE_CONTROLLER__IKE_CONTROLLER_HPP_
 
+#include "ike_controller_parameter/ike_controller_parameter.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_twist.hpp"
@@ -23,6 +25,8 @@ public:
   explicit IkeController(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initPublisher();
   void initService();
 
@@ -48,6 +52,9 @@ protected:
 private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr predictive_horizon_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetTwist>::SharedPtr get_twist_srv_;
+
+  std::shared_ptr<ike_controller::ParamListener> param_listener_;
+  ike_controller::Params params_;
 
   geometry_msgs::msg::PoseStamped start_, goal_;
   nav_msgs::msg::Path path_;

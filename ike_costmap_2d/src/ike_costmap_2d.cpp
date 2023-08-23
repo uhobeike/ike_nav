@@ -14,6 +14,8 @@ namespace ike_nav
 
 IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_costmap_2d", options)
 {
+  getParam();
+
   initTf();
   initPublisher();
   initSubscription();
@@ -21,6 +23,18 @@ IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_cost
   initTimer();
 
   map_ = getMap();
+}
+
+void IkeCostMap2D::getParam()
+{
+  this->param_listener_ =
+    std::make_shared<ike_costmap_2d::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  inflation_layer_inflation_radius_ = this->params_.inflation_layer.inflation_radius;
+  obstacle_layer_inflation_radius_ = this->params_.obstacle_layer.inflation_radius;
+  obstacle_layer_obstacle_range_ = this->params_.obstacle_layer.obstacle_range;
+  publish_costmap_2d_ms_ = 1 / this->params_.publish_costmap_2d_hz * 1000.;
 }
 
 void IkeCostMap2D::initTf()
@@ -98,8 +112,9 @@ void IkeCostMap2D::initTimer()
 {
   using namespace std::chrono_literals;
 
-  create_obstacle_layer_timer_ =
-    this->create_wall_timer(500ms, std::bind(&IkeCostMap2D::createObstacleLayer, this));
+  create_obstacle_layer_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds{publish_costmap_2d_ms_},
+    std::bind(&IkeCostMap2D::createObstacleLayer, this));
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()
@@ -141,12 +156,11 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
   const nav_msgs::msg::OccupancyGrid & map)
 {
   auto inflation_layer = map;
-  auto inflation_radius = 10.;
 
   for (uint32_t map_y = 0; map_y < inflation_layer.info.width; map_y++) {
     for (uint32_t map_x = 0; map_x < inflation_layer.info.height; map_x++)
       if (inflation_layer.data[map_y * inflation_layer.info.width + map_x] == 100) {
-        calculateInflation(inflation_layer, inflation_radius, map_x, map_y);
+        calculateInflation(inflation_layer, inflation_layer_inflation_radius_, map_x, map_y);
       }
   }
 
@@ -155,8 +169,6 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
 
 void IkeCostMap2D::createObstacleLayer()
 {
-  auto inflation_radius = 10.;
-
   if (costmap_2d_layers_.find("inflation_layer") != costmap_2d_layers_.end()) {
     costmap_2d_layers_["obstacle_layer"] = costmap_2d_layers_["inflation_layer"];
 
@@ -172,7 +184,8 @@ void IkeCostMap2D::createObstacleLayer()
         // clang-format on
 
         calculateInflation(
-          costmap_2d_layers_["obstacle_layer"], inflation_radius, hit_xy.first, hit_xy.second);
+          costmap_2d_layers_["obstacle_layer"], obstacle_layer_inflation_radius_, hit_xy.first,
+          hit_xy.second);
 
         costmap_2d_layers_["obstacle_layer"].header.stamp = rclcpp::Time();
         costmap_2d_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
@@ -184,14 +197,13 @@ void IkeCostMap2D::createObstacleLayer()
 std::vector<std::pair<uint32_t, uint32_t>> IkeCostMap2D::calculateHitPoint(
   sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose)
 {
-  auto obstacle_range = 3.;
-
   std::vector<std::pair<uint32_t, uint32_t>> hits_xy;
   double scan_angle_increment = scan_.angle_increment;
   for (auto scan_range : scan.ranges) {
     // todo fix
     ++scan_angle_increment;
-    if (scan_range == INFINITY || scan_range == NAN || scan_range > obstacle_range) continue;
+    if (scan_range == INFINITY || scan_range == NAN || scan_range > obstacle_layer_obstacle_range_)
+      continue;
 
     auto hit_x =
       lidar_pose.pose.position.x +

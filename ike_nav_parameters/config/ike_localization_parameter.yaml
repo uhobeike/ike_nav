@@ -1,0 +1,84 @@
+ike_localization:
+  loop_mcl_hz: {
+    type: double,
+    default_value: 10.0,
+    description: "",
+  }
+
+  particle_size: {
+    type: int,
+    default_value: 500,
+    description: "",
+  }
+
+  initial_pose_x: {
+    type: double,
+    default_value: 8.0,
+    description: "",
+  }
+
+  initial_pose_y: {
+    type: double,
+    default_value: 9.5,
+    description: "",
+  }
+
+  initial_pose_a: {
+    type: double,
+    default_value: 0.3,
+    description: "",
+  }
+
+  map_frame: {
+    type: string,
+    default_value: "map",
+    description: "",
+  }
+
+  odom_frame: {
+    type: string,
+    default_value: "odom",
+    description: "",
+  }
+
+  robot_frame: {
+    type: string,
+    default_value: "base_footprint",
+    description: "",
+  }
+
+  alpha_trans_trans: {
+    type: double,
+    default_value: 1.0,
+    description: "",
+  }
+
+  alpha_trans_rotate: {
+    type: double,
+    default_value: 0.2,
+    description: "",
+  }
+
+  alpha_rotate_trans: {
+    type: double,
+    default_value: 0.2,
+    description: "",
+  }
+
+  alpha_rotate_rotate: {
+    type: double,
+    default_value: 0.02,
+    description: "",
+  }
+
+  likelihood_dist: {
+    type: double,
+    default_value: 10.0,
+    description: "",
+  }
+
+  publish_particles_scan_match_point: {
+    type: bool,
+    default_value: false,
+    description: "",
+  }

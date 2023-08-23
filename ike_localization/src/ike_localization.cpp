@@ -40,14 +40,46 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
 {
   RCLCPP_INFO(this->get_logger(), "Run IkeLocalization");
 
-  initPubSub();
-  setParam();
   getParam();
+
+  initPubSub();
   getMap();
   loopMcl();
   initService();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
+
+void IkeLocalization::getParam()
+{
+  RCLCPP_INFO(get_logger(), "Run getParam.");
+
+  this->param_listener_ =
+    std::make_shared<ike_localization::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  loop_mcl_ms_ = 1 / this->params_.loop_mcl_hz * 1000;
+
+  particle_size_ = get_parameter("particle_size").get_value<int>();
+
+  initial_pose_x_ = this->params_.initial_pose_x;
+  initial_pose_y_ = this->params_.initial_pose_y;
+  initial_pose_a_ = this->params_.initial_pose_a;
+
+  map_frame_ = this->params_.map_frame;
+  odom_frame_ = this->params_.odom_frame;
+  robot_frame_ = this->params_.robot_frame;
+
+  alpha1_ = this->params_.alpha_trans_trans;
+  alpha2_ = this->params_.alpha_trans_rotate;
+  alpha3_ = this->params_.alpha_rotate_trans;
+  alpha4_ = this->params_.alpha_rotate_rotate;
+
+  likelihood_dist_ = this->params_.likelihood_dist;
+
+  publish_particles_scan_match_point_ = this->params_.publish_particles_scan_match_point;
+
+  RCLCPP_INFO(get_logger(), "Done getParam.");
+}
 
 void IkeLocalization::initPubSub()
 {
@@ -136,63 +168,6 @@ void IkeLocalization::receiveInitialPose(
 
   RCLCPP_INFO(get_logger(), "Done receiveInitialPose.");
 };
-
-void IkeLocalization::setParam()
-{
-  RCLCPP_INFO(get_logger(), "Run setParam.");
-
-  declare_parameter("loop_mcl_hz", 10.0);
-
-  declare_parameter("particle_size", 500);
-
-  declare_parameter("map_frame", "map");
-  declare_parameter("odom_frame", "odom");
-  declare_parameter("robot_frame", "base_footprint");
-
-  declare_parameter("initial_pose_x", 0.0);
-  declare_parameter("initial_pose_y", 0.0);
-  declare_parameter("initial_pose_a", 0.0);
-
-  declare_parameter("alpha_trans_trans", 1.0);
-  declare_parameter("alpha_trans_rotate", 0.03);
-  declare_parameter("alpha_rotate_trans", 0.3);
-  declare_parameter("alpha_rotate_rotate", 0.03);
-
-  declare_parameter("likelihood_dist", 5.0);
-
-  declare_parameter("publish_particles_scan_match_point", false);
-
-  RCLCPP_INFO(get_logger(), "Done setParam.");
-}
-void IkeLocalization::getParam()
-{
-  RCLCPP_INFO(get_logger(), "Run getParam.");
-
-  int loop_mcl_hz = 1000 / get_parameter("loop_mcl_hz").get_value<double>();
-  loop_mcl_ms_ = std::chrono::milliseconds{loop_mcl_hz};
-
-  particle_size_ = get_parameter("particle_size").get_value<int>();
-
-  initial_pose_x_ = get_parameter("initial_pose_x").get_value<double>();
-  initial_pose_y_ = get_parameter("initial_pose_y").get_value<double>();
-  initial_pose_a_ = get_parameter("initial_pose_a").get_value<double>();
-
-  map_frame_ = get_parameter("map_frame").get_value<std::string>();
-  odom_frame_ = get_parameter("odom_frame").get_value<std::string>();
-  robot_frame_ = get_parameter("robot_frame").get_value<std::string>();
-
-  alpha1_ = get_parameter("alpha_trans_trans").get_value<double>();
-  alpha2_ = get_parameter("alpha_trans_rotate").get_value<double>();
-  alpha3_ = get_parameter("alpha_rotate_trans").get_value<double>();
-  alpha4_ = get_parameter("alpha_rotate_rotate").get_value<double>();
-
-  likelihood_dist_ = get_parameter("likelihood_dist").get_value<double>();
-
-  publish_particles_scan_match_point_ =
-    get_parameter("publish_particles_scan_match_point").get_value<bool>();
-
-  RCLCPP_INFO(get_logger(), "Done getParam.");
-}
 
 void IkeLocalization::initTf()
 {
@@ -399,7 +374,7 @@ void IkeLocalization::mcl_to_ros2()
 
 void IkeLocalization::loopMcl()
 {
-  mcl_loop_timer_ = create_wall_timer(loop_mcl_ms_, [this]() {
+  mcl_loop_timer_ = create_wall_timer(std::chrono::milliseconds{loop_mcl_ms_}, [this]() {
     if (rclcpp::ok() && scan_receive_ && map_receive_ && init_tf_ && init_mcl_) {
       RCLCPP_INFO(get_logger(), "Run loopMcl.");
       getCurrentRobotPose(current_pose_);

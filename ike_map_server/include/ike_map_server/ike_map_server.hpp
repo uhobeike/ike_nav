@@ -4,6 +4,8 @@
 #ifndef IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
 #define IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
 
+#include "ike_map_server_parameter/ike_map_server_parameter.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_map.hpp"
@@ -28,9 +30,10 @@ public:
   explicit IkeMapServer(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initPublisher();
   void initService();
-  void setParam();
 
   bool readMapYaml(Pgm & pgm);
   bool readPgm(Pgm & pgm);
@@ -41,8 +44,13 @@ private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
   rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
+
+  std::shared_ptr<ike_map_server::ParamListener> param_listener_;
+  ike_map_server::Params params_;
+
+  std::string map_yaml_path_;
 };
 
 }  // namespace ike_nav
 
-#endif	// IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_
+#endif  // IKE_MAP_SERVER__IKE_MAP_SERVER_HPP_

@@ -4,6 +4,8 @@
 #ifndef IKE_PLANNER__IKE_PLANNER_HPP_
 #define IKE_PLANNER__IKE_PLANNER_HPP_
 
+#include "ike_planner_parameter/ike_planner_parameter.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 #include "ike_nav_msgs/srv/get_cost_map2_d.hpp"
@@ -13,7 +15,6 @@
 
 namespace ike_nav
 {
-
 struct Node
 {
   uint32_t x, y;
@@ -34,12 +35,12 @@ public:
   explicit IkePlanner(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initPublisher();
   void initSubscriber();
   void initServiceServer();
   void initServiceClient();
-  void declareParam();
-  void getParam();
 
   void initPlanner();
 
@@ -68,6 +69,9 @@ private:
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_2d_sub_;
   rclcpp::Service<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_srv_;
   rclcpp::Client<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_map_srv_;
+
+  std::shared_ptr<ike_planner::ParamListener> param_listener_;
+  ike_planner::Params params_;
 
   double resolution_, robot_radius_;
   uint32_t min_x_, min_y_, max_x_, max_y_;

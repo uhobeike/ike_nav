@@ -4,6 +4,8 @@
 #ifndef IKE_NAV_SERVER__IKE_NAV_SERVER_HPP_
 #define IKE_NAV_SERVER__IKE_NAV_SERVER_HPP_
 
+#include "ike_nav_server_parameter/ike_nav_server_parameter.hpp"
+
 #include <nav2_util/robot_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
@@ -29,6 +31,8 @@ public:
   explicit IkeNavServer(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initTf();
   void initPublisher();
   void initSubscription();
@@ -65,6 +69,9 @@ private:
 
   rclcpp::TimerBase::SharedPtr stop_velocity_publish_timer_;
 
+  std::shared_ptr<ike_nav_server::ParamListener> param_listener_;
+  ike_nav_server::Params params_;
+
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
@@ -76,6 +83,10 @@ private:
 
   std::vector<std::thread::id> thread_id_;
   std::mutex mutex_;
+
+  double ike_nav_server_loop_hz_;
+  double goal_tolerance_xy_;
+  uint32_t publish_stop_velocity_ms_;
 };
 
 }  // namespace ike_nav

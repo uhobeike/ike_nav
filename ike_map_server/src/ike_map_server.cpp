@@ -17,20 +17,30 @@ namespace ike_nav
 
 IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_server", options)
 {
-  Pgm pgm;
+  getParam();
 
   initPublisher();
   initService();
-  setParam();
 
   RCLCPP_INFO(
     get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
+
+  Pgm pgm;
   readMapYaml(pgm);
   readPgm(pgm);
 
   nav_msgs::msg::OccupancyGrid map;
   createOccupancyGrid(pgm, map);
   publishMap(map);
+}
+
+void IkeMapServer::getParam()
+{
+  this->param_listener_ =
+    std::make_shared<ike_map_server::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  map_yaml_path_ = this->params_.map_yaml_path;
 }
 
 void IkeMapServer::initPublisher()
@@ -85,11 +95,9 @@ void IkeMapServer::initService()
   publish_map_srv_ = create_service<std_srvs::srv::Trigger>("publish_map", publish_map);
 }
 
-void IkeMapServer::setParam() { this->declare_parameter("map_yaml_path", ""); }
-
 bool IkeMapServer::readMapYaml(Pgm & pgm)
 {
-  YAML::Node config = YAML::LoadFile(this->get_parameter("map_yaml_path").as_string().c_str());
+  YAML::Node config = YAML::LoadFile(map_yaml_path_);
 
   pgm.image = config["image"].as<std::string>();
   pgm.resolution = config["resolution"].as<double>();
