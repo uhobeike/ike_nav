@@ -40,13 +40,46 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
 {
   RCLCPP_INFO(this->get_logger(), "Run IkeLocalization");
 
-  initPubSub();
   getParam();
+
+  initPubSub();
   getMap();
   loopMcl();
   initService();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
+
+void IkeLocalization::getParam()
+{
+  RCLCPP_INFO(get_logger(), "Run getParam.");
+
+  this->param_listener_ =
+    std::make_shared<ike_localization::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  loop_mcl_ms_ = 1 / this->params_.loop_mcl_hz * 1000;
+
+  particle_size_ = get_parameter("particle_size").get_value<int>();
+
+  initial_pose_x_ = this->params_.initial_pose_x;
+  initial_pose_y_ = this->params_.initial_pose_y;
+  initial_pose_a_ = this->params_.initial_pose_a;
+
+  map_frame_ = this->params_.map_frame;
+  odom_frame_ = this->params_.odom_frame;
+  robot_frame_ = this->params_.robot_frame;
+
+  alpha1_ = this->params_.alpha_trans_trans;
+  alpha2_ = this->params_.alpha_trans_rotate;
+  alpha3_ = this->params_.alpha_rotate_trans;
+  alpha4_ = this->params_.alpha_rotate_rotate;
+
+  likelihood_dist_ = this->params_.likelihood_dist;
+
+  publish_particles_scan_match_point_ = this->params_.publish_particles_scan_match_point;
+
+  RCLCPP_INFO(get_logger(), "Done getParam.");
+}
 
 void IkeLocalization::initPubSub()
 {
@@ -135,38 +168,6 @@ void IkeLocalization::receiveInitialPose(
 
   RCLCPP_INFO(get_logger(), "Done receiveInitialPose.");
 };
-
-void IkeLocalization::getParam()
-{
-  RCLCPP_INFO(get_logger(), "Run getParam.");
-
-  this->param_listener_ =
-    std::make_shared<ike_localization::ParamListener>(this->get_node_parameters_interface());
-  this->params_ = param_listener_->get_params();
-
-  loop_mcl_ms_ = 1 / this->params_.loop_mcl_hz * 1000;
-
-  particle_size_ = get_parameter("particle_size").get_value<int>();
-
-  initial_pose_x_ = this->params_.initial_pose_x;
-  initial_pose_y_ = this->params_.initial_pose_y;
-  initial_pose_a_ = this->params_.initial_pose_a;
-
-  map_frame_ = this->params_.map_frame;
-  odom_frame_ = this->params_.odom_frame;
-  robot_frame_ = this->params_.robot_frame;
-
-  alpha1_ = this->params_.alpha_trans_trans;
-  alpha2_ = this->params_.alpha_trans_rotate;
-  alpha3_ = this->params_.alpha_rotate_trans;
-  alpha4_ = this->params_.alpha_rotate_rotate;
-
-  likelihood_dist_ = this->params_.likelihood_dist;
-
-  publish_particles_scan_match_point_ = this->params_.publish_particles_scan_match_point;
-
-  RCLCPP_INFO(get_logger(), "Done getParam.");
-}
 
 void IkeLocalization::initTf()
 {

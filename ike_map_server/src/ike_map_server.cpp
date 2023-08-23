@@ -17,8 +17,6 @@ namespace ike_nav
 
 IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_server", options)
 {
-  Pgm pgm;
-
   getParam();
 
   initPublisher();
@@ -26,6 +24,8 @@ IkeMapServer::IkeMapServer(const rclcpp::NodeOptions & options) : Node("ike_map_
 
   RCLCPP_INFO(
     get_logger(), "Read map yaml: %s", this->get_parameter("map_yaml_path").as_string().c_str());
+
+  Pgm pgm;
   readMapYaml(pgm);
   readPgm(pgm);
 

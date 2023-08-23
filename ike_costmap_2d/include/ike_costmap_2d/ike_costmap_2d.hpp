@@ -27,13 +27,13 @@ public:
   explicit IkeCostMap2D(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initTf();
   void initPublisher();
   void initSubscription();
   void initServiceServer();
   void initTimer();
-
-  void getParam();
 
   void createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map);
   nav_msgs::msg::OccupancyGrid createStaticLayer(const nav_msgs::msg::OccupancyGrid & map);

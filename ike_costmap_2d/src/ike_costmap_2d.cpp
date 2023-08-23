@@ -25,6 +25,18 @@ IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_cost
   map_ = getMap();
 }
 
+void IkeCostMap2D::getParam()
+{
+  this->param_listener_ =
+    std::make_shared<ike_costmap_2d::ParamListener>(this->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  inflation_layer_inflation_radius_ = this->params_.inflation_layer.inflation_radius;
+  obstacle_layer_inflation_radius_ = this->params_.obstacle_layer.inflation_radius;
+  obstacle_layer_obstacle_range_ = this->params_.obstacle_layer.obstacle_range;
+  publish_costmap_2d_ms_ = 1 / this->params_.publish_costmap_2d_hz * 1000.;
+}
+
 void IkeCostMap2D::initTf()
 {
   tf_buffer_.reset();
@@ -103,18 +115,6 @@ void IkeCostMap2D::initTimer()
   create_obstacle_layer_timer_ = this->create_wall_timer(
     std::chrono::milliseconds{publish_costmap_2d_ms_},
     std::bind(&IkeCostMap2D::createObstacleLayer, this));
-}
-
-void IkeCostMap2D::getParam()
-{
-  this->param_listener_ =
-    std::make_shared<ike_costmap_2d::ParamListener>(this->get_node_parameters_interface());
-  this->params_ = param_listener_->get_params();
-
-  inflation_layer_inflation_radius_ = this->params_.inflation_layer.inflation_radius;
-  obstacle_layer_inflation_radius_ = this->params_.obstacle_layer.inflation_radius;
-  obstacle_layer_obstacle_range_ = this->params_.obstacle_layer.obstacle_range;
-  publish_costmap_2d_ms_ = 1 / this->params_.publish_costmap_2d_hz * 1000.;
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::getMap()

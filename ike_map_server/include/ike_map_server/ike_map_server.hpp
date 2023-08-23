@@ -30,9 +30,10 @@ public:
   explicit IkeMapServer(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initPublisher();
   void initService();
-  void getParam();
 
   bool readMapYaml(Pgm & pgm);
   bool readPgm(Pgm & pgm);

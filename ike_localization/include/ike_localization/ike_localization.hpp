@@ -45,9 +45,10 @@ protected:
     geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);  // 初期位置の受取
   void receiveScan(sensor_msgs::msg::LaserScan::SharedPtr msg);  // LiDARからのデータの受取
 
+  void getParam();  // パラメータを取得する
+
   void initPubSub();   // パブリッシャ・サブスクライバ初期化
   void initService();  // サービスサーバの初期化
-  void getParam();     // パラメータを取得する
   void initTf();       // tf関連の初期化
   void initMcl();      // MClの初期化
   void getMap();       // サービス経由でmapを取得する

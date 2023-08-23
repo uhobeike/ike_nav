@@ -35,12 +35,12 @@ public:
   explicit IkePlanner(const rclcpp::NodeOptions & options);
 
 protected:
+  void getParam();
+
   void initPublisher();
   void initSubscriber();
   void initServiceServer();
   void initServiceClient();
-
-  void getParam();
 
   void initPlanner();
 
