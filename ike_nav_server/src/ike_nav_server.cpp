@@ -214,6 +214,7 @@ bool IkeNavServer::checkShouldExitThisThread()
 void IkeNavServer::clearThreadId()
 {
   std::lock_guard<std::mutex> lock(mutex_);
+
   thread_id_.clear();
 }
 
