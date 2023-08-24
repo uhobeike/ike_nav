@@ -44,7 +44,7 @@ void IkeController::getParam()
   upper_bound_angular_velocity_ = this->params_.mpc.upper_bound_angular_velocity;
   max_num_iterations_ = this->params_.mpc.max_num_iterations;
   recovery_rotate_velocity_ = this->params_.mpc.recovery_rotate_velocity;
-  limit_rotate_velocity_ = this->params_.mpc.limit_rotate_velocity;
+  limit_absolute_rotate_velocity_ = this->params_.mpc.limit_absolute_rotate_velocity;
 }
 
 void IkeController::initPublisher()
@@ -207,8 +207,14 @@ void IkeController::recoveryMPC(bool should_execute, double & omega)
 
 void IkeController::limitRotateVelocity(double & omega)
 {
-  if (omega > limit_rotate_velocity_) {
-    omega = limit_rotate_velocity_;
+  if (omega > 0) {
+    if (omega > limit_absolute_rotate_velocity_) {
+      omega = limit_absolute_rotate_velocity_;
+    }
+  } else {
+    if (omega < -1 * limit_absolute_rotate_velocity_) {
+      omega = -1 * limit_absolute_rotate_velocity_;
+    }
   }
 }
 
