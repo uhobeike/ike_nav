@@ -3,6 +3,8 @@
 
 #include "ike_waypoint_follower/ike_waypoint_follower.hpp"
 
+#include <nav2_util/robot_utils.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 namespace ike_nav
@@ -13,6 +15,7 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
 {
   getParam();
 
+  initTf();
   initActionClient();
   initTimer();
 
@@ -26,6 +29,14 @@ void IkeWaypointFollower::getParam()
   this->params_ = param_listener_->get_params();
 
   waypoint_yaml_path_ = this->params_.waypoint_yaml_path;
+}
+
+void IkeWaypointFollower::initTf()
+{
+  tf_buffer_.reset();
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
+  // tf_buffer_->setUsingDedicatedThread(true);
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
 void IkeWaypointFollower::initActionClient()
@@ -75,7 +86,22 @@ void IkeWaypointFollower::readWaypointYaml()
   }
 }
 
-void IkeWaypointFollower::loop() { RCLCPP_INFO(get_logger(), "Run IkeWaypointFollower::loop"); }
+void IkeWaypointFollower::getMapFrameRobotPose(
+  geometry_msgs::msg::PoseStamped & map_frame_robot_pose)
+{
+  geometry_msgs::msg::PoseStamped pose;
+  if (nav2_util::getCurrentPose(pose, *tf_buffer_)) {
+    map_frame_robot_pose = pose;
+    get_robot_pose_ = true;
+  }
+}
+
+void IkeWaypointFollower::loop()
+{
+  RCLCPP_INFO(get_logger(), "Run IkeWaypointFollower::loop");
+
+  getMapFrameRobotPose(robot_pose_);
+}
 
 }  // namespace ike_nav
 

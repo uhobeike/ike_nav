@@ -11,6 +11,10 @@
 
 #include "ike_nav_msgs/action/navigate_to_goal.hpp"
 #include "ike_nav_msgs/msg/waypoints.hpp"
+#include <geometry_msgs/msg/pose_stamped.hpp>
+
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 using NavigateToGoal = ike_nav_msgs::action::NavigateToGoal;
 using GoalHandleNavigateToGoal = rclcpp_action::ServerGoalHandle<NavigateToGoal>;
@@ -25,10 +29,12 @@ public:
 protected:
   void getParam();
 
+  void initTf();
   void initActionClient();
   void initTimer();
 
   void readWaypointYaml();
+  void getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose);
 
   void loop();
 
@@ -40,8 +46,15 @@ private:
   std::shared_ptr<ike_waypoint_follower::ParamListener> param_listener_;
   ike_waypoint_follower::Params params_;
 
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
   std::string waypoint_yaml_path_;
   ike_nav_msgs::msg::Waypoints waypoints_;
+
+  geometry_msgs::msg::PoseStamped robot_pose_;
+
+  bool get_robot_pose_;
 };
 
 }  // namespace ike_nav
