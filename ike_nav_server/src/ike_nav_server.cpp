@@ -8,8 +8,6 @@
 #include <memory>
 #include <utility>
 
-using namespace std::chrono_literals;
-
 namespace ike_nav
 {
 
@@ -53,6 +51,8 @@ void IkeNavServer::initPublisher()
 
 void IkeNavServer::initSubscription()
 {
+  using namespace std::chrono_literals;
+
   auto goal_pose_callback = [this](geometry_msgs::msg::PoseStamped msg) -> void {
     if (!navigate_to_goal_action_client_->wait_for_action_server(10s)) {
       RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
@@ -136,6 +136,8 @@ void IkeNavServer::handle_accepted(const std::shared_ptr<GoalHandleNavigateToGoa
 void IkeNavServer::asyncGetPath(
   geometry_msgs::msg::PoseStamped start, geometry_msgs::msg::PoseStamped goal)
 {
+  using namespace std::chrono_literals;
+
   while (!get_path_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
@@ -158,6 +160,8 @@ void IkeNavServer::asyncGetPath(
 void IkeNavServer::asyncGetTwist(
   const geometry_msgs::msg::PoseStamped & robot_pose, const nav_msgs::msg::Path & path)
 {
+  using namespace std::chrono_literals;
+
   while (!get_path_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
