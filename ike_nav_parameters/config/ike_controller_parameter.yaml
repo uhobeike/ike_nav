@@ -48,7 +48,7 @@ ike_controller:
       description: "",
     }
 
-    limit_rotate_velocity: {
+    limit_absolute_rotate_velocity: {
       type: double,
       default_value: 1.0,
       description: "",

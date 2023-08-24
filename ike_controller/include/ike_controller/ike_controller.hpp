@@ -70,7 +70,7 @@ private:
   double upper_bound_angular_velocity_;
   int max_num_iterations_;
   double recovery_rotate_velocity_;
-  double limit_rotate_velocity_;
+  double limit_absolute_rotate_velocity_;
 };
 
 struct ObjectiveFunction
