@@ -1,8 +1,9 @@
 <launch>
-  <arg name ="map_yaml" default="$(find-pkg-share turtlebot3_navigation2)/map/map.yaml"/>
-  <arg name ="rviz_config" default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
+  <arg name ="map_yaml"       default="$(find-pkg-share turtlebot3_navigation2)/map/map.yaml"/>
+  <arg name ="waypoint_yaml"  default="$(find-pkg-share ike_launch)/config/waypoint.yaml"/>
+  <arg name ="rviz_config"    default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
 
-  <node_container pkg="rclcpp_components" exec="component_container" name="ike_map_server" namespace="" args="">
+  <!-- <node_container pkg="rclcpp_components" exec="component_container" name="ike_map_server" namespace="" args="">
     <composable_node pkg="ike_map_server" plugin="ike_nav::IkeMapServer" name="ike_map_server" namespace="">
       <param name="map_yaml_path"               value="$(var map_yaml)"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
@@ -13,10 +14,10 @@
     <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
-  </node_container>
+  </node_container> -->
   
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
-    <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
+    <!-- <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
       <param name="loop_mcl_hz"                         value="10.0"/>
       <param name="particle_size"                       value="500"/>
       <param name="initial_pose_x"                      value="8.0"/>
@@ -49,12 +50,17 @@
 
     <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
       <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node> -->
+
+    <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
+      <param name="waypoint_yaml_path"          value="$(var waypoint_yaml)"/>
+      <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
   </node_container>
 
-  <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
+  <!-- <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
 
   <executable cmd="bash -c 'sleep 1; ros2 service call /publish_map std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/>
   <executable cmd="bash -c 'sleep 1; ros2 service call /publish_likelihoodfield_map std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/>
-  <executable cmd="bash -c 'sleep 1; ros2 service call /publish_costmap_2d std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/>
+  <executable cmd="bash -c 'sleep 1; ros2 service call /publish_costmap_2d std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/> -->
 </launch>
