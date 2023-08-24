@@ -1,0 +1,6 @@
+ike_waypoint_follower:
+  waypoint_yaml_path: {
+    type: string,
+    default_value: "./waypoint.yaml",
+    description: "",
+  }

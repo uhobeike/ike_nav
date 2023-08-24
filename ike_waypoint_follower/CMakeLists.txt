@@ -13,7 +13,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   src/ike_waypoint_follower.cpp
 )
 
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} ${YAML_CPP_LIBRARIES})
 
 rclcpp_components_register_nodes(${PROJECT_NAME}
   PLUGIN "ike_nav::IkeWaypointFollower"

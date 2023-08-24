@@ -11,6 +11,8 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>ike_nav_msgs</depend>
+  <depend>yaml-cpp</depend>
 
   <depend>ike_nav_parameters</depend>
 
