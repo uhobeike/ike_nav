@@ -41,6 +41,10 @@ protected:
     const std::tuple<double, double, double> & robot_pose,
     const std::pair<std::vector<double>, std::vector<double>> & action);
 
+  bool checkOneIteration(const Solver::Summary & summary);
+  void recoveryMPC(bool should_execute, double & omega);
+  void limitRotateVelocity(double & omega);
+
   void publishPredictiveHorizon(
     const std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> &
       predictive_horizon);
@@ -65,6 +69,8 @@ private:
   double upper_bound_linear_velocity_;
   double upper_bound_angular_velocity_;
   int max_num_iterations_;
+  double recovery_rotate_velocity_;
+  double limit_rotate_velocity_;
 };
 
 struct ObjectiveFunction

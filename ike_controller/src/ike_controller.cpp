@@ -43,6 +43,8 @@ void IkeController::getParam()
   upper_bound_linear_velocity_ = this->params_.mpc.upper_bound_linear_velocity;
   upper_bound_angular_velocity_ = this->params_.mpc.upper_bound_angular_velocity;
   max_num_iterations_ = this->params_.mpc.max_num_iterations;
+  recovery_rotate_velocity_ = this->params_.mpc.recovery_rotate_velocity;
+  limit_rotate_velocity_ = this->params_.mpc.limit_rotate_velocity;
 }
 
 void IkeController::initPublisher()
@@ -149,6 +151,9 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimize(
 
   RCLCPP_INFO(this->get_logger(), "%s", summary.BriefReport().c_str());
 
+  recoveryMPC(checkOneIteration(summary), *w_out.begin());
+  limitRotateVelocity(*w_out.begin());
+
   return std::make_pair(v_out, w_out);
 }
 
@@ -182,6 +187,29 @@ IkeController::getPredictiveHorizon(
   }
 
   return std::make_tuple(predictive_horizon_x, predictive_horizon_y, predictive_horizon_ths);
+}
+
+bool IkeController::checkOneIteration(const Solver::Summary & summary)
+{
+  if (summary.iterations.size() == 1) {
+    return true;
+  }
+
+  return false;
+}
+
+void IkeController::recoveryMPC(bool should_execute, double & omega)
+{
+  if (should_execute) {
+    omega = recovery_rotate_velocity_;
+  }
+}
+
+void IkeController::limitRotateVelocity(double & omega)
+{
+  if (omega > limit_rotate_velocity_) {
+    omega = limit_rotate_velocity_;
+  }
 }
 
 void IkeController::publishPredictiveHorizon(
