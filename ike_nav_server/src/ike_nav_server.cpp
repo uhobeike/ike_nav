@@ -3,6 +3,8 @@
 
 #include "ike_nav_server/ike_nav_server.hpp"
 
+#include <nav2_util/robot_utils.hpp>
+
 #include <memory>
 #include <utility>
 
