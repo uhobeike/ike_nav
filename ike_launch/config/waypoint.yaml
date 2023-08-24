@@ -5,9 +5,9 @@ waypoints:
       y: 8.136463165283203
     euler_angle:
       z: 0.0
-    # functions:
-    #   - function: variable_waypoint_radius
-    #     waypoint_radius: 1.0
+    functions:
+      - function: variable_waypoint_radius
+        waypoint_radius: 1.0
   - id: 2
     position:
       x: 11.880502700805664
