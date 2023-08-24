@@ -26,11 +26,16 @@ protected:
   void getParam();
 
   void initActionClient();
+  void initTimer();
 
   void readWaypointYaml();
 
+  void loop();
+
 private:
   rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
+
+  rclcpp::TimerBase::SharedPtr loop_timer_;
 
   std::shared_ptr<ike_waypoint_follower::ParamListener> param_listener_;
   ike_waypoint_follower::Params params_;

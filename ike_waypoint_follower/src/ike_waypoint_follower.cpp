@@ -14,6 +14,7 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
   getParam();
 
   initActionClient();
+  initTimer();
 
   readWaypointYaml();
 }
@@ -32,6 +33,14 @@ void IkeWaypointFollower::initActionClient()
   navigate_to_goal_action_client_ = rclcpp_action::create_client<NavigateToGoal>(
     this->get_node_base_interface(), this->get_node_graph_interface(),
     this->get_node_logging_interface(), this->get_node_waitables_interface(), "navigate_to_goal");
+}
+
+void IkeWaypointFollower::initTimer()
+{
+  using namespace std::chrono_literals;
+
+  loop_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds{100ms}, std::bind(&IkeWaypointFollower::loop, this));
 }
 
 void IkeWaypointFollower::readWaypointYaml()
@@ -65,6 +74,8 @@ void IkeWaypointFollower::readWaypointYaml()
     }
   }
 }
+
+void IkeWaypointFollower::loop() { RCLCPP_INFO(get_logger(), "Run IkeWaypointFollower::loop"); }
 
 }  // namespace ike_nav
 
