@@ -1,6 +1,7 @@
 <launch>
-  <arg name ="map_yaml" default="$(find-pkg-share turtlebot3_navigation2)/map/map.yaml"/>
-  <arg name ="rviz_config" default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
+  <arg name ="map_yaml"       default="$(find-pkg-share turtlebot3_navigation2)/map/map.yaml"/>
+  <arg name ="waypoint_yaml"  default="$(find-pkg-share ike_launch)/config/waypoint.yaml"/>
+  <arg name ="rviz_config"    default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
 
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_map_server" namespace="" args="">
     <composable_node pkg="ike_map_server" plugin="ike_nav::IkeMapServer" name="ike_map_server" namespace="">
@@ -48,6 +49,11 @@
     </composable_node>
 
     <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
+
+    <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
+      <param name="waypoint_yaml_path"          value="$(var waypoint_yaml)"/>
       <extra_arg name="use_intra_process_comms" value="true"/>
     </composable_node>
   </node_container>

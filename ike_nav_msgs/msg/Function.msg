@@ -1,0 +1,1 @@
+VariableWaypointRadius variable_waypoint_radius

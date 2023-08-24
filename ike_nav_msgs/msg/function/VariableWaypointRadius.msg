@@ -1,0 +1,1 @@
+float32 waypoint_radius

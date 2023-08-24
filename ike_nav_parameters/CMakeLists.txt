@@ -32,6 +32,10 @@ generate_parameter_library(ike_planner_parameter
   config/ike_planner_parameter.yaml
 )
 
+generate_parameter_library(ike_waypoint_follower_parameter
+  config/ike_waypoint_follower_parameter.yaml
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()

@@ -6,7 +6,6 @@
 
 #include "ike_nav_server_parameter/ike_nav_server_parameter.hpp"
 
-#include <nav2_util/robot_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 

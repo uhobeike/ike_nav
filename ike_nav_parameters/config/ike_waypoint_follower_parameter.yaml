@@ -1,0 +1,12 @@
+ike_waypoint_follower:
+  waypoint_yaml_path: {
+    type: string,
+    default_value: "./waypoint.yaml",
+    description: "",
+  }
+
+  waypoint_radius: {
+    type: double,
+    default_value: 1.0,
+    description: "",
+  }

@@ -376,7 +376,7 @@ void IkeLocalization::loopMcl()
 {
   mcl_loop_timer_ = create_wall_timer(std::chrono::milliseconds{loop_mcl_ms_}, [this]() {
     if (rclcpp::ok() && scan_receive_ && map_receive_ && init_tf_ && init_mcl_) {
-      RCLCPP_INFO(get_logger(), "Run loopMcl.");
+      RCLCPP_INFO(get_logger(), "Run IkeLocalization::loopMcl");
       getCurrentRobotPose(current_pose_);
 
       mcl_->motion_model_->getDelta(

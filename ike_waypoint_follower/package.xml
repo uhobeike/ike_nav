@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ike_nav_server</name>
+  <name>ike_waypoint_follower</name>
   <version>0.0.0</version>
-  <description>The ike_nav_server package</description>
+  <description>The ike_waypoint_follower package</description>
   <maintainer email="beike315@icloud.com">Tatsuhiro Ikebe</maintainer>
   <license>Apache-2.0</license>
 
@@ -12,13 +12,13 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
   <depend>rclcpp_components</depend>
-  <depend>ike_controller</depend>
-  <depend>ike_localization</depend>
-  <depend>ike_map_server</depend>
-  <depend>ike_nav_msgs</depend>
-  <depend>ike_planner</depend>
   <depend>geometry_msgs</depend>
+  <depend>ike_nav_msgs</depend>
   <depend>nav2_util</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>yaml-cpp</depend>
 
   <depend>ike_nav_parameters</depend>
 
