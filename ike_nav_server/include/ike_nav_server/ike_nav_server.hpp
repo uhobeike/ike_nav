@@ -58,6 +58,7 @@ protected:
     const geometry_msgs::msg::PoseStamped & start, const geometry_msgs::msg::PoseStamped & goal,
     float & distance_remaining);
   bool checkShouldExitThisThread();
+  void clearThreadId();
 
 private:
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
