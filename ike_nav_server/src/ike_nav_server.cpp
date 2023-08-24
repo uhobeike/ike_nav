@@ -211,6 +211,12 @@ bool IkeNavServer::checkShouldExitThisThread()
   return false;
 }
 
+void IkeNavServer::clearThreadId()
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  thread_id_.clear();
+}
+
 void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_handle)
 {
   RCLCPP_INFO(this->get_logger(), "Executing navigate_to_goal");
@@ -255,6 +261,7 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     if (checkGoalReached(start_, goal->pose, distance_remaining)) {
       result->goal_reached = true;
       RCLCPP_INFO(this->get_logger(), "Goal Reached");
+      clearThreadId();
       stop_velocity_publish_timer_->reset();
       break;
     }
