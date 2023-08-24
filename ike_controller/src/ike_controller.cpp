@@ -28,7 +28,6 @@ IkeController::IkeController(const rclcpp::NodeOptions & options) : Node("ike_co
 
   initPublisher();
   initService();
-  setMpcParameters();
 }
 
 void IkeController::getParam()
@@ -64,26 +63,6 @@ void IkeController::initService()
     RCLCPP_INFO(this->get_logger(), "IkeController Model Predictive Control done");
   };
   get_twist_srv_ = create_service<ike_nav_msgs::srv::GetTwist>("get_twist", get_twist);
-}
-
-void IkeController::setMpcParameters()
-{
-  // MPC Parameters
-  constexpr double dt = 1.0;
-  int predictive_horizon_num = 10;
-  constexpr double lower_bound_linear_velocity = 0.0;
-  constexpr double lower_bound_angular_velocity = -M_PI;
-  constexpr double upper_bound_linear_velocity = 1.0;
-  constexpr double upper_bound_angular_velocity = M_PI;
-  constexpr int max_num_iterations = 100;
-
-  dt_ = dt;
-  predictive_horizon_num_ = predictive_horizon_num;
-  lower_bound_linear_velocity_ = lower_bound_linear_velocity;
-  lower_bound_angular_velocity_ = lower_bound_angular_velocity;
-  upper_bound_linear_velocity_ = upper_bound_linear_velocity;
-  upper_bound_angular_velocity_ = upper_bound_angular_velocity;
-  max_num_iterations_ = max_num_iterations;
 }
 
 geometry_msgs::msg::TwistStamped IkeController::ModelPredictiveControl(

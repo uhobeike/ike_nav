@@ -32,7 +32,6 @@ protected:
 
   geometry_msgs::msg::TwistStamped ModelPredictiveControl(
     const geometry_msgs::msg::PoseStamped & robot_pose, nav_msgs::msg::Path & path);
-  void setMpcParameters();
   std::pair<std::vector<double>, std::vector<double>> convertPathXY(
     const nav_msgs::msg::Path & path);
   std::pair<std::vector<double>, std::vector<double>> optimize(
