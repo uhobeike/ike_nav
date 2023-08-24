@@ -13,6 +13,8 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
 {
   getParam();
 
+  initActionClient();
+
   readWaypointYaml();
 }
 
@@ -23,6 +25,13 @@ void IkeWaypointFollower::getParam()
   this->params_ = param_listener_->get_params();
 
   waypoint_yaml_path_ = this->params_.waypoint_yaml_path;
+}
+
+void IkeWaypointFollower::initActionClient()
+{
+  navigate_to_goal_action_client_ = rclcpp_action::create_client<NavigateToGoal>(
+    this->get_node_base_interface(), this->get_node_graph_interface(),
+    this->get_node_logging_interface(), this->get_node_waitables_interface(), "navigate_to_goal");
 }
 
 void IkeWaypointFollower::readWaypointYaml()

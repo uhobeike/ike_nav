@@ -7,8 +7,13 @@
 #include "ike_waypoint_follower_parameter/ike_waypoint_follower_parameter.hpp"
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
+#include "ike_nav_msgs/action/navigate_to_goal.hpp"
 #include "ike_nav_msgs/msg/waypoints.hpp"
+
+using NavigateToGoal = ike_nav_msgs::action::NavigateToGoal;
+using GoalHandleNavigateToGoal = rclcpp_action::ServerGoalHandle<NavigateToGoal>;
 
 namespace ike_nav
 {
@@ -20,9 +25,13 @@ public:
 protected:
   void getParam();
 
+  void initActionClient();
+
   void readWaypointYaml();
 
 private:
+  rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
+
   std::shared_ptr<ike_waypoint_follower::ParamListener> param_listener_;
   ike_waypoint_follower::Params params_;
 
