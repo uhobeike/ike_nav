@@ -12,6 +12,7 @@
 #include "ike_nav_msgs/action/navigate_to_goal.hpp"
 #include "ike_nav_msgs/msg/waypoints.hpp"
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -30,15 +31,20 @@ protected:
   void getParam();
 
   void initTf();
+  void initServiceServer();
   void initActionClient();
   void initTimer();
 
   void readWaypointYaml();
   void getMapFrameRobotPose(geometry_msgs::msg::PoseStamped & map_frame_robot_pose);
+  bool isInsideWaypointArea(
+    const geometry_msgs::msg::Pose & robot_pose, const ike_nav_msgs::msg::Waypoint & waypoint);
+  void sendGoal(const geometry_msgs::msg::Pose & goal);
 
   void loop();
 
 private:
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_service_server_;
   rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
 
   rclcpp::TimerBase::SharedPtr loop_timer_;
@@ -51,7 +57,9 @@ private:
 
   std::string waypoint_yaml_path_;
   ike_nav_msgs::msg::Waypoints waypoints_;
+  double waypoint_radius_;
 
+  u_int32_t waypoint_id_;
   geometry_msgs::msg::PoseStamped robot_pose_;
 
   bool get_robot_pose_;

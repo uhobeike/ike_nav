@@ -4,3 +4,9 @@ ike_waypoint_follower:
     default_value: "./waypoint.yaml",
     description: "",
   }
+
+  waypoint_radius: {
+    type: double,
+    default_value: 1.0,
+    description: "",
+  }
