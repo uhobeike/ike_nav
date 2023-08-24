@@ -199,7 +199,7 @@ nav_msgs::msg::Path IkePlanner::calcFinalPath(
   std::reverse(plan_path.poses.begin(), plan_path.poses.end());
 
   plan_path.header.frame_id = "map";
-  plan_path.header.stamp = rclcpp::Time(0);
+  plan_path.header.stamp = rclcpp::Time();
 
   if (publish_searched_map_) search_map_pub_->publish(search_map_);
   smoothPath(plan_path);
