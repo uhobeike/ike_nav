@@ -12,9 +12,7 @@ Panels:
         - /ike_planner1
         - /ike_controller1
         - /ike_waypoint_follower1
-        - /ike_waypoint_follower1/Waypoints1
-        - /ike_waypoint_follower1/Waypoints1/Topic1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.6235294342041016
     Tree Height: 725
   - Class: rviz_common/Selection
     Name: Selection
@@ -32,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Visualization Manager:
   Class: ""
   Displays:
@@ -157,13 +155,44 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: true
+            base_footprint:
+              Value: true
+            base_link:
+              Value: true
+            base_scan:
+              Value: true
+            caster_back_link:
+              Value: true
+            imu_link:
+              Value: true
+            map:
+              Value: true
+            odom:
+              Value: true
+            wheel_left_link:
+              Value: true
+            wheel_right_link:
+              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: false
           Tree:
-            {}
+            map:
+              odom:
+                base_footprint:
+                  base_link:
+                    base_scan:
+                      {}
+                    caster_back_link:
+                      {}
+                    imu_link:
+                      {}
+                    wheel_left_link:
+                      {}
+                    wheel_right_link:
+                      {}
           Update Interval: 0
           Value: true
       Enabled: true
