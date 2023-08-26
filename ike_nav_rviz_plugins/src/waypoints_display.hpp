@@ -7,7 +7,7 @@
 #ifndef Q_MOC_RUN
 #include "rviz_common/message_filter_display.hpp"
 
-#include "sensor_msgs/msg/imu.hpp"
+#include "ike_nav_msgs/msg/waypoints.hpp"
 
 #include <deque>
 #include <memory>
@@ -30,7 +30,7 @@ namespace ike_nav_rviz_plugins
 
 class WaypointsVisual;
 
-class WaypointsDisplay : public rviz_common::MessageFilterDisplay<sensor_msgs::msg::Imu>
+class WaypointsDisplay : public rviz_common::MessageFilterDisplay<ike_nav_msgs::msg::Waypoints>
 {
   Q_OBJECT
 
@@ -45,10 +45,9 @@ protected:
 
 private Q_SLOTS:
   void updateColorAndAlpha();
-  void updateHistoryLength();
 
 private:
-  void processMessage(sensor_msgs::msg::Imu::ConstSharedPtr msg);
+  void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg);
 
   std::deque<std::shared_ptr<WaypointsVisual>> visuals_;
   std::size_t history_length_{1};

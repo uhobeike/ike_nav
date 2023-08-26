@@ -4,23 +4,15 @@
 #ifndef WAYPOINTS_VISUAL_HPP_
 #define WAYPOINTS_VISUAL_HPP_
 
-#include "rviz_rendering/objects/arrow.hpp"
+#include "rviz_rendering/geometry.hpp"
+#include "rviz_rendering/mesh_loader.hpp"
+#include "rviz_rendering/viewport_projection_finder.hpp"
 
-#include "sensor_msgs/msg/imu.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 #include <Ogre.h>
 
 #include <memory>
-
-namespace Ogre
-{
-class Quaternion;
-}
-
-namespace rviz_rendering
-{
-class Arrow;
-}
 
 namespace ike_nav_rviz_plugins
 {
@@ -31,19 +23,18 @@ public:
 
   virtual ~WaypointsVisual();
 
-  void setMessage(sensor_msgs::msg::Imu::ConstSharedPtr msg);
-
-  void setFramePosition(const Ogre::Vector3 & position);
-  void setFrameOrientation(const Ogre::Quaternion & orientation);
+  void setMeshPose(const Ogre::Vector3 & position);
 
   void setColor(float r, float g, float b, float a);
 
 private:
-  std::shared_ptr<rviz_rendering::Arrow> acceleration_arrow_;
-
-  Ogre::SceneNode * frame_node_;
+  Ogre::SceneNode * ogre_node_;
 
   Ogre::SceneManager * scene_manager_;
+
+  Ogre::Entity * entity_;
+
+  std::string goal_flag_resource_;
 };
 
 }  // namespace ike_nav_rviz_plugins
