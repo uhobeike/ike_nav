@@ -54,11 +54,11 @@
 
     <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
       <param name="waypoint_yaml_path"          value="$(var waypoint_yaml)"/>
-      <extra_arg name="use_intra_process_comms" value="true"/>
+      <extra_arg name="use_intra_process_comms" value="false"/>
     </composable_node>
   </node_container>
 
-  <!-- <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/> -->
+  <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
 
   <!-- <executable cmd="bash -c 'sleep 1; ros2 service call /publish_map std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/>
   <executable cmd="bash -c 'sleep 1; ros2 service call /publish_likelihoodfield_map std_srvs/srv/Trigger {}\ '" cwd="/" launch-prefix="" output="screen"/>

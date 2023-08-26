@@ -44,7 +44,8 @@ void IkeWaypointFollower::initTf()
 
 void IkeWaypointFollower::initPublisher()
 {
-  waypoints_pub_ = this->create_publisher<ike_nav_msgs::msg::Waypoints>("a", 1);
+  waypoints_pub_ = this->create_publisher<ike_nav_msgs::msg::Waypoints>(
+    "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
 void IkeWaypointFollower::initServiceServer()
