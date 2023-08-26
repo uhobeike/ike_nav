@@ -47,7 +47,7 @@ private Q_SLOTS:
   void updateColorAndAlpha();
 
 private:
-  void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg);
+  void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) override;
 
   std::deque<std::shared_ptr<WaypointsVisual>> visuals_;
   std::size_t history_length_{1};

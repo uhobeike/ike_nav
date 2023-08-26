@@ -36,8 +36,10 @@ void WaypointsVisual::setMeshPose(const Ogre::Vector3 & position)
 
 void WaypointsVisual::setColor(float r, float g, float b, float a)
 {
+  Ogre::String new_material_name =
+    "goal_flag_material_" + Ogre::StringConverter::toString(Ogre::Math::UnitRandom());
   Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-    "goal_flag_material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    new_material_name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
   material->setDiffuse(Ogre::ColourValue(r, g, b, a));
   entity_->setMaterial(material);
 }
