@@ -15,10 +15,11 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
 {
   getParam();
 
-  initTf();
-  initServiceServer();
-  initActionClient();
-  initTimer();
+  // initTf();
+  initPublisher();
+  // initServiceServer();
+  // initActionClient();
+  // initTimer();
 
   readWaypointYaml();
 }
@@ -39,6 +40,11 @@ void IkeWaypointFollower::initTf()
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   // tf_buffer_->setUsingDedicatedThread(true);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+}
+
+void IkeWaypointFollower::initPublisher()
+{
+  waypoints_pub_ = this->create_publisher<ike_nav_msgs::msg::Waypoints>("a", 1);
 }
 
 void IkeWaypointFollower::initServiceServer()
@@ -104,6 +110,8 @@ void IkeWaypointFollower::readWaypointYaml()
       waypoints_.waypoints.push_back(waypoint);
     }
   }
+
+  waypoints_pub_->publish(waypoints_);
 }
 
 void IkeWaypointFollower::getMapFrameRobotPose(
