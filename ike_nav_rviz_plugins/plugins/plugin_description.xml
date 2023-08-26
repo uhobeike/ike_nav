@@ -1,0 +1,7 @@
+<library path="ike_nav_rviz_plugins">
+  <class name="ike_nav_rviz_plugins/Waypoints"
+    type="ike_nav_rviz_plugins::WaypointsDisplay"
+    base_class_type="rviz_common::Display">
+    <description></description>
+  </class>
+</library>
