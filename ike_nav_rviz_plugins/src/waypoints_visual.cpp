@@ -3,8 +3,7 @@
 
 #include "waypoints_visual.hpp"
 
-#include <Ogre.h>
-#include <OgreMaterialManager.h>
+#include "rviz_rendering/material_manager.hpp"
 
 namespace ike_nav_rviz_plugins
 {
@@ -40,8 +39,11 @@ void WaypointsVisual::setColor(float r, float g, float b, float a)
     "goal_flag_material_" + Ogre::StringConverter::toString(Ogre::Math::UnitRandom());
   Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
     new_material_name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
   material->setDiffuse(Ogre::ColourValue(r, g, b, a));
   entity_->setMaterial(material);
+
+  rviz_rendering::MaterialManager::enableAlphaBlending(material, a);
 }
 // END_TUTORIAL
 
