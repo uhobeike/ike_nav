@@ -9,11 +9,10 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
-  <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
+  <depend>ike_nav_msgs</depend>
   <depend>rviz_common</depend>
   <depend>rviz_rendering</depend>
-  <depend>sensor_msgs</depend>
 
   <build_depend>qtbase5-dev</build_depend>
 
