@@ -14,6 +14,11 @@
 
 #include <memory>
 
+namespace rviz_rendering
+{
+class Shape;
+}
+
 namespace ike_nav_rviz_plugins
 {
 class WaypointsVisual
@@ -34,6 +39,8 @@ private:
   Ogre::SceneManager * scene_manager_;
 
   Ogre::Entity * entity_;
+
+  std::shared_ptr<rviz_rendering::Shape> waypoint_area_;
 
   std::string goal_flag_resource_;
 };
