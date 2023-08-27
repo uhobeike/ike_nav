@@ -44,21 +44,34 @@ protected:
   virtual void reset();
 
 private Q_SLOTS:
-  void updateColorAndAlpha();
-  void updateScale();
-  void updateYawOnlyOrientation();
+  // Waypoint Area
+  void updateWaypointAreaColorAndAlpha();
+  void updateWaypointAreaScale(const Ogre::Vector3 & scale);
+  void updateWaypointAreaYawOnlyOrientation(const Ogre::Quaternion & orientation);
+
+  // Waypoint Flag
+  void updateWaypointFlagColorAndAlpha();
+  void updateWaypointFlagScale();
+  void updateWaypointFlagOrientation();
+
+  // Waypoints
+  void updateWaypointsColorAndAlpha();
 
 private:
   void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) override;
 
   std::deque<std::shared_ptr<WaypointsVisual>> visuals_;
-  std::size_t history_length_{1};
 
-  rviz_common::properties::ColorProperty * color_property_;
-  rviz_common::properties::FloatProperty * alpha_property_;
-  rviz_common::properties::FloatProperty * scale_property_;
-  rviz_common::properties::FloatProperty * yaw_only_orientation_property_;
-  rviz_common::properties::IntProperty * history_length_property_;
+  // Waypoint Area
+  rviz_common::properties::ColorProperty * waypoint_area_color_property_;
+
+  // Waypoint Flag
+  rviz_common::properties::ColorProperty * waypoint_flag_color_property_;
+  rviz_common::properties::FloatProperty * waypoint_flag_scale_property_;
+  rviz_common::properties::FloatProperty * waypoint_flag_yaw_only_orientation_property_;
+
+  // Waypoints
+  rviz_common::properties::FloatProperty * waypoints_alpha_property_;
 };
 
 }  // namespace ike_nav_rviz_plugins

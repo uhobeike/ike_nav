@@ -28,21 +28,29 @@ public:
 
   virtual ~WaypointsVisual();
 
-  void setPosition(const Ogre::Vector3 & position);
-  void setOrientation(const Ogre::Quaternion & orientation);
-  void setColor(float r, float g, float b, float a);
-  void setScale(float s);
+  // Waypoint Area
+  void setWaypointAreaPosition(const Ogre::Vector3 & position);
+  void setWaypointAreaOrientation(const Ogre::Quaternion & orientation);
+  void setWaypointAreaColor(const float & r, const float & g, const float & b, const float & a);
+  void setWaypointAreaScale(const Ogre::Vector3 & s);
+
+  // Waypoint Flag
+  void setWaypointFlagPosition(const Ogre::Vector3 & position);
+  void setWaypointFlagOrientation(const Ogre::Quaternion & orientation);
+  void setWaypointFlagColor(const float & r, const float & g, const float & b, const float & a);
+  void setWaypointFlagScale(const float & scalse);
 
 private:
-  Ogre::SceneNode * ogre_node_;
+  Ogre::SceneNode * frame_node_;
+  Ogre::SceneNode * waypoint_area_node_;
+  Ogre::SceneNode * waypoint_flag_node_;
 
   Ogre::SceneManager * scene_manager_;
-
-  Ogre::Entity * entity_;
+  Ogre::Entity * waypoint_flag_entity_;
 
   std::shared_ptr<rviz_rendering::Shape> waypoint_area_;
 
-  std::string goal_flag_resource_;
+  std::string waypoint_flag_resource_;
 };
 
 }  // namespace ike_nav_rviz_plugins
