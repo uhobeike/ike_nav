@@ -23,7 +23,8 @@ public:
 
   virtual ~WaypointsVisual();
 
-  void setMeshPose(const Ogre::Vector3 & position);
+  void setPosition(const Ogre::Vector3 & position);
+  void setOrientation(const Ogre::Quaternion & orientation);
   void setColor(float r, float g, float b, float a);
   void setScale(float s);
 

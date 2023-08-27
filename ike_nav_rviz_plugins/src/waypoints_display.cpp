@@ -34,6 +34,12 @@ WaypointsDisplay::WaypointsDisplay()
   scale_property_ = new rviz_common::properties::FloatProperty(
     "Scale", 1.0, "change waypoints size.", this, SLOT(updateScale()));
   alpha_property_->setMin(0.);
+
+  yaw_only_orientation_property_ = new rviz_common::properties::FloatProperty(
+    "Yaw", 0.0, "change only yaw direction of the waypoint.", this,
+    SLOT(updateYawOnlyOrientation()));
+  yaw_only_orientation_property_->setMin(-1. * M_PI);
+  yaw_only_orientation_property_->setMax(M_PI);
 }
 
 void WaypointsDisplay::onInitialize() { MFDClass::onInitialize(); }
@@ -64,6 +70,15 @@ void WaypointsDisplay::updateScale()
   }
 }
 
+void WaypointsDisplay::updateYawOnlyOrientation()
+{
+  float yaw = yaw_only_orientation_property_->getFloat();
+  Ogre::Quaternion yawOnlyOrientation = Ogre::Quaternion(Ogre::Radian(yaw), Ogre::Vector3::UNIT_Z);
+  for (size_t i = 0; i < visuals_.size(); i++) {
+    visuals_[i]->setOrientation(yawOnlyOrientation);
+  }
+}
+
 void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg)
 {
   visuals_.clear();
@@ -76,7 +91,7 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
 
     std::shared_ptr<WaypointsVisual> visual;
     visual.reset(new WaypointsVisual(context_->getSceneManager(), scene_node_));
-    visual->setMeshPose(position);
+    visual->setPosition(position);
 
     float alpha = alpha_property_->getFloat();
     Ogre::ColourValue color = color_property_->getOgreColor();

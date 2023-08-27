@@ -17,7 +17,7 @@ WaypointsVisual::WaypointsVisual(Ogre::SceneManager * scene_manager, Ogre::Scene
 
   if (!rviz_rendering::loadMeshFromResource(goal_flag_resource_)) {
     RCLCPP_ERROR(
-      rclcpp::get_logger("plant_flag_tool"), "PlantFlagTool: failed to load model resource '%s'.",
+      rclcpp::get_logger("waypoints_display"), "PlantFlagTool: failed to load model resource '%s'.",
       goal_flag_resource_.c_str());
     return;
   }
@@ -28,9 +28,14 @@ WaypointsVisual::WaypointsVisual(Ogre::SceneManager * scene_manager, Ogre::Scene
 
 WaypointsVisual::~WaypointsVisual() { scene_manager_->destroySceneNode(ogre_node_); }
 
-void WaypointsVisual::setMeshPose(const Ogre::Vector3 & position)
+void WaypointsVisual::setPosition(const Ogre::Vector3 & position)
 {
   ogre_node_->setPosition(position);
+}
+
+void WaypointsVisual::setOrientation(const Ogre::Quaternion & orientation)
+{
+  ogre_node_->setOrientation(orientation);
 }
 
 void WaypointsVisual::setColor(float r, float g, float b, float a)

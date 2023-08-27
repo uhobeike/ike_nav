@@ -46,6 +46,7 @@ protected:
 private Q_SLOTS:
   void updateColorAndAlpha();
   void updateScale();
+  void updateYawOnlyOrientation();
 
 private:
   void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) override;
@@ -56,6 +57,7 @@ private:
   rviz_common::properties::ColorProperty * color_property_;
   rviz_common::properties::FloatProperty * alpha_property_;
   rviz_common::properties::FloatProperty * scale_property_;
+  rviz_common::properties::FloatProperty * yaw_only_orientation_property_;
   rviz_common::properties::IntProperty * history_length_property_;
 };
 
