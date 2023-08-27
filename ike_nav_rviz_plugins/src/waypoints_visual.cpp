@@ -45,6 +45,11 @@ void WaypointsVisual::setColor(float r, float g, float b, float a)
 
   rviz_rendering::MaterialManager::enableAlphaBlending(material, a);
 }
-// END_TUTORIAL
+
+void WaypointsVisual::setScale(float s)
+{
+  Ogre::Vector3 scale(s, s, s);
+  ogre_node_->setScale(scale);
+}
 
 }  // namespace ike_nav_rviz_plugins

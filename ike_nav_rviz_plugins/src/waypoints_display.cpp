@@ -28,6 +28,12 @@ WaypointsDisplay::WaypointsDisplay()
   alpha_property_ = new rviz_common::properties::FloatProperty(
     "Alpha", 1.0, "0 is fully transparent, 1.0 is fully opaque.", this,
     SLOT(updateColorAndAlpha()));
+  alpha_property_->setMin(0.);
+  alpha_property_->setMax(1.);
+
+  scale_property_ = new rviz_common::properties::FloatProperty(
+    "Scale", 1.0, "change waypoints size.", this, SLOT(updateScale()));
+  alpha_property_->setMin(0.);
 }
 
 void WaypointsDisplay::onInitialize() { MFDClass::onInitialize(); }
@@ -47,6 +53,14 @@ void WaypointsDisplay::updateColorAndAlpha()
 
   for (size_t i = 0; i < visuals_.size(); i++) {
     visuals_[i]->setColor(color.r, color.g, color.b, alpha);
+  }
+}
+
+void WaypointsDisplay::updateScale()
+{
+  float scale = scale_property_->getFloat();
+  for (size_t i = 0; i < visuals_.size(); i++) {
+    visuals_[i]->setScale(scale);
   }
 }
 

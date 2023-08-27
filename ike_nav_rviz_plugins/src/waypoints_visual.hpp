@@ -24,8 +24,8 @@ public:
   virtual ~WaypointsVisual();
 
   void setMeshPose(const Ogre::Vector3 & position);
-
   void setColor(float r, float g, float b, float a);
+  void setScale(float s);
 
 private:
   Ogre::SceneNode * ogre_node_;
