@@ -356,6 +356,7 @@ Visualization Manager:
           Color: 0; 0; 0
           Enabled: true
           Name: Waypoints
+          Scale: 0.4000000059604645
           Topic:
             Depth: 1
             Durability Policy: Transient Local
@@ -364,6 +365,7 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: waypoints
           Value: true
+          Yaw: -1.5700000524520874
       Enabled: true
       Name: ike_waypoint_follower
   Enabled: true
@@ -409,18 +411,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 9.707077980041504
-        Y: 9.578887939453125
-        Z: -0.3261374533176422
+        X: 9.472258567810059
+        Y: 9.865498542785645
+        Z: -0.5051530599594116
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2297966480255127
+      Pitch: 0.9247969388961792
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 3.122382640838623
+      Yaw: 3.132382869720459
     Saved: ~
 Window Geometry:
   Displays:

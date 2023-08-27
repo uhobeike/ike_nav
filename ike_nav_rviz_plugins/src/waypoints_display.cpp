@@ -99,6 +99,10 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
 
     visuals_.push_front(visual);
   }
+
+  updateColorAndAlpha();
+  updateScale();
+  updateYawOnlyOrientation();
 }
 
 }  // namespace ike_nav_rviz_plugins
