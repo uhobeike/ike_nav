@@ -30,6 +30,13 @@ WaypointsVisual::WaypointsVisual(Ogre::SceneManager * scene_manager, Ogre::Scene
   waypoint_flag_node_ = frame_node_->createChildSceneNode();
   waypoint_flag_entity_ = scene_manager_->createEntity(waypoint_flag_resource_);
   waypoint_flag_node_->attachObject(waypoint_flag_entity_);
+
+  // Waypoint Text
+  waypoint_text_node_ = frame_node_->createChildSceneNode();
+  waypoint_text_ = new rviz_rendering::MovableText(Ogre::String("aaaa"));
+  waypoint_text_->setTextAlignment(
+    rviz_rendering::MovableText::H_CENTER, rviz_rendering::MovableText::V_CENTER);
+  waypoint_text_node_->attachObject(waypoint_text_);
 }
 
 WaypointsVisual::~WaypointsVisual() { scene_manager_->destroySceneNode(frame_node_); }
@@ -63,6 +70,27 @@ void WaypointsVisual::setWaypointFlagPosition(const Ogre::Vector3 & position)
 void WaypointsVisual::setWaypointFlagOrientation(const Ogre::Quaternion & orientation)
 {
   waypoint_flag_node_->setOrientation(orientation);
+}
+
+void WaypointsVisual::setWaypointTextPosition(const Ogre::Vector3 & position)
+{
+  waypoint_text_node_->setPosition(position);
+}
+
+void WaypointsVisual::setWaypointTextColor(
+  const float & r, const float & g, const float & b, const float & a)
+{
+  waypoint_text_->setColor(Ogre::ColourValue(r, g, b, a));
+}
+
+void WaypointsVisual::setWaypointTextHeight(const float & height)
+{
+  waypoint_text_->setCharacterHeight(height);
+}
+
+void WaypointsVisual::setWaypointTextCaption(const Ogre::String & caption)
+{
+  waypoint_text_->setCaption(caption);
 }
 
 void WaypointsVisual::setWaypointFlagColor(

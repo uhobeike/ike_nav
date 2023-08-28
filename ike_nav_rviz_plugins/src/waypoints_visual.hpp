@@ -6,6 +6,7 @@
 
 #include "rviz_rendering/geometry.hpp"
 #include "rviz_rendering/mesh_loader.hpp"
+#include "rviz_rendering/objects/movable_text.hpp"
 #include "rviz_rendering/viewport_projection_finder.hpp"
 
 #include <rclcpp/rclcpp.hpp>
@@ -40,15 +41,23 @@ public:
   void setWaypointFlagColor(const float & r, const float & g, const float & b, const float & a);
   void setWaypointFlagScale(const float & scalse);
 
+  // Waypoint Text
+  void setWaypointTextPosition(const Ogre::Vector3 & position);
+  void setWaypointTextColor(const float & r, const float & g, const float & b, const float & a);
+  void setWaypointTextHeight(const float & height);
+  void setWaypointTextCaption(const Ogre::String & caption);
+
 private:
   Ogre::SceneNode * frame_node_;
   Ogre::SceneNode * waypoint_area_node_;
   Ogre::SceneNode * waypoint_flag_node_;
+  Ogre::SceneNode * waypoint_text_node_;
 
   Ogre::SceneManager * scene_manager_;
   Ogre::Entity * waypoint_flag_entity_;
 
   std::shared_ptr<rviz_rendering::Shape> waypoint_area_;
+  rviz_rendering::MovableText * waypoint_text_;
 
   std::string waypoint_flag_resource_;
 };

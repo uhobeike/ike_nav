@@ -54,6 +54,10 @@ private Q_SLOTS:
   void updateWaypointFlagScale();
   void updateWaypointFlagYawOnlyOrientation();
 
+  // Waypoint Text
+  void updateWaypointTextColorAndAlpha();
+  void updateWaypointTextScale();
+
   // Waypoints
   void updateWaypointsColorAndAlpha();
 
@@ -69,6 +73,10 @@ private:
   rviz_common::properties::ColorProperty * waypoint_flag_color_property_;
   rviz_common::properties::FloatProperty * waypoint_flag_scale_property_;
   rviz_common::properties::FloatProperty * waypoint_flag_yaw_only_orientation_property_;
+
+  // Waypoint Text
+  rviz_common::properties::ColorProperty * waypoint_text_color_property_;
+  rviz_common::properties::FloatProperty * waypoint_text_scale_property_;
 
   // Waypoints
   rviz_common::properties::FloatProperty * waypoints_alpha_property_;
