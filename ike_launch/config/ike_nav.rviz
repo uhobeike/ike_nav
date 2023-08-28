@@ -335,6 +335,8 @@ Visualization Manager:
           Waypoint Flag Color: 0; 0; 0
           Waypoint Flag Scale: 0.30000001192092896
           Waypoint Flag Yaw: -1.5700000524520874
+          Waypoint Text Color: 255; 255; 255
+          Waypoint Text Scale: 0.30000001192092896
           Waypoints Alpha: 0.800000011920929
       Enabled: true
       Name: ike_waypoint_follower
