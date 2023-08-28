@@ -30,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -155,44 +155,13 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: true
-            base_footprint:
-              Value: true
-            base_link:
-              Value: true
-            base_scan:
-              Value: true
-            caster_back_link:
-              Value: true
-            imu_link:
-              Value: true
-            map:
-              Value: true
-            odom:
-              Value: true
-            wheel_left_link:
-              Value: true
-            wheel_right_link:
-              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: false
           Tree:
-            map:
-              odom:
-                base_footprint:
-                  base_link:
-                    base_scan:
-                      {}
-                    caster_back_link:
-                      {}
-                    imu_link:
-                      {}
-                    wheel_left_link:
-                      {}
-                    wheel_right_link:
-                      {}
+            {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -351,12 +320,9 @@ Visualization Manager:
       Name: ike_controller
     - Class: rviz_common/Group
       Displays:
-        - Alpha: 1
-          Class: ike_nav_rviz_plugins/Waypoints
-          Color: 0; 0; 0
+        - Class: ike_nav_rviz_plugins/Waypoints
           Enabled: true
           Name: Waypoints
-          Scale: 0.4000000059604645
           Topic:
             Depth: 1
             Durability Policy: Transient Local
@@ -365,7 +331,11 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: waypoints
           Value: true
-          Yaw: -1.5700000524520874
+          Waypoint Area Color: 85; 170; 255
+          Waypoint Flag Color: 0; 0; 0
+          Waypoint Flag Scale: 0.30000001192092896
+          Waypoint Flag Yaw: -1.5700000524520874
+          Waypoints Alpha: 0.800000011920929
       Enabled: true
       Name: ike_waypoint_follower
   Enabled: true
@@ -404,25 +374,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 6.586071968078613
+      Distance: 4.775076866149902
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 9.472258567810059
-        Y: 9.865498542785645
-        Z: -0.5051530599594116
+        X: 9.303377151489258
+        Y: 9.859063148498535
+        Z: -0.3471517562866211
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9247969388961792
+      Pitch: 0.4247973561286926
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 3.132382869720459
+      Yaw: 3.122384786605835
     Saved: ~
 Window Geometry:
   Displays:
