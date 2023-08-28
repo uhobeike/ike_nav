@@ -15,11 +15,11 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
 {
   getParam();
 
-  // initTf();
+  initTf();
   initPublisher();
-  // initServiceServer();
-  // initActionClient();
-  // initTimer();
+  initServiceServer();
+  initActionClient();
+  initTimer();
 
   readWaypointYaml();
 }
