@@ -45,7 +45,7 @@ WaypointsDisplay::WaypointsDisplay()
   // Waypoints
   waypoints_alpha_property_ = new rviz_common::properties::FloatProperty(
     "Waypoints Alpha", 1.0, "0 is fully transparent, 1.0 is fully opaque.", this,
-    SLOT(updateWaypointFlagColorAndAlpha()));
+    SLOT(updateWaypointsColorAndAlpha()));
   waypoints_alpha_property_->setMin(0.);
   waypoints_alpha_property_->setMax(1.);
 }
@@ -87,10 +87,10 @@ void WaypointsDisplay::updateWaypointAreaOrientation(const Ogre::Quaternion & or
 void WaypointsDisplay::updateWaypointFlagColorAndAlpha()
 {
   float alpha = waypoints_alpha_property_->getFloat();
-  Ogre::ColourValue color = waypoint_area_color_property_->getOgreColor();
+  Ogre::ColourValue color = waypoint_flag_color_property_->getOgreColor();
 
   for (size_t i = 0; i < visuals_.size(); i++) {
-    visuals_[i]->setWaypointAreaColor(color.r, color.g, color.b, alpha);
+    visuals_[i]->setWaypointFlagColor(color.r, color.g, color.b, alpha);
   }
 }
 
@@ -144,11 +144,6 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
     visual->setWaypointFlagPosition(waypoint_flag_position);
     visual->setWaypointAreaScale(waypoint_area_scale);
 
-    float alpha = waypoints_alpha_property_->getFloat();
-    Ogre::ColourValue color = waypoint_flag_color_property_->getOgreColor();
-    visual->setWaypointAreaColor(color.r, color.g, color.b, alpha);
-    visual->setWaypointFlagColor(color.r, color.g, color.b, alpha);
-
     Ogre::Quaternion waypoint_area_orientation =
       Ogre::Quaternion(Ogre::Radian(M_PI / 2.), Ogre::Vector3::UNIT_X);
     visual->setWaypointAreaOrientation(waypoint_area_orientation);
@@ -156,7 +151,9 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
     visuals_.push_front(visual);
   }
 
+  updateWaypointAreaColorAndAlpha();
   updateWaypointFlagColorAndAlpha();
+  updateWaypointsColorAndAlpha();
   updateWaypointFlagScale();
   updateWaypointFlagYawOnlyOrientation();
 }
