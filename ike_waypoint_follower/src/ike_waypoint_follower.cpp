@@ -99,13 +99,17 @@ void IkeWaypointFollower::readWaypointYaml()
       waypoint.pose.orientation.w = cos(waypoint_yaml["euler_angle"]["z"].as<double>() / 2.);
       waypoint.pose.orientation.z = sin(waypoint_yaml["euler_angle"]["z"].as<double>() / 2.);
 
-      for (const auto & function : waypoint_yaml["functions"]) {
-        if (function["function"].as<std::string>() == "variable_waypoint_radius") {
-          if (!function["waypoint_radius"].IsNull()) {
-            waypoint.function.variable_waypoint_radius.waypoint_radius =
-              function["waypoint_radius"].as<float>();
+      if (waypoint_yaml["functions"].IsDefined()) {
+        for (const auto & function : waypoint_yaml["functions"]) {
+          if (function["function"].as<std::string>() == "variable_waypoint_radius") {
+            if (!function["waypoint_radius"].IsNull()) {
+              waypoint.function.variable_waypoint_radius.waypoint_radius =
+                function["waypoint_radius"].as<float>();
+            }
           }
         }
+      } else {
+        waypoint.function.variable_waypoint_radius.waypoint_radius = waypoint_radius_;
       }
 
       waypoints_.waypoints.push_back(waypoint);
@@ -132,14 +136,8 @@ bool IkeWaypointFollower::isInsideWaypointArea(
     robot_pose.position.x - waypoint.pose.position.x,
     robot_pose.position.y - waypoint.pose.position.y);
 
-  if (waypoint.function.variable_waypoint_radius.waypoint_radius) {
-    if (distance < waypoint.function.variable_waypoint_radius.waypoint_radius) {
-      return true;
-    }
-  } else {
-    if (distance < waypoint_radius_) {
-      return true;
-    }
+  if (distance < waypoint.function.variable_waypoint_radius.waypoint_radius) {
+    return true;
   }
 
   return false;
