@@ -47,12 +47,12 @@ private Q_SLOTS:
   // Waypoint Area
   void updateWaypointAreaColorAndAlpha();
   void updateWaypointAreaScale(const Ogre::Vector3 & scale);
-  void updateWaypointAreaYawOnlyOrientation(const Ogre::Quaternion & orientation);
+  void updateWaypointAreaOrientation(const Ogre::Quaternion & orientation);
 
   // Waypoint Flag
   void updateWaypointFlagColorAndAlpha();
   void updateWaypointFlagScale();
-  void updateWaypointFlagOrientation();
+  void updateWaypointFlagYawOnlyOrientation();
 
   // Waypoints
   void updateWaypointsColorAndAlpha();

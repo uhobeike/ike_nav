@@ -41,8 +41,7 @@ void WaypointsVisual::setWaypointAreaPosition(const Ogre::Vector3 & position)
 
 void WaypointsVisual::setWaypointAreaOrientation(const Ogre::Quaternion & orientation)
 {
-  Ogre::Quaternion yawOnlyOrientation = Ogre::Quaternion(Ogre::Radian(1.57), Ogre::Vector3::UNIT_Y);
-  waypoint_area_node_->setOrientation(yawOnlyOrientation);
+  waypoint_area_node_->setOrientation(orientation);
 }
 
 void WaypointsVisual::setWaypointAreaColor(
@@ -63,8 +62,7 @@ void WaypointsVisual::setWaypointFlagPosition(const Ogre::Vector3 & position)
 
 void WaypointsVisual::setWaypointFlagOrientation(const Ogre::Quaternion & orientation)
 {
-  Ogre::Quaternion yawOnlyOrientation = Ogre::Quaternion(Ogre::Radian(1.57), Ogre::Vector3::UNIT_Y);
-  waypoint_flag_node_->setOrientation(yawOnlyOrientation);
+  waypoint_flag_node_->setOrientation(orientation);
 }
 
 void WaypointsVisual::setWaypointFlagColor(
