@@ -16,6 +16,7 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
   getParam();
 
   initTf();
+  initPublisher();
   initServiceServer();
   initActionClient();
   initTimer();
@@ -39,6 +40,12 @@ void IkeWaypointFollower::initTf()
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   // tf_buffer_->setUsingDedicatedThread(true);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+}
+
+void IkeWaypointFollower::initPublisher()
+{
+  waypoints_pub_ = this->create_publisher<ike_nav_msgs::msg::Waypoints>(
+    "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
 void IkeWaypointFollower::initServiceServer()
@@ -92,18 +99,24 @@ void IkeWaypointFollower::readWaypointYaml()
       waypoint.pose.orientation.w = cos(waypoint_yaml["euler_angle"]["z"].as<double>() / 2.);
       waypoint.pose.orientation.z = sin(waypoint_yaml["euler_angle"]["z"].as<double>() / 2.);
 
-      for (const auto & function : waypoint_yaml["functions"]) {
-        if (function["function"].as<std::string>() == "variable_waypoint_radius") {
-          if (!function["waypoint_radius"].IsNull()) {
-            waypoint.function.variable_waypoint_radius.waypoint_radius =
-              function["waypoint_radius"].as<float>();
+      if (waypoint_yaml["functions"].IsDefined()) {
+        for (const auto & function : waypoint_yaml["functions"]) {
+          if (function["function"].as<std::string>() == "variable_waypoint_radius") {
+            if (!function["waypoint_radius"].IsNull()) {
+              waypoint.function.variable_waypoint_radius.waypoint_radius =
+                function["waypoint_radius"].as<float>();
+            }
           }
         }
+      } else {
+        waypoint.function.variable_waypoint_radius.waypoint_radius = waypoint_radius_;
       }
 
       waypoints_.waypoints.push_back(waypoint);
     }
   }
+
+  waypoints_pub_->publish(waypoints_);
 }
 
 void IkeWaypointFollower::getMapFrameRobotPose(
@@ -123,14 +136,8 @@ bool IkeWaypointFollower::isInsideWaypointArea(
     robot_pose.position.x - waypoint.pose.position.x,
     robot_pose.position.y - waypoint.pose.position.y);
 
-  if (waypoint.function.variable_waypoint_radius.waypoint_radius) {
-    if (distance < waypoint.function.variable_waypoint_radius.waypoint_radius) {
-      return true;
-    }
-  } else {
-    if (distance < waypoint_radius_) {
-      return true;
-    }
+  if (distance < waypoint.function.variable_waypoint_radius.waypoint_radius) {
+    return true;
   }
 
   return false;

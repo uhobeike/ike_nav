@@ -54,7 +54,7 @@
 
     <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
       <param name="waypoint_yaml_path"          value="$(var waypoint_yaml)"/>
-      <extra_arg name="use_intra_process_comms" value="true"/>
+      <extra_arg name="use_intra_process_comms" value="false"/>
     </composable_node>
   </node_container>
 

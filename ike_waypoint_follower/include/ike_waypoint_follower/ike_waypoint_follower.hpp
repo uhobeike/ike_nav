@@ -31,6 +31,7 @@ protected:
   void getParam();
 
   void initTf();
+  void initPublisher();
   void initServiceServer();
   void initActionClient();
   void initTimer();
@@ -44,6 +45,7 @@ protected:
   void loop();
 
 private:
+  rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_service_server_;
   rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
 
