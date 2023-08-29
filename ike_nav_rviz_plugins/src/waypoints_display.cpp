@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "waypoints_display.hpp"
+#include "ike_nav_rviz_plugins/waypoints_display.hpp"
 
+#include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rviz_common/properties/color_property.hpp"
@@ -10,7 +11,6 @@
 #include "rviz_common/properties/int_property.hpp"
 #include "rviz_common/visualization_manager.hpp"
 #include "tf2_ros/transform_listener.h"
-#include "waypoints_visual.hpp"
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>

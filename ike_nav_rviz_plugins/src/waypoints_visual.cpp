@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "waypoints_visual.hpp"
+#include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 
 #include "rviz_rendering/material_manager.hpp"
 #include "rviz_rendering/objects/shape.hpp"
