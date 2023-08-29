@@ -19,6 +19,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
+  include/ike_nav_rviz_plugins/waypoints_display.hpp
+  include/ike_nav_rviz_plugins/waypoints_visual.hpp
   src/waypoints_display.cpp
   src/waypoints_visual.cpp
 )
