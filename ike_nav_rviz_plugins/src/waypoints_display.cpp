@@ -185,7 +185,7 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
       Ogre::Quaternion(Ogre::Radian(M_PI / 2.), Ogre::Vector3::UNIT_X);
     visual->setWaypointAreaOrientation(waypoint_area_orientation);
 
-    waypoints_position_.push_back(
+    waypoints_position_.push_front(
       Ogre::Vector2(waypoint.pose.position.x, waypoint.pose.position.y));
     visuals_.push_front(visual);
   }
