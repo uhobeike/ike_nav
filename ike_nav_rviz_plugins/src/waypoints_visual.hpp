@@ -57,7 +57,7 @@ private:
   Ogre::Entity * waypoint_flag_entity_;
 
   std::shared_ptr<rviz_rendering::Shape> waypoint_area_;
-  rviz_rendering::MovableText * waypoint_text_;
+  std::shared_ptr<rviz_rendering::MovableText> waypoint_text_;
 
   std::string waypoint_flag_resource_;
 };
