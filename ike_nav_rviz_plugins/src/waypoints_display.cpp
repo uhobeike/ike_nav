@@ -105,6 +105,9 @@ void WaypointsDisplay::updateWaypointFlagScale()
   float scale = waypoint_flag_scale_property_->getFloat();
   for (size_t i = 0; i < visuals_.size(); i++) {
     visuals_[i]->setWaypointFlagScale(scale);
+    visuals_[i]->setWaypointTextPosition(Ogre::Vector3(
+      waypoints_position_[i].x, waypoints_position_[i].y,
+      waypoint_flag_scale_property_->getFloat() * 2. + 0.1));
   }
 }
 
@@ -146,6 +149,7 @@ void WaypointsDisplay::updateWaypointsColorAndAlpha()
 void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg)
 {
   visuals_.clear();
+  waypoints_position_.clear();
 
   for (const auto & waypoint : msg->waypoints) {
     Ogre::Vector3 waypoint_flag_position;
@@ -181,6 +185,8 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
       Ogre::Quaternion(Ogre::Radian(M_PI / 2.), Ogre::Vector3::UNIT_X);
     visual->setWaypointAreaOrientation(waypoint_area_orientation);
 
+    waypoints_position_.push_back(
+      Ogre::Vector2(waypoint.pose.position.x, waypoint.pose.position.y));
     visuals_.push_front(visual);
   }
 
