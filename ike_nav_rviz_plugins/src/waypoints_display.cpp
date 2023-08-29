@@ -168,9 +168,9 @@ void WaypointsDisplay::processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedP
     waypoint_text_position.z = waypoint_flag_scale_property_->getFloat() * 2. + 0.1;
 
     Ogre::Vector3 waypoint_area_scale;
-    waypoint_area_scale.x = waypoint.function.variable_waypoint_radius.waypoint_radius;
+    waypoint_area_scale.x = waypoint.function.variable_waypoint_radius.waypoint_radius * 2.;
     waypoint_area_scale.y = 0.01;
-    waypoint_area_scale.z = waypoint.function.variable_waypoint_radius.waypoint_radius;
+    waypoint_area_scale.z = waypoint.function.variable_waypoint_radius.waypoint_radius * 2.;
 
     std::shared_ptr<WaypointsVisual> visual;
     visual.reset(new WaypointsVisual(context_->getSceneManager(), scene_node_));
