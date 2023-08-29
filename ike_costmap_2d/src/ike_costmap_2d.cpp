@@ -23,6 +23,8 @@ IkeCostMap2D::IkeCostMap2D(const rclcpp::NodeOptions & options) : Node("ike_cost
   initTimer();
 
   map_ = getMap();
+  createCostMap2DLayers(map_);
+  publishCostMap2DLayers(costmap_2d_layers_);
 }
 
 void IkeCostMap2D::getParam()
@@ -47,15 +49,15 @@ void IkeCostMap2D::initTf()
 
 void IkeCostMap2D::initPublisher()
 {
-  static_layer_pub_ =
-    this->create_publisher<nav_msgs::msg::OccupancyGrid>("static_layer", rclcpp::QoS(1).reliable());
+  static_layer_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "static_layer", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
   inflation_layer_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
-    "inflation_layer", rclcpp::QoS(1).reliable());
+    "inflation_layer", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
   obstacle_layer_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
     "obstacle_layer", rclcpp::QoS(1).reliable());
 
-  costmap_2d_pub_ =
-    this->create_publisher<nav_msgs::msg::OccupancyGrid>("costmap_2d", rclcpp::QoS(1).reliable());
+  costmap_2d_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "costmap_2d", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
 void IkeCostMap2D::initSubscription()
@@ -188,6 +190,7 @@ void IkeCostMap2D::createObstacleLayer()
           hit_xy.second);
 
         costmap_2d_layers_["obstacle_layer"].header.stamp = rclcpp::Time();
+        obstacle_layer_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
         costmap_2d_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
       }
     }

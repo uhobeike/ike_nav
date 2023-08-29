@@ -45,7 +45,8 @@ void IkeMapServer::getParam()
 
 void IkeMapServer::initPublisher()
 {
-  map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map", rclcpp::QoS(1).reliable());
+  map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "map", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
 void IkeMapServer::initService()

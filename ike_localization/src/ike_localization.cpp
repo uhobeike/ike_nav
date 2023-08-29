@@ -86,7 +86,8 @@ void IkeLocalization::initPubSub()
   RCLCPP_INFO(get_logger(), "Run initPubSub.");
 
   particle_cloud_pub_ = create_publisher<nav2_msgs::msg::ParticleCloud>("particle_cloud", 2);
-  likelihood_map_pub_ = create_publisher<nav_msgs::msg::OccupancyGrid>("likelihood_map", 2);
+  likelihood_map_pub_ = create_publisher<nav_msgs::msg::OccupancyGrid>(
+    "likelihood_map", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
   particles_scan_match_point_publisher_ =
     create_publisher<visualization_msgs::msg::MarkerArray>("mcl_match", 2);
   marginal_likelihood_publisher_ =
