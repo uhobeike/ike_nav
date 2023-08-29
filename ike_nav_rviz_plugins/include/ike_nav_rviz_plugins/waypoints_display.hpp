@@ -65,6 +65,7 @@ private:
   void processMessage(ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) override;
 
   std::deque<std::shared_ptr<WaypointsVisual>> visuals_;
+  std::deque<Ogre::Vector2> waypoints_position_;
 
   // Waypoint Area
   rviz_common::properties::ColorProperty * waypoint_area_color_property_;

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "waypoints_visual.hpp"
+#include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 
 #include "rviz_rendering/material_manager.hpp"
 #include "rviz_rendering/objects/shape.hpp"
@@ -33,10 +33,10 @@ WaypointsVisual::WaypointsVisual(Ogre::SceneManager * scene_manager, Ogre::Scene
 
   // Waypoint Text
   waypoint_text_node_ = frame_node_->createChildSceneNode();
-  waypoint_text_ = new rviz_rendering::MovableText(Ogre::String("aaaa"));
+  waypoint_text_ = std::make_shared<rviz_rendering::MovableText>(Ogre::String("none"));
   waypoint_text_->setTextAlignment(
     rviz_rendering::MovableText::H_CENTER, rviz_rendering::MovableText::V_CENTER);
-  waypoint_text_node_->attachObject(waypoint_text_);
+  waypoint_text_node_->attachObject(waypoint_text_.get());
 }
 
 WaypointsVisual::~WaypointsVisual() { scene_manager_->destroySceneNode(frame_node_); }
