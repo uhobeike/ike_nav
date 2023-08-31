@@ -4,4 +4,10 @@
     base_class_type="rviz_common::Display">
     <description></description>
   </class>
+
+  <class name="ike_nav_rviz_plugins/IkeNavPanel"
+    type="ike_nav_rviz_plugins::IkeNavPanel"
+    base_class_type="rviz_common::Panel">
+    <description></description>
+  </class>
 </library>
