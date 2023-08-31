@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>333</width>
+    <height>301</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>IkeNavPanel</string>
+   <string>Form</string>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>240</x>
      <y>80</y>
-     <width>160</width>
+     <width>91</width>
      <height>240</height>
     </rect>
    </property>
@@ -71,6 +71,19 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QLabel" name="image_label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>311</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
  </widget>
  <resources/>
