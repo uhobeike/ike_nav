@@ -18,6 +18,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES builtin_interfaces std_msgs geometry_msgs nav_msgs
 )
 
+rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+
 ament_export_dependencies(rosidl_default_runtime)
 
 ament_auto_package()
