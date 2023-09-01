@@ -158,6 +158,7 @@ void IkeWaypointFollower::sendGoal(const geometry_msgs::msg::Pose & goal)
   goal_stamp.header.stamp = rclcpp::Time();
   goal_stamp.pose = goal;
   goal_msg.pose = goal_stamp;
+  goal_msg.waypoint_id = waypoint_id_ + 1;
 
   RCLCPP_INFO(this->get_logger(), "Sending goal");
 
