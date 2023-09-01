@@ -1,6 +1,12 @@
+uint32 waypoint_id
 geometry_msgs/PoseStamped pose
 ---
 bool goal_reached
 ---
-#geometry_msgs/PoseStamped current_pose
+uint32 waypoint_id
 float32 distance_remaining
+uint8 navigation_status
+# 0 planning
+# 1 goal reached
+
+#geometry_msgs/PoseStamped current_pose
