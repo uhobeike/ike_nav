@@ -15,17 +15,55 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
   ui_->setupUi(this);
   addLogo();
 
+  initSubscription();
   initServiceClient();
 
   connect(ui_->start, &QPushButton::clicked, this, &IkeNavPanel::onStartButtonClicked);
+
+  disableButton();
+
+  timer_id_ = startTimer(100);
 }
 
 IkeNavPanel::~IkeNavPanel() {}
+
+void IkeNavPanel::initSubscription()
+{
+  navigation_feedback_sub_ =
+    client_node_->create_subscription<NavigateToGoal::Impl::FeedbackMessage>(
+      "navigate_to_goal/_action/feedback", 1,
+      [this](const NavigateToGoal::Impl::FeedbackMessage msg) {
+        this->ui_->waypoint_id_value_label->setText(
+          std::to_string(msg.feedback.waypoint_id).c_str());
+        std::string distance_remaining = std::to_string(msg.feedback.distance_remaining) + " [m]";
+        this->ui_->distance_remaining_value_label->setText(distance_remaining.c_str());
+
+        if (msg.feedback.navigation_status == 0) {
+          this->ui_->navigation_status_value_label->setText("Planning");
+          QPalette palette = this->ui_->navigation_status_value_label->palette();
+          palette.setColor(QPalette::WindowText, Qt::cyan);
+          this->ui_->navigation_status_value_label->setPalette(palette);
+        } else if (msg.feedback.navigation_status == 1) {
+          this->ui_->navigation_status_value_label->setText("Goal Reached");
+          QPalette palette = this->ui_->navigation_status_value_label->palette();
+          palette.setColor(QPalette::WindowText, Qt::green);
+          this->ui_->navigation_status_value_label->setPalette(palette);
+        }
+      });
+}
 
 void IkeNavPanel::initServiceClient()
 {
   start_waypoint_follower_client_ =
     client_node_->create_client<std_srvs::srv::Trigger>("start_waypoint_follower");
+}
+
+void IkeNavPanel::disableButton()
+{
+  ui_->stop->setEnabled(false);
+  ui_->cancel->setEnabled(false);
+  ui_->waypoint_save->setEnabled(false);
+  ui_->waypoint_load->setEnabled(false);
 }
 
 void IkeNavPanel::addLogo()
@@ -66,6 +104,11 @@ void IkeNavPanel::onStartButtonClicked()
   };
   auto future_result =
     start_waypoint_follower_client_->async_send_request(request, response_received_callback);
+}
+
+void IkeNavPanel::timerEvent(QTimerEvent * event)
+{
+  if (event->timerId() == timer_id_) rclcpp::spin_some(client_node_);
 }
 
 }  // namespace ike_nav_rviz_plugins
