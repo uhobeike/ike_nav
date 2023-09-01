@@ -255,7 +255,10 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     if (goal_handle->is_canceling()) {
       goal_handle->canceled(result);
       RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
+      clearThreadId();
       stop_velocity_publish_timer_->reset();
+      result->goal_reached = false;
+      should_exit_this_thread = true;
       return;
     }
 

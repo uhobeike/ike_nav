@@ -30,6 +30,8 @@ protected:
   rclcpp::Node::SharedPtr createNewNode(const std::string & node_name);
 
   void onStartButtonClicked();
+  void onStopButtonClicked();
+  void onCancelButtonClicked();
 
 private:
   void timerEvent(QTimerEvent * event) override;
@@ -39,6 +41,8 @@ private:
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Subscription<NavigateToGoal::Impl::FeedbackMessage>::SharedPtr navigation_feedback_sub_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr cancel_waypoint_follower_client_;
 
   int timer_id_;
 };

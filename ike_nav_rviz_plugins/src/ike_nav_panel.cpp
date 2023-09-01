@@ -14,13 +14,14 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
 {
   ui_->setupUi(this);
   addLogo();
+  disableButton();
 
   initSubscription();
   initServiceClient();
 
   connect(ui_->start, &QPushButton::clicked, this, &IkeNavPanel::onStartButtonClicked);
-
-  disableButton();
+  connect(ui_->stop, &QPushButton::clicked, this, &IkeNavPanel::onStopButtonClicked);
+  connect(ui_->cancel, &QPushButton::clicked, this, &IkeNavPanel::onCancelButtonClicked);
 
   timer_id_ = startTimer(100);
 }
@@ -41,7 +42,7 @@ void IkeNavPanel::initSubscription()
         if (msg.feedback.navigation_status == 0) {
           this->ui_->navigation_status_value_label->setText("Planning");
           QPalette palette = this->ui_->navigation_status_value_label->palette();
-          palette.setColor(QPalette::WindowText, Qt::cyan);
+          palette.setColor(QPalette::WindowText, Qt::blue);
           this->ui_->navigation_status_value_label->setPalette(palette);
         } else if (msg.feedback.navigation_status == 1) {
           this->ui_->navigation_status_value_label->setText("Goal Reached");
@@ -56,6 +57,12 @@ void IkeNavPanel::initServiceClient()
 {
   start_waypoint_follower_client_ =
     client_node_->create_client<std_srvs::srv::Trigger>("start_waypoint_follower");
+
+  stop_waypoint_follower_client_ =
+    client_node_->create_client<std_srvs::srv::Trigger>("stop_waypoint_follower");
+
+  cancel_waypoint_follower_client_ =
+    client_node_->create_client<std_srvs::srv::Trigger>("cancel_waypoint_follower");
 }
 
 void IkeNavPanel::disableButton()
@@ -86,6 +93,8 @@ rclcpp::Node::SharedPtr IkeNavPanel::createNewNode(const std::string & node_name
 
 void IkeNavPanel::onStartButtonClicked()
 {
+  ui_->start->setEnabled(false);
+
   using namespace std::chrono_literals;
 
   while (!start_waypoint_follower_client_->wait_for_service(1s)) {
@@ -104,6 +113,61 @@ void IkeNavPanel::onStartButtonClicked()
   };
   auto future_result =
     start_waypoint_follower_client_->async_send_request(request, response_received_callback);
+
+  ui_->stop->setEnabled(true);
+  ui_->cancel->setEnabled(true);
+}
+
+void IkeNavPanel::onStopButtonClicked()
+{
+  ui_->stop->setEnabled(false);
+
+  using namespace std::chrono_literals;
+
+  while (!stop_waypoint_follower_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+  }
+  auto request = std::make_shared<std_srvs::srv::Trigger_Request>();
+
+  using ServiceResponseFuture = rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+  };
+  auto future_result =
+    stop_waypoint_follower_client_->async_send_request(request, response_received_callback);
+
+  ui_->start->setEnabled(true);
+}
+
+void IkeNavPanel::onCancelButtonClicked()
+{
+  ui_->cancel->setEnabled(false);
+
+  using namespace std::chrono_literals;
+
+  while (!cancel_waypoint_follower_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+  }
+  auto request = std::make_shared<std_srvs::srv::Trigger_Request>();
+
+  using ServiceResponseFuture = rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+  };
+  auto future_result =
+    cancel_waypoint_follower_client_->async_send_request(request, response_received_callback);
+
+  ui_->start->setEnabled(true);
 }
 
 void IkeNavPanel::timerEvent(QTimerEvent * event)

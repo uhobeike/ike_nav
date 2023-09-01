@@ -41,12 +41,15 @@ protected:
   bool isInsideWaypointArea(
     const geometry_msgs::msg::Pose & robot_pose, const ike_nav_msgs::msg::Waypoint & waypoint);
   void sendGoal(const geometry_msgs::msg::Pose & goal);
+  void cancelGoal();
 
   void loop();
 
 private:
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_service_server_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_service_server_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr cancel_waypoint_follower_service_server_;
   rclcpp_action::Client<NavigateToGoal>::SharedPtr navigate_to_goal_action_client_;
 
   rclcpp::TimerBase::SharedPtr loop_timer_;
