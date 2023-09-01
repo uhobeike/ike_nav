@@ -23,8 +23,68 @@
       </size>
      </property>
      <property name="text">
-      <string/>
+      <string>ロゴ</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="waypoint_id_layout_widget">
+     <layout class="QHBoxLayout" name="waypoint_id_layout">
+      <item>
+       <widget class="QLabel" name="waypoint_id_label">
+        <property name="text">
+         <string>waypoint id:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="waypoint_id_value_label">
+        <property name="text">
+         <string>none</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="distance_remaining_layout_widget">
+     <layout class="QHBoxLayout" name="remain_distance_layout">
+      <item>
+       <widget class="QLabel" name="distance_remaining_label">
+        <property name="text">
+         <string>distance remaining:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="distance_remaining_value_label">
+        <property name="text">
+         <string>none [m]</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="navigation_status_layout_widget">
+     <layout class="QHBoxLayout" name="navigation_status_layout">
+      <item>
+       <widget class="QLabel" name="navigation_status_label">
+        <property name="text">
+         <string>navigation status:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="navigation_status_value_label">
+        <property name="text">
+         <string>none</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
