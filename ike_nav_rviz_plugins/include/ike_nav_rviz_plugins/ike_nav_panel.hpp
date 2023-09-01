@@ -2,6 +2,7 @@
 #include <rviz_common/panel.hpp>
 
 #include "ike_nav_msgs/action/navigate_to_goal.hpp"
+#include "ike_nav_msgs/srv/load_waypoint_yaml.hpp"
 #include <std_srvs/srv/trigger.hpp>
 
 using NavigateToGoal = ike_nav_msgs::action::NavigateToGoal;
@@ -29,6 +30,9 @@ protected:
 
   rclcpp::Node::SharedPtr createNewNode(const std::string & node_name);
 
+  void onWaypointLoadButtonClicked();
+  void onWaypointSaveButtonClicked();
+
   void onStartButtonClicked();
   void onStopButtonClicked();
   void onCancelButtonClicked();
@@ -40,6 +44,7 @@ private:
 
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Subscription<NavigateToGoal::Impl::FeedbackMessage>::SharedPtr navigation_feedback_sub_;
+  rclcpp::Client<ike_nav_msgs::srv::LoadWaypointYaml>::SharedPtr load_waypoint_yaml_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr cancel_waypoint_follower_client_;

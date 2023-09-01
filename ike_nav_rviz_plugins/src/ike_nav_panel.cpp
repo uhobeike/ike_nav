@@ -2,6 +2,7 @@
 
 #include "ui_ike_nav.h"
 
+#include <QFileDialog>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace ike_nav_rviz_plugins
@@ -19,9 +20,14 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
   initSubscription();
   initServiceClient();
 
+  // clang-format off
+  connect(ui_->waypoint_load, &QPushButton::clicked, this, &IkeNavPanel::onWaypointLoadButtonClicked);
+  connect(ui_->waypoint_save, &QPushButton::clicked, this, &IkeNavPanel::onWaypointSaveButtonClicked);
+
   connect(ui_->start, &QPushButton::clicked, this, &IkeNavPanel::onStartButtonClicked);
   connect(ui_->stop, &QPushButton::clicked, this, &IkeNavPanel::onStopButtonClicked);
   connect(ui_->cancel, &QPushButton::clicked, this, &IkeNavPanel::onCancelButtonClicked);
+  // clang-format on
 
   timer_id_ = startTimer(100);
 }
@@ -55,6 +61,9 @@ void IkeNavPanel::initSubscription()
 
 void IkeNavPanel::initServiceClient()
 {
+  load_waypoint_yaml_client_ =
+    client_node_->create_client<ike_nav_msgs::srv::LoadWaypointYaml>("load_waypoint_yaml");
+
   start_waypoint_follower_client_ =
     client_node_->create_client<std_srvs::srv::Trigger>("start_waypoint_follower");
 
@@ -69,8 +78,8 @@ void IkeNavPanel::disableButton()
 {
   ui_->stop->setEnabled(false);
   ui_->cancel->setEnabled(false);
+  // ui_->waypoint_load->setEnabled(false);
   ui_->waypoint_save->setEnabled(false);
-  ui_->waypoint_load->setEnabled(false);
 }
 
 void IkeNavPanel::addLogo()
@@ -90,6 +99,43 @@ rclcpp::Node::SharedPtr IkeNavPanel::createNewNode(const std::string & node_name
   auto options = rclcpp::NodeOptions().arguments({"--ros-args", "--remap", node, "--"});
   return std::make_shared<rclcpp::Node>("_", options);
 }
+
+void IkeNavPanel::onWaypointLoadButtonClicked()
+{
+  ui_->waypoint_load->setEnabled(false);
+
+  std::string waypoint_yaml_path =
+    ament_index_cpp::get_package_share_directory("ike_launch") + "/config";
+  QString path = QFileDialog::getOpenFileName(
+    this, tr("Open Waypoint Yaml"), waypoint_yaml_path.c_str(), tr("Yaml Files (*.yaml)"));
+
+  if (!path.toStdString().empty()) {
+    using namespace std::chrono_literals;
+
+    while (!load_waypoint_yaml_client_->wait_for_service(1s)) {
+      if (!rclcpp::ok()) {
+        RCLCPP_ERROR(
+          client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+        return;
+      }
+      RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+    }
+    auto request = std::make_shared<ike_nav_msgs::srv::LoadWaypointYaml_Request>();
+
+    request->waypoint_yaml_path = path.toStdString();
+
+    using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::LoadWaypointYaml>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future) {
+      auto result = future.get();
+    };
+    auto future_result =
+      load_waypoint_yaml_client_->async_send_request(request, response_received_callback);
+  }
+
+  ui_->waypoint_load->setEnabled(true);
+}
+
+void IkeNavPanel::onWaypointSaveButtonClicked() {}
 
 void IkeNavPanel::onStartButtonClicked()
 {

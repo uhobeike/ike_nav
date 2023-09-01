@@ -50,6 +50,25 @@ void IkeWaypointFollower::initPublisher()
 
 void IkeWaypointFollower::initServiceServer()
 {
+  auto load_waypoint_yaml =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      std::shared_ptr<ike_nav_msgs::srv::LoadWaypointYaml::Request> request,
+      std::shared_ptr<ike_nav_msgs::srv::LoadWaypointYaml::Response> response) -> void {
+    (void)request_header;
+
+    this->loop_timer_->reset();
+    waypoint_yaml_path_ = request->waypoint_yaml_path;
+    this->readWaypointYaml();
+    this->loop_timer_->cancel();
+    this->cancelGoal();
+    this->waypoint_id_ = 0;
+
+    response->success = true;
+  };
+  load_waypoint_yaml_service_server_ =
+    create_service<ike_nav_msgs::srv::LoadWaypointYaml>("load_waypoint_yaml", load_waypoint_yaml);
+
   auto start_waypoint_follower =
     [this](
       const std::shared_ptr<rmw_request_id_t> request_header,
