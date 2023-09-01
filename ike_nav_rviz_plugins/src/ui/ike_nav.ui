@@ -91,16 +91,16 @@
     <widget class="QWidget" name="horizontalLayoutWidget">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="waypoint_save">
+       <widget class="QPushButton" name="waypoint_load">
         <property name="text">
-         <string>Waypoint Save</string>
+         <string>Waypoint Load</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="waypoint_load">
+       <widget class="QPushButton" name="waypoint_save">
         <property name="text">
-         <string>Waypoint Load</string>
+         <string>Waypoint Save</string>
         </property>
        </widget>
       </item>
