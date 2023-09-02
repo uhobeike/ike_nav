@@ -10,4 +10,10 @@
     base_class_type="rviz_common::Panel">
     <description></description>
   </class>
+
+  <class name="ike_nav_rviz_plugins/WaypointSetTool"
+    type="ike_nav_rviz_plugins::WaypointSetTool"
+    base_class_type="rviz_common::Tool">
+    <description></description>
+  </class>
 </library>

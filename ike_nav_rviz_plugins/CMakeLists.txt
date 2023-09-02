@@ -29,9 +29,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   include/ike_nav_rviz_plugins/ike_nav_panel.hpp
+  include/ike_nav_rviz_plugins/waypoint_set_tool.hpp
   include/ike_nav_rviz_plugins/waypoints_display.hpp
   include/ike_nav_rviz_plugins/waypoints_visual.hpp
   src/ike_nav_panel.cpp
+  src/waypoint_set_tool.cpp
   src/waypoints_display.cpp
   src/waypoints_visual.cpp
   ${UIC_FILES}
