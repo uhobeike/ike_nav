@@ -7,13 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>333</width>
-    <height>301</height>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
+
+   <!-- Logo -->
    <item>
     <widget class="QLabel" name="image_label">
      <property name="minimumSize">
@@ -27,6 +29,8 @@
      </property>
     </widget>
    </item>
+
+   <!-- Waypoint ID -->
    <item>
     <widget class="QWidget" name="waypoint_id_layout_widget">
      <layout class="QHBoxLayout" name="waypoint_id_layout">
@@ -47,6 +51,8 @@
      </layout>
     </widget>
    </item>
+
+   <!-- Distance Remaining -->
    <item>
     <widget class="QWidget" name="distance_remaining_layout_widget">
      <layout class="QHBoxLayout" name="remain_distance_layout">
@@ -67,6 +73,8 @@
      </layout>
     </widget>
    </item>
+
+   <!-- Navigation Status -->
    <item>
     <widget class="QWidget" name="navigation_status_layout_widget">
      <layout class="QHBoxLayout" name="navigation_status_layout">
@@ -87,16 +95,71 @@
      </layout>
     </widget>
    </item>
+
+   <!-- Waypoint Load and Navigation Group Side by Side -->
    <item>
-    <widget class="QWidget" name="horizontalLayoutWidget">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+    <widget class="QWidget" name="loadAndNavGroup_layout_widget">
+     <layout class="QHBoxLayout" name="loadAndNavGroup_layout">
+      <!-- Waypoint Load -->
       <item>
-       <widget class="QPushButton" name="waypoint_load">
-        <property name="text">
-         <string>Waypoint Load</string>
+       <widget class="QFrame" name="waypointLoadFrame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
         </property>
+        <layout class="QVBoxLayout" name="waypointLoadLayout">
+         <item>
+          <widget class="QPushButton" name="waypoint_load">
+           <property name="text">
+            <string>Waypoint Load</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
+      
+      <!-- Navigation Group (Start/Restart, Stop, Cancel) -->
+      <item>
+       <widget class="QFrame" name="navigationGroupFrame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <layout class="QVBoxLayout" name="navigationGroupLayout">
+         <item>
+          <widget class="QPushButton" name="start">
+           <property name="text">
+            <string>Start / Restart</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="stop">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cancel">
+           <property name="text">
+            <string>Cancel</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Waypoint Operations (Save, Delete, All Delete) -->
+   <item>
+    <widget class="QFrame" name="waypointOperationsFrame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QVBoxLayout" name="waypointOperationsLayout">
       <item>
        <widget class="QPushButton" name="waypoint_save">
         <property name="text">
@@ -104,36 +167,24 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="verticalLayoutWidget">
-     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPushButton" name="start">
+       <widget class="QPushButton" name="waypoint_delete">
         <property name="text">
-         <string>Start / Restart</string>
+         <string>Waypoint Delete</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="stop">
+       <widget class="QPushButton" name="waypoint_all_delete">
         <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cancel">
-        <property name="text">
-         <string>Cancel</string>
+         <string>Waypoint All Delete</string>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
+
   </layout>
  </widget>
  <resources/>
