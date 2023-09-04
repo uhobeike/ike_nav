@@ -1,8 +1,12 @@
 #ifndef PLANT_FLAG_TOOL_HPP_
 #define PLANT_FLAG_TOOL_HPP_
 
+#include "rviz_common/display.hpp"
+#include "rviz_common/display_group.hpp"
 #include "rviz_common/tool.hpp"
 #include "rviz_rendering/objects/movable_text.hpp"
+
+#include <rviz_common/properties/color_property.hpp>
 
 #include <Ogre.h>
 
@@ -14,11 +18,6 @@ namespace Ogre
 class SceneNode;
 }
 
-namespace rviz_common::properties
-{
-class VectorProperty;
-}
-
 namespace rviz_common
 {
 class VisualizationManager;
@@ -28,6 +27,8 @@ class ViewportMouseEvent;
 namespace ike_nav_rviz_plugins
 {
 
+class WaypointsVisual;
+
 class WaypointSetTool : public rviz_common::Tool
 {
   Q_OBJECT
@@ -36,29 +37,40 @@ public:
   WaypointSetTool();
   ~WaypointSetTool();
 
-  virtual void onInitialize();
+  void onInitialize() override;
 
-  virtual void activate();
-  virtual void deactivate();
+  void activate() override;
+  void deactivate() override;
 
-  virtual int processMouseEvent(rviz_common::ViewportMouseEvent & event);
+  int processMouseEvent(rviz_common::ViewportMouseEvent & event) override;
 
-  virtual void save(rviz_common::Config config) const;
+  void moveWaypoint(const Ogre::Vector3 & position);
+  bool getWaypointsProperty();
+
+  void makeWaypoints(const Ogre::Vector3 & position);
+  void createWaypointsMsg();
+  void publishWaypoints();
 
 private:
-  void makeFlag(const Ogre::Vector3 & position);
-  void makeText(const Ogre::Vector3 & position);
+  std::shared_ptr<WaypointsVisual> visual_;
 
-  std::vector<Ogre::SceneNode *> flag_nodes_;
-  Ogre::SceneNode * moving_flag_node_;
-  std::string flag_resource_;
-  rviz_common::properties::VectorProperty * current_flag_property_;
+  Ogre::SceneNode * move_waypoint_node_;
 
-  std::vector<Ogre::SceneNode *> text_nodes_;
-  Ogre::SceneNode * moving_text_node_;
-  std::vector<std::shared_ptr<rviz_rendering::MovableText>> waypoint_text_;
+  // Waypoint Area
+  rviz_common::properties::ColorProperty * waypoint_area_color_property_;
 
-  uint32_t waypoint_id_;
+  // Waypoint Flag
+  rviz_common::properties::ColorProperty * waypoint_flag_color_property_;
+  rviz_common::properties::Property * waypoint_flag_scale_property_;
+
+  // Waypoint Text
+  rviz_common::properties::ColorProperty * waypoint_text_color_property_;
+  rviz_common::properties::Property * waypoint_text_scale_property_;
+
+  // Waypoints
+  rviz_common::properties::Property * waypoints_alpha_property_;
+
+  bool get_waypoints_property_;
 };
 
 }  // namespace ike_nav_rviz_plugins

@@ -1,6 +1,7 @@
 
 #include "ike_nav_rviz_plugins/waypoint_set_tool.hpp"
 
+#include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include "rviz_common/properties/vector_property.hpp"
 #include "rviz_common/render_panel.hpp"
@@ -17,83 +18,36 @@
 namespace ike_nav_rviz_plugins
 {
 
-WaypointSetTool::WaypointSetTool()
-: moving_flag_node_(NULL), current_flag_property_(NULL), waypoint_id_(0)
-{
-}
+WaypointSetTool::WaypointSetTool() {}
 
-WaypointSetTool::~WaypointSetTool()
-{
-  for (std::size_t i = 0; i < flag_nodes_.size(); i++) {
-    scene_manager_->destroySceneNode(flag_nodes_[i]);
-    scene_manager_->destroySceneNode(text_nodes_[i]);
-  }
-}
+WaypointSetTool::~WaypointSetTool() {}
 
 void WaypointSetTool::onInitialize()
 {
-  flag_resource_ = "package://ike_nav_rviz_plugins/media/ike_nav_goal_flag.dae";
-
-  if (!rviz_rendering::loadMeshFromResource(flag_resource_)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("plant_flag_tool"), "WaypointSetTool: failed to load model resource '%s'.",
-      flag_resource_.c_str());
-    return;
-  }
-
-  moving_flag_node_ = scene_manager_->getRootSceneNode()->createChildSceneNode();
-  Ogre::Entity * entity = scene_manager_->createEntity(flag_resource_);
-  moving_flag_node_->attachObject(entity);
-  moving_flag_node_->setVisible(false);
-
-  moving_text_node_ = scene_manager_->getRootSceneNode()->createChildSceneNode();
-  auto new_waypoint_text = std::make_shared<rviz_rendering::MovableText>(Ogre::String("none"));
-  new_waypoint_text->setTextAlignment(
-    rviz_rendering::MovableText::H_CENTER, rviz_rendering::MovableText::V_CENTER);
-  moving_text_node_->attachObject(new_waypoint_text.get());
-  moving_text_node_->setVisible(false);
-  waypoint_text_.push_back(new_waypoint_text);
+  move_waypoint_node_ = scene_manager_->getRootSceneNode()->createChildSceneNode();
+  visual_ = std::make_shared<WaypointsVisual>(context_->getSceneManager(), move_waypoint_node_);
+  move_waypoint_node_->setVisible(false);
 }
 
 void WaypointSetTool::activate()
 {
-  if (moving_flag_node_) {
-    moving_flag_node_->setVisible(true);
-
-    current_flag_property_ =
-      new rviz_common::properties::VectorProperty("Flag " + QString::number(flag_nodes_.size()));
-    current_flag_property_->setReadOnly(true);
-    getPropertyContainer()->addChild(current_flag_property_);
-  }
-
-  if (moving_text_node_) {
-    moving_text_node_->setVisible(true);
-    waypoint_text_.back()->setCaption(std::to_string(waypoint_id_));
-    // current_flag_property_ =
-    //   new rviz_common::properties::VectorProperty("Flag " + QString::number(flag_nodes_.size()));
-    // current_flag_property_->setReadOnly(true);
-    // getPropertyContainer()->addChild(current_flag_property_);
+  if (move_waypoint_node_) {
+    get_waypoints_property_ = getWaypointsProperty();
+    moveWaypoint(Ogre::Vector3{0., 0., 0.});
+    move_waypoint_node_->setVisible(true);
   }
 }
 
 void WaypointSetTool::deactivate()
 {
-  if (moving_flag_node_) {
-    moving_flag_node_->setVisible(false);
-    delete current_flag_property_;
-    current_flag_property_ = NULL;
-  }
-
-  if (moving_text_node_) {
-    moving_text_node_->setVisible(false);
-    // delete current_flag_property_;
-    // current_flag_property_ = NULL;
+  if (move_waypoint_node_) {
+    move_waypoint_node_->setVisible(false);
   }
 }
 
 int WaypointSetTool::processMouseEvent(rviz_common::ViewportMouseEvent & event)
 {
-  if (!moving_flag_node_ || !moving_text_node_) {
+  if (!move_waypoint_node_) {
     return Render;
   }
   auto projection_finder = std::make_shared<rviz_rendering::ViewportProjectionFinder>();
@@ -101,64 +55,115 @@ int WaypointSetTool::processMouseEvent(rviz_common::ViewportMouseEvent & event)
     event.panel->getRenderWindow(), event.x, event.y);
   Ogre::Vector3 intersection = projection.second;
   if (projection.first) {
-    moving_flag_node_->setVisible(true);
-    moving_text_node_->setVisible(true);
-    moving_flag_node_->setPosition(intersection);
-    moving_text_node_->setPosition(intersection);
-    current_flag_property_->setVector(intersection);
+    moveWaypoint(intersection);
+    move_waypoint_node_->setVisible(true);
 
     if (event.leftDown()) {
-      makeFlag(intersection);
-      makeText(intersection);
-      current_flag_property_ = NULL;
+      // makeWaypoints(intersection);
       return Render | Finished;
     }
   } else {
-    moving_flag_node_->setVisible(false);
-    moving_text_node_->setVisible(false);
+    move_waypoint_node_->setVisible(false);
   }
   return Render;
 }
 
-void WaypointSetTool::makeFlag(const Ogre::Vector3 & position)
+void WaypointSetTool::moveWaypoint(const Ogre::Vector3 & position)
 {
-  Ogre::SceneNode * node = scene_manager_->getRootSceneNode()->createChildSceneNode();
-  Ogre::Entity * entity = scene_manager_->createEntity(flag_resource_);
-  node->attachObject(entity);
-  node->setVisible(true);
-  node->setPosition(position);
-  flag_nodes_.push_back(node);
-}
+  Ogre::Vector3 waypoint_flag_position;
+  waypoint_flag_position.x = position.x;
+  waypoint_flag_position.y = position.y;
+  waypoint_flag_position.z = position.z;
 
-void WaypointSetTool::makeText(const Ogre::Vector3 & position)
-{
-  Ogre::SceneNode * node = scene_manager_->getRootSceneNode()->createChildSceneNode();
-  auto new_waypoint_text = std::make_shared<rviz_rendering::MovableText>(Ogre::String("none"));
-  new_waypoint_text->setTextAlignment(
-    rviz_rendering::MovableText::H_CENTER, rviz_rendering::MovableText::V_CENTER);
-  node->attachObject(new_waypoint_text.get());
-  node->setVisible(true);
-  node->setPosition(position);
-  new_waypoint_text->setCaption(std::to_string(++waypoint_id_));
-  waypoint_text_.push_back(new_waypoint_text);
-  text_nodes_.push_back(node);
-}
+  Ogre::Vector3 waypoint_area_position;
+  waypoint_area_position.x = position.x;
+  waypoint_area_position.y = position.y;
+  waypoint_area_position.z = 0.01;
 
-void WaypointSetTool::save(rviz_common::Config config) const
-{
-  config.mapSetValue("Class", getClassId());
+  Ogre::Vector3 waypoint_text_position;
+  waypoint_text_position.x = position.x;
+  waypoint_text_position.y = position.y;
+  waypoint_text_position.z = 1. * 2. + 0.1;
 
-  rviz_common::Config flags_config = config.mapMakeChild("Flags");
+  Ogre::Vector3 waypoint_area_scale;
+  waypoint_area_scale.x = 0.5 * 2.;
+  waypoint_area_scale.y = 0.01;
+  waypoint_area_scale.z = 0.5 * 2.;
 
-  rviz_common::properties::Property * container = getPropertyContainer();
-  int num_children = container->numChildren();
-  for (int i = 0; i < num_children; i++) {
-    rviz_common::properties::Property * position_prop = container->childAt(i);
-    rviz_common::Config flag_config = flags_config.listAppendNew();
-    flag_config.mapSetValue("Name", position_prop->getName());
-    position_prop->save(flag_config);
+  visual_->setWaypointAreaPosition(waypoint_area_position);
+  visual_->setWaypointFlagPosition(waypoint_flag_position);
+  visual_->setWaypointTextPosition(waypoint_text_position);
+  visual_->setWaypointAreaScale(waypoint_area_scale);
+  // visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint.id)));
+  visual_->setWaypointTextHeight(0.3);
+
+  Ogre::Quaternion waypoint_area_orientation =
+    Ogre::Quaternion(Ogre::Radian(M_PI / 2.), Ogre::Vector3::UNIT_X);
+  visual_->setWaypointAreaOrientation(waypoint_area_orientation);
+
+  if (get_waypoints_property_) {
+    Ogre::Vector3 waypoint_text_position;
+    waypoint_text_position.x = position.x;
+    waypoint_text_position.y = position.y;
+    waypoint_text_position.z = waypoint_flag_scale_property_->getValue().toFloat() * 2. + 0.1;
+
+    visual_->setWaypointTextPosition(waypoint_text_position);
+    visual_->setWaypointTextHeight(waypoint_text_scale_property_->getValue().toFloat());
+    visual_->setWaypointFlagScale(waypoint_flag_scale_property_->getValue().toFloat());
+
+    float alpha = waypoints_alpha_property_->getValue().toFloat();
+    Ogre::ColourValue text_color = waypoint_text_color_property_->getOgreColor();
+    visual_->setWaypointTextColor(text_color.r, text_color.g, text_color.b, alpha);
+    Ogre::ColourValue flag_color = waypoint_flag_color_property_->getOgreColor();
+    visual_->setWaypointFlagColor(flag_color.r, flag_color.g, flag_color.b, alpha);
+    Ogre::ColourValue area_color = waypoint_area_color_property_->getOgreColor();
+    visual_->setWaypointAreaColor(area_color.r, area_color.g, area_color.b, alpha);
   }
 }
+
+bool WaypointSetTool::getWaypointsProperty()
+{
+  for (int diplay_number = 0; diplay_number < context_->getRootDisplayGroup()->numDisplays();
+       ++diplay_number) {
+    if (context_->getRootDisplayGroup()->getDisplayAt(diplay_number)->getNameStd() == "Waypoints") {
+      // clang-format off
+      waypoint_text_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                        (context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoint Text Color"));
+      waypoint_area_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                        (context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoint Area Color"));
+      waypoint_flag_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                        (context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoint Flag Color"));
+      waypoint_flag_scale_property_ = context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoint Flag Scale");
+      waypoint_text_scale_property_ = context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoint Text Scale");
+      waypoints_alpha_property_ = context_->getRootDisplayGroup()
+                                        ->getDisplayAt(diplay_number)
+                                        ->subProp("Waypoints Alpha");
+      // clang-format on
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void WaypointSetTool::makeWaypoints(const Ogre::Vector3 & position)
+{
+  createWaypointsMsg();
+  publishWaypoints();
+}
+void WaypointSetTool::createWaypointsMsg() {}
+void WaypointSetTool::publishWaypoints() {}
 
 }  // namespace ike_nav_rviz_plugins
 
