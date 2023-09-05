@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 9 * * *
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - '**'
+      - '!README.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: osrf/ros:humble-desktop-full
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+    - name: Copy repository
+      run: |
+        mkdir -p ~/ros2_ws/src/ike_nav
+        cp -rf . ~/ros2_ws/src/ike_nav
+      shell: bash
+
+    - name: Cache ROS 2 build
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/ros2_ws/build
+          ~/ros2_ws/install
+          ~/ros2_ws/log
+        key: ${{ runner.os }}-ros2-${{ hashFiles('**/package.xml', '**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-ros2-
+    
+    - name: Update install apt
+      run: |
+        sudo apt update -y
+        sudo apt install -y
+      shell: bash
+
+    - name: Resolve dependent packages
+      run: |
+        cd ~/ros2_ws
+        rosdep update
+        rosdep install -i -y --from-path src --rosdistro $ROS_DISTRO
+      shell: bash
+
+    - name: Build ROS 2 package
+      run: |
+        source /opt/ros/$ROS_DISTRO/setup.sh
+        cd ~/ros2_ws
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+      shell: bash
