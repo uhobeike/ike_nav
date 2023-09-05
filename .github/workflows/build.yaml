@@ -10,6 +10,9 @@ on:
   pull_request:
     paths:
       - '**'
+      - '!.clang-format'
+      - '!.gitignore'
+      - '!LICENSE'
       - '!README.md'
 
 jobs:
