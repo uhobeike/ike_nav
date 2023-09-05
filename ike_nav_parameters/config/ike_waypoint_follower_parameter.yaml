@@ -7,6 +7,6 @@ ike_waypoint_follower:
 
   waypoint_radius: {
     type: double,
-    default_value: 1.0,
+    default_value: 0.5,
     description: "",
   }

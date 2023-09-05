@@ -231,7 +231,9 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
   rclcpp::Rate loop_rate(ike_nav_server_loop_hz_);
   const auto goal = goal_handle->get_goal();
   auto feedback = std::make_shared<NavigateToGoal::Feedback>();
+  feedback->waypoint_id = goal->waypoint_id;
   auto & distance_remaining = feedback->distance_remaining;
+  auto & navigation_status = feedback->navigation_status;
   auto result = std::make_shared<NavigateToGoal::Result>();
   auto should_exit_this_thread = false;
 
@@ -253,7 +255,10 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
     if (goal_handle->is_canceling()) {
       goal_handle->canceled(result);
       RCLCPP_INFO(this->get_logger(), "navigate_to_goal Canceled");
+      clearThreadId();
       stop_velocity_publish_timer_->reset();
+      result->goal_reached = false;
+      should_exit_this_thread = true;
       return;
     }
 
@@ -273,12 +278,17 @@ void IkeNavServer::execute(const std::shared_ptr<GoalHandleNavigateToGoal> goal_
       break;
     }
 
+    navigation_status = 0;
     goal_handle->publish_feedback(feedback);
 
     loop_rate.sleep();
   }
 
-  if (result->goal_reached) goal_handle->succeed(result);
+  if (result->goal_reached) {
+    navigation_status = 1;
+    goal_handle->publish_feedback(feedback);
+    goal_handle->succeed(result);
+  }
   if (should_exit_this_thread) goal_handle->succeed(result);
 
   RCLCPP_INFO(this->get_logger(), "Done navigate_to_goal");

@@ -50,6 +50,25 @@ void IkeWaypointFollower::initPublisher()
 
 void IkeWaypointFollower::initServiceServer()
 {
+  auto load_waypoint_yaml =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      std::shared_ptr<ike_nav_msgs::srv::LoadWaypointYaml::Request> request,
+      std::shared_ptr<ike_nav_msgs::srv::LoadWaypointYaml::Response> response) -> void {
+    (void)request_header;
+
+    this->loop_timer_->reset();
+    waypoint_yaml_path_ = request->waypoint_yaml_path;
+    this->readWaypointYaml();
+    this->loop_timer_->cancel();
+    this->cancelGoal();
+    this->waypoint_id_ = 0;
+
+    response->success = true;
+  };
+  load_waypoint_yaml_service_server_ =
+    create_service<ike_nav_msgs::srv::LoadWaypointYaml>("load_waypoint_yaml", load_waypoint_yaml);
+
   auto start_waypoint_follower =
     [this](
       const std::shared_ptr<rmw_request_id_t> request_header,
@@ -57,6 +76,7 @@ void IkeWaypointFollower::initServiceServer()
       std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
     (void)request_header;
 
+    this->loop_timer_->reset();
     this->sendGoal(this->waypoints_.waypoints[this->waypoint_id_].pose);
 
     response->success = true;
@@ -64,6 +84,39 @@ void IkeWaypointFollower::initServiceServer()
   };
   start_waypoint_follower_service_server_ =
     create_service<std_srvs::srv::Trigger>("start_waypoint_follower", start_waypoint_follower);
+
+  auto stop_waypoint_follower =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    this->loop_timer_->cancel();
+    this->cancelGoal();
+
+    response->success = true;
+    response->message = "Called /stop_waypoint_follower. Cancel goal done.";
+  };
+  stop_waypoint_follower_service_server_ =
+    create_service<std_srvs::srv::Trigger>("stop_waypoint_follower", stop_waypoint_follower);
+
+  auto cancel_waypoint_follower =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    this->loop_timer_->cancel();
+    this->cancelGoal();
+    this->waypoint_id_ = 0;
+
+    response->success = true;
+    response->message = "Called /cancel_waypoint_follower. Cancel goal done.";
+  };
+  cancel_waypoint_follower_service_server_ =
+    create_service<std_srvs::srv::Trigger>("cancel_waypoint_follower", cancel_waypoint_follower);
 }
 
 void IkeWaypointFollower::initActionClient()
@@ -158,12 +211,29 @@ void IkeWaypointFollower::sendGoal(const geometry_msgs::msg::Pose & goal)
   goal_stamp.header.stamp = rclcpp::Time();
   goal_stamp.pose = goal;
   goal_msg.pose = goal_stamp;
+  goal_msg.waypoint_id = waypoint_id_ + 1;
 
   RCLCPP_INFO(this->get_logger(), "Sending goal");
 
   auto send_goal_options = rclcpp_action::Client<NavigateToGoal>::SendGoalOptions();
   auto goal_handle_future =
     navigate_to_goal_action_client_->async_send_goal(goal_msg, send_goal_options);
+}
+
+void IkeWaypointFollower::cancelGoal()
+{
+  using namespace std::chrono_literals;
+
+  if (!navigate_to_goal_action_client_->wait_for_action_server(10s)) {
+    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+    return;
+  }
+
+  auto goal_msg = NavigateToGoal::Goal();
+
+  RCLCPP_INFO(this->get_logger(), "Cancel goal");
+
+  auto goal_handle_future = navigate_to_goal_action_client_->async_cancel_all_goals();
 }
 
 void IkeWaypointFollower::loop()

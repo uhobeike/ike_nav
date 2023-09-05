@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef WAYPOINTS_VISUAL_HPP_
-#define WAYPOINTS_VISUAL_HPP_
-
-#include "rviz_rendering/geometry.hpp"
-#include "rviz_rendering/mesh_loader.hpp"
-#include "rviz_rendering/objects/movable_text.hpp"
-#include "rviz_rendering/viewport_projection_finder.hpp"
+#ifndef IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_VISUAL_HPP_
+#define IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_VISUAL_HPP_
 
 #include <rclcpp/rclcpp.hpp>
+#include <rviz_rendering/geometry.hpp>
+#include <rviz_rendering/mesh_loader.hpp>
+#include <rviz_rendering/objects/movable_text.hpp>
+#include <rviz_rendering/viewport_projection_finder.hpp>
 
 #include <Ogre.h>
 
@@ -64,4 +63,4 @@ private:
 
 }  // namespace ike_nav_rviz_plugins
 
-#endif  // WAYPOINTS_VISUAL_HPP_
+#endif  // IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_VISUAL_HPP_
