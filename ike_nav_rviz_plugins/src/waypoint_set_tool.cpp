@@ -23,7 +23,11 @@ WaypointSetTool::WaypointSetTool()
 : waypoint_id_cnt_(1), client_node_(createNewNode("waypoints_set_tool"))
 {
   getParam();
+
   initPublisher();
+  initServiceServer();
+
+  timer_id_ = startTimer(100);
 }
 
 WaypointSetTool::~WaypointSetTool() {}
@@ -41,6 +45,45 @@ void WaypointSetTool::initPublisher()
 {
   waypoints_pub_ = client_node_->create_publisher<ike_nav_msgs::msg::Waypoints>(
     "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+}
+
+void WaypointSetTool::initServiceServer()
+{
+  auto delete_waypoint =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    if (waypoint_id_cnt_ > 1 && waypoints_position_.size()) {
+      waypoint_id_cnt_ -= 1;
+      waypoints_position_.pop_back();
+    }
+    makeWaypoints();
+
+    response->success = true;
+    response->message = "Called /delete_waypoint. Send goal done.";
+  };
+  delete_waypoint_ =
+    client_node_->create_service<std_srvs::srv::Trigger>("delete_waypoint", delete_waypoint);
+
+  auto delete_all_waypoints =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger_Request> request,
+      std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
+    (void)request_header;
+
+    waypoint_id_cnt_ = 1;
+    waypoints_position_.clear();
+    makeWaypoints();
+
+    response->success = true;
+    response->message = "Called /delete_all_waypoints. Send goal done.";
+  };
+  delete_all_waypoints_ = client_node_->create_service<std_srvs::srv::Trigger>(
+    "delete_all_waypoints", delete_all_waypoints);
 }
 
 void WaypointSetTool::onInitialize()
@@ -215,6 +258,11 @@ rclcpp::Node::SharedPtr WaypointSetTool::createNewNode(const std::string & node_
   std::string node = "__node:=" + node_name;
   auto options = rclcpp::NodeOptions().arguments({"--ros-args", "--remap", node, "--"});
   return std::make_shared<rclcpp::Node>("_", options);
+}
+
+void WaypointSetTool::timerEvent(QTimerEvent * event)
+{
+  if (event->timerId() == timer_id_) rclcpp::spin_some(client_node_);
 }
 
 }  // namespace ike_nav_rviz_plugins

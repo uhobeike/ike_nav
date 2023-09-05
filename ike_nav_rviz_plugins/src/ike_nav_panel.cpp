@@ -15,7 +15,6 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
 {
   ui_->setupUi(this);
   addLogo();
-  disableButton();
 
   initSubscription();
   initServiceClient();
@@ -27,6 +26,10 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
   connect(ui_->start, &QPushButton::clicked, this, &IkeNavPanel::onStartButtonClicked);
   connect(ui_->stop, &QPushButton::clicked, this, &IkeNavPanel::onStopButtonClicked);
   connect(ui_->cancel, &QPushButton::clicked, this, &IkeNavPanel::onCancelButtonClicked);
+
+  // connect(ui_->cancel, &QPushButton::clicked, this, &IkeNavPanel::onCancelButtonClicked);
+  connect(ui_->delete_waypoint, &QPushButton::clicked, this, &IkeNavPanel::onDeleteWaypointButtonClicked);
+  connect(ui_->delete_all_waypoints, &QPushButton::clicked, this, &IkeNavPanel::onDeleteAllWaypointsButtonClicked);
   // clang-format on
 
   timer_id_ = startTimer(100);
@@ -61,6 +64,7 @@ void IkeNavPanel::initSubscription()
 
 void IkeNavPanel::initServiceClient()
 {
+  // clang-format off
   load_waypoint_yaml_client_ =
     client_node_->create_client<ike_nav_msgs::srv::LoadWaypointYaml>("load_waypoint_yaml");
 
@@ -72,14 +76,13 @@ void IkeNavPanel::initServiceClient()
 
   cancel_waypoint_follower_client_ =
     client_node_->create_client<std_srvs::srv::Trigger>("cancel_waypoint_follower");
-}
 
-void IkeNavPanel::disableButton()
-{
-  ui_->stop->setEnabled(false);
-  ui_->cancel->setEnabled(false);
-  // ui_->waypoint_load->setEnabled(false);
-  ui_->waypoint_save->setEnabled(false);
+  delete_waypoint_client_ = 
+    client_node_->create_client<std_srvs::srv::Trigger>("delete_waypoint");
+
+  delete_all_waypoints_client_ =
+    client_node_->create_client<std_srvs::srv::Trigger>("delete_all_waypoints");
+  // clang-format on
 }
 
 void IkeNavPanel::addLogo()
@@ -214,6 +217,58 @@ void IkeNavPanel::onCancelButtonClicked()
     cancel_waypoint_follower_client_->async_send_request(request, response_received_callback);
 
   ui_->start->setEnabled(true);
+}
+
+void IkeNavPanel::onDeleteWaypointButtonClicked()
+{
+  ui_->delete_waypoint->setEnabled(false);
+
+  using namespace std::chrono_literals;
+
+  while (!delete_waypoint_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+  }
+  auto request = std::make_shared<std_srvs::srv::Trigger_Request>();
+
+  using ServiceResponseFuture = rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+  };
+  auto future_result =
+    delete_waypoint_client_->async_send_request(request, response_received_callback);
+
+  ui_->delete_waypoint->setEnabled(true);
+}
+
+void IkeNavPanel::onDeleteAllWaypointsButtonClicked()
+{
+  ui_->delete_all_waypoints->setEnabled(false);
+
+  using namespace std::chrono_literals;
+
+  while (!delete_all_waypoints_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+  }
+  auto request = std::make_shared<std_srvs::srv::Trigger_Request>();
+
+  using ServiceResponseFuture = rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+  };
+  auto future_result =
+    delete_all_waypoints_client_->async_send_request(request, response_received_callback);
+
+  ui_->delete_all_waypoints->setEnabled(true);
 }
 
 void IkeNavPanel::timerEvent(QTimerEvent * event)

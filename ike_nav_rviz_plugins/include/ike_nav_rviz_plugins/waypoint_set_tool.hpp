@@ -11,6 +11,7 @@
 #include <rviz_common/properties/color_property.hpp>
 
 #include <ike_nav_msgs/msg/waypoints.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 #include <Ogre.h>
 
@@ -44,6 +45,7 @@ public:
 protected:
   void getParam();
   void initPublisher();
+  void initServiceServer();
 
   void onInitialize() override;
 
@@ -61,9 +63,14 @@ protected:
 
   rclcpp::Node::SharedPtr createNewNode(const std::string & node_name);
 
+  void timerEvent(QTimerEvent * event);
+
 private:
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
+
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_waypoint_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_all_waypoints_;
 
   std::shared_ptr<ike_waypoint_follower::ParamListener> param_listener_;
   ike_waypoint_follower::Params params_;
@@ -92,6 +99,8 @@ private:
   std::deque<Ogre::Vector2> waypoints_position_;
 
   double waypoint_radius_;
+
+  int timer_id_;
 };
 
 }  // namespace ike_nav_rviz_plugins

@@ -25,7 +25,6 @@ protected:
   void initSubscription();
   void initServiceClient();
 
-  void disableButton();
   void addLogo();
 
   rclcpp::Node::SharedPtr createNewNode(const std::string & node_name);
@@ -36,6 +35,9 @@ protected:
   void onStartButtonClicked();
   void onStopButtonClicked();
   void onCancelButtonClicked();
+
+  void onDeleteWaypointButtonClicked();
+  void onDeleteAllWaypointsButtonClicked();
 
 private:
   void timerEvent(QTimerEvent * event) override;
@@ -48,6 +50,8 @@ private:
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr cancel_waypoint_follower_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr delete_waypoint_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr delete_all_waypoints_client_;
 
   int timer_id_;
 };
