@@ -3,7 +3,7 @@ name: Build
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 9 * * *
+    - cron: '0 9 * * *'
   push:
     branches:
       - main
@@ -19,10 +19,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: osrf/ros:humble-desktop-full
-    
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
     - name: Copy repository
       run: |
@@ -40,7 +40,7 @@ jobs:
         key: ${{ runner.os }}-ros2-${{ hashFiles('**/package.xml', '**/CMakeLists.txt') }}
         restore-keys: |
           ${{ runner.os }}-ros2-
-    
+
     - name: Update install apt
       run: |
         sudo apt update -y
