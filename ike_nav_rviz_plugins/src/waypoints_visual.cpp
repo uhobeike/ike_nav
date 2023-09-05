@@ -3,8 +3,8 @@
 
 #include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 
-#include "rviz_rendering/material_manager.hpp"
-#include "rviz_rendering/objects/shape.hpp"
+#include <rviz_rendering/material_manager.hpp>
+#include <rviz_rendering/objects/shape.hpp>
 
 namespace ike_nav_rviz_plugins
 {

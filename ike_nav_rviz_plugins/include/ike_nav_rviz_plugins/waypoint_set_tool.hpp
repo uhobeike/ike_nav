@@ -1,14 +1,17 @@
-#ifndef PLANT_FLAG_TOOL_HPP_
-#define PLANT_FLAG_TOOL_HPP_
+// SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
+// SPDX-License-Identifier: Apache-2.0
+
+#ifndef IKE_NAV_RVIZ_PLUGINS__WAYPOINT_SET_TOOL_HPP_
+#define IKE_NAV_RVIZ_PLUGINS__WAYPOINT_SET_TOOL_HPP_
 
 #include "ike_waypoint_follower_parameter/ike_waypoint_follower_parameter.hpp"
-#include "rviz_common/display.hpp"
-#include "rviz_common/tool.hpp"
-#include "rviz_rendering/objects/movable_text.hpp"
 
 #include <rclcpp/rclcpp.hpp>
+#include <rviz_common/display.hpp>
 #include <rviz_common/display_group.hpp>
 #include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/tool.hpp>
+#include <rviz_rendering/objects/movable_text.hpp>
 
 #include <ike_nav_msgs/msg/waypoints.hpp>
 #include <ike_nav_msgs/srv/get_waypoints_msg.hpp>
@@ -67,6 +70,8 @@ protected:
   void timerEvent(QTimerEvent * event);
 
 private:
+  u_int32_t waypoint_id_cnt_;
+
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
 
@@ -97,10 +102,8 @@ private:
   rviz_common::properties::Property * waypoints_alpha_property_;
 
   bool get_waypoints_property_;
-  u_int32_t waypoint_id_cnt_;
 
   std::deque<Ogre::Vector2> waypoints_position_;
-
   double waypoint_radius_;
 
   int timer_id_;
@@ -108,4 +111,4 @@ private:
 
 }  // namespace ike_nav_rviz_plugins
 
-#endif
+#endif  // IKE_NAV_RVIZ_PLUGINS__WAYPOINT_SET_TOOL_HPP_

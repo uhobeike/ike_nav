@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
+// SPDX-License-Identifier: Apache-2.0
+
+#ifndef IKE_NAV_RVIZ_PLUGINS__IKE_NAV_PANEL_HPP_
+#define IKE_NAV_RVIZ_PLUGINS__IKE_NAV_PANEL_HPP_
+
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/panel.hpp>
 
@@ -59,3 +65,5 @@ private:
   int timer_id_;
 };
 }  // namespace ike_nav_rviz_plugins
+
+#endif  // IKE_NAV_RVIZ_PLUGINS__IKE_NAV_PANEL_HPP_

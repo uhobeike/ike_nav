@@ -1,17 +1,15 @@
 // SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef WAYPOINTS_DISPLAY_HPP_
-#define WAYPOINTS_DISPLAY_HPP_
+#ifndef IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_DISPLAY_HPP_
+#define IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_DISPLAY_HPP_
 
-#ifndef Q_MOC_RUN
-#include "rviz_common/message_filter_display.hpp"
+#include <rviz_common/message_filter_display.hpp>
 
 #include "ike_nav_msgs/msg/waypoints.hpp"
 
 #include <deque>
 #include <memory>
-#endif
 
 namespace Ogre
 {
@@ -85,4 +83,4 @@ private:
 
 }  // namespace ike_nav_rviz_plugins
 
-#endif  // WAYPOINTS_DISPLAY_HPP_
+#endif  // IKE_NAV_RVIZ_PLUGINS__WAYPOINTS_DISPLAY_HPP_

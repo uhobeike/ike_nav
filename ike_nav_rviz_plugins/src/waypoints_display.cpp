@@ -4,16 +4,17 @@
 #include "ike_nav_rviz_plugins/waypoints_display.hpp"
 
 #include "ike_nav_rviz_plugins/waypoints_visual.hpp"
-#include "pluginlib/class_list_macros.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rviz_common/properties/color_property.hpp"
-#include "rviz_common/properties/float_property.hpp"
-#include "rviz_common/properties/int_property.hpp"
-#include "rviz_common/visualization_manager.hpp"
-#include "tf2_ros/transform_listener.h"
+
+#include <pluginlib/class_list_macros.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/int_property.hpp>
+#include <rviz_common/visualization_manager.hpp>
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <memory>
 

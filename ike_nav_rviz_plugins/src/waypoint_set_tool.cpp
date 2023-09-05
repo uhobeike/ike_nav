@@ -1,16 +1,19 @@
+// SPDX-FileCopyrightText: 2023 Tatsuhiro Ikebe <beike315@icloud.com>
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ike_nav_rviz_plugins/waypoint_set_tool.hpp"
 
 #include "ike_nav_rviz_plugins/waypoints_visual.hpp"
 #include "ike_waypoint_follower_parameter/ike_waypoint_follower_parameter.hpp"
-#include "pluginlib/class_list_macros.hpp"
-#include "rviz_common/properties/vector_property.hpp"
-#include "rviz_common/render_panel.hpp"
-#include "rviz_common/viewport_mouse_event.hpp"
-#include "rviz_common/visualization_manager.hpp"
-#include "rviz_rendering/geometry.hpp"
-#include "rviz_rendering/mesh_loader.hpp"
-#include "rviz_rendering/viewport_projection_finder.hpp"
+
+#include <pluginlib/class_list_macros.hpp>
+#include <rviz_common/properties/vector_property.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/viewport_mouse_event.hpp>
+#include <rviz_common/visualization_manager.hpp>
+#include <rviz_rendering/geometry.hpp>
+#include <rviz_rendering/mesh_loader.hpp>
+#include <rviz_rendering/viewport_projection_finder.hpp>
 
 #include <Ogre.h>
 
