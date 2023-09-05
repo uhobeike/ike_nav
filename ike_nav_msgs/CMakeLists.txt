@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetMap.srv"
   "srv/GetPath.srv"
   "srv/GetTwist.srv"
+  "srv/GetWaypointsMsg.srv"
   "srv/LoadWaypointYaml.srv"
   DEPENDENCIES builtin_interfaces std_msgs geometry_msgs nav_msgs
 )
