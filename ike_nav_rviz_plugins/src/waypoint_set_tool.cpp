@@ -65,7 +65,7 @@ void WaypointSetTool::initServiceServer()
     response->success = true;
     response->message = "Called /delete_waypoint. Send goal done.";
   };
-  delete_waypoint_ =
+  delete_waypoint_service_server_ =
     client_node_->create_service<std_srvs::srv::Trigger>("delete_waypoint", delete_waypoint);
 
   auto delete_all_waypoints =
@@ -82,8 +82,24 @@ void WaypointSetTool::initServiceServer()
     response->success = true;
     response->message = "Called /delete_all_waypoints. Send goal done.";
   };
-  delete_all_waypoints_ = client_node_->create_service<std_srvs::srv::Trigger>(
+  delete_all_waypoints_service_server_ = client_node_->create_service<std_srvs::srv::Trigger>(
     "delete_all_waypoints", delete_all_waypoints);
+
+  auto get_waypoints_msg =
+    [this](
+      const std::shared_ptr<rmw_request_id_t> request_header,
+      [[maybe_unused]] const std::shared_ptr<ike_nav_msgs::srv::GetWaypointsMsg_Request> request,
+      std::shared_ptr<ike_nav_msgs::srv::GetWaypointsMsg_Response> response) -> void {
+    (void)request_header;
+
+    auto waypoints_msg = createWaypointsMsg();
+    response->waypoints = waypoints_msg;
+
+    response->success = true;
+  };
+  get_waypoints_msg_service_server_ =
+    client_node_->create_service<ike_nav_msgs::srv::GetWaypointsMsg>(
+      "get_waypoints_msg", get_waypoints_msg);
 }
 
 void WaypointSetTool::onInitialize()

@@ -1,9 +1,16 @@
 #include "ike_nav_rviz_plugins/ike_nav_panel.hpp"
 
+#include "tf2/utils.h"
 #include "ui_ike_nav.h"
 
 #include <QFileDialog>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+
+#include <yaml-cpp/yaml.h>
+
+#include <fstream>
 
 namespace ike_nav_rviz_plugins
 {
@@ -82,6 +89,9 @@ void IkeNavPanel::initServiceClient()
 
   delete_all_waypoints_client_ =
     client_node_->create_client<std_srvs::srv::Trigger>("delete_all_waypoints");
+
+  get_waypoints_msg_client_ =
+    client_node_->create_client<ike_nav_msgs::srv::GetWaypointsMsg>("get_waypoints_msg");
   // clang-format on
 }
 
@@ -94,13 +104,6 @@ void IkeNavPanel::addLogo()
   QPixmap pixmap(ike_nav_logo_path.c_str());
   ui_->image_label->setPixmap(pixmap);
   ui_->image_label->setScaledContents(true);
-}
-
-rclcpp::Node::SharedPtr IkeNavPanel::createNewNode(const std::string & node_name)
-{
-  std::string node = "__node:=" + node_name;
-  auto options = rclcpp::NodeOptions().arguments({"--ros-args", "--remap", node, "--"});
-  return std::make_shared<rclcpp::Node>("_", options);
 }
 
 void IkeNavPanel::onWaypointLoadButtonClicked()
@@ -138,7 +141,44 @@ void IkeNavPanel::onWaypointLoadButtonClicked()
   ui_->waypoint_load->setEnabled(true);
 }
 
-void IkeNavPanel::onWaypointSaveButtonClicked() {}
+void IkeNavPanel::onWaypointSaveButtonClicked()
+{
+  ui_->waypoint_save->setEnabled(false);
+
+  std::string waypoint_yaml_path =
+    ament_index_cpp::get_package_share_directory("ike_launch") + "/config";
+  std::string default_filename = "waypoint.yaml";
+  QString path = QFileDialog::getSaveFileName(
+    this, tr("Save Waypoint Yaml"), (waypoint_yaml_path + "/" + default_filename).c_str(),
+    tr("Yaml Files (*.yaml)"));
+
+  if (!path.toStdString().empty()) {
+    using namespace std::chrono_literals;
+
+    while (!get_waypoints_msg_client_->wait_for_service(1s)) {
+      if (!rclcpp::ok()) {
+        RCLCPP_ERROR(
+          client_node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+        return;
+      }
+      RCLCPP_INFO(client_node_->get_logger(), "service not available, waiting again...");
+    }
+    auto request = std::make_shared<ike_nav_msgs::srv::GetWaypointsMsg_Request>();
+
+    using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetWaypointsMsg>::SharedFuture;
+    auto response_received_callback = [this, path](ServiceResponseFuture future) {
+      auto result = future.get();
+
+      if (result->waypoints.waypoints.size()) {
+        writeWaypointYaml(result->waypoints, path.toStdString());
+      }
+    };
+    auto future_result =
+      get_waypoints_msg_client_->async_send_request(request, response_received_callback);
+  }
+
+  ui_->waypoint_save->setEnabled(true);
+}
 
 void IkeNavPanel::onStartButtonClicked()
 {
@@ -269,6 +309,45 @@ void IkeNavPanel::onDeleteAllWaypointsButtonClicked()
     delete_all_waypoints_client_->async_send_request(request, response_received_callback);
 
   ui_->delete_all_waypoints->setEnabled(true);
+}
+
+void IkeNavPanel::writeWaypointYaml(
+  const ike_nav_msgs::msg::Waypoints waypoints, const std::string file_path)
+{
+  YAML::Emitter out;
+  out << YAML::BeginMap;
+  out << YAML::Key << "waypoints";
+  out << YAML::Value << YAML::BeginSeq;
+
+  for (const auto & waypoint : waypoints.waypoints) {
+    out << YAML::BeginMap;
+
+    out << YAML::Key << "id" << YAML::Value << waypoint.id;
+
+    out << YAML::Key << "position" << YAML::Value << YAML::BeginMap;
+    out << YAML::Key << "x" << YAML::Value << waypoint.pose.position.x;
+    out << YAML::Key << "y" << YAML::Value << waypoint.pose.position.y;
+    out << YAML::EndMap;
+
+    out << YAML::Key << "euler_angle" << YAML::Value << YAML::BeginMap;
+    out << YAML::Key << "z" << YAML::Value << tf2::getYaw(waypoint.pose.orientation);
+    out << YAML::EndMap;
+
+    out << YAML::EndMap;
+  }
+  out << YAML::EndSeq;
+  out << YAML::EndMap;
+
+  std::ofstream fout(file_path);
+  fout << out.c_str();
+  fout.close();
+}
+
+rclcpp::Node::SharedPtr IkeNavPanel::createNewNode(const std::string & node_name)
+{
+  std::string node = "__node:=" + node_name;
+  auto options = rclcpp::NodeOptions().arguments({"--ros-args", "--remap", node, "--"});
+  return std::make_shared<rclcpp::Node>("_", options);
 }
 
 void IkeNavPanel::timerEvent(QTimerEvent * event)

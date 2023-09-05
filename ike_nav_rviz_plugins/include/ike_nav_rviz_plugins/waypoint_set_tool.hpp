@@ -11,6 +11,7 @@
 #include <rviz_common/properties/color_property.hpp>
 
 #include <ike_nav_msgs/msg/waypoints.hpp>
+#include <ike_nav_msgs/srv/get_waypoints_msg.hpp>
 #include <std_srvs/srv/trigger.hpp>
 
 #include <Ogre.h>
@@ -69,8 +70,10 @@ private:
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
 
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_waypoint_;
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_all_waypoints_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_waypoint_service_server_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_all_waypoints_service_server_;
+
+  rclcpp::Service<ike_nav_msgs::srv::GetWaypointsMsg>::SharedPtr get_waypoints_msg_service_server_;
 
   std::shared_ptr<ike_waypoint_follower::ParamListener> param_listener_;
   ike_waypoint_follower::Params params_;
