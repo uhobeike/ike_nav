@@ -168,16 +168,16 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="waypoint_delete">
+       <widget class="QPushButton" name="delete_waypoint">
         <property name="text">
-         <string>Waypoint Delete</string>
+         <string>Delete Waypoint</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="waypoint_all_delete">
+       <widget class="QPushButton" name="delete_all_waypoints">
         <property name="text">
-         <string>Waypoint All Delete</string>
+         <string>Delete All Waypoints</string>
         </property>
        </widget>
       </item>
