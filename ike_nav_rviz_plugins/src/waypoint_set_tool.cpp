@@ -2,6 +2,7 @@
 #include "ike_nav_rviz_plugins/waypoint_set_tool.hpp"
 
 #include "ike_nav_rviz_plugins/waypoints_visual.hpp"
+#include "ike_waypoint_follower_parameter/ike_waypoint_follower_parameter.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include "rviz_common/properties/vector_property.hpp"
 #include "rviz_common/render_panel.hpp"
@@ -18,9 +19,29 @@
 namespace ike_nav_rviz_plugins
 {
 
-WaypointSetTool::WaypointSetTool() {}
+WaypointSetTool::WaypointSetTool()
+: waypoint_id_cnt_(1), client_node_(createNewNode("waypoints_set_tool"))
+{
+  getParam();
+  initPublisher();
+}
 
 WaypointSetTool::~WaypointSetTool() {}
+
+void WaypointSetTool::getParam()
+{
+  this->param_listener_ = std::make_shared<ike_waypoint_follower::ParamListener>(
+    client_node_->get_node_parameters_interface());
+  this->params_ = param_listener_->get_params();
+
+  waypoint_radius_ = this->params_.waypoint_radius;
+}
+
+void WaypointSetTool::initPublisher()
+{
+  waypoints_pub_ = client_node_->create_publisher<ike_nav_msgs::msg::Waypoints>(
+    "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+}
 
 void WaypointSetTool::onInitialize()
 {
@@ -32,7 +53,7 @@ void WaypointSetTool::onInitialize()
 void WaypointSetTool::activate()
 {
   if (move_waypoint_node_) {
-    get_waypoints_property_ = getWaypointsProperty();
+    get_waypoints_property_ = getWaypointsProperty(context_->getRootDisplayGroup());
     moveWaypoint(Ogre::Vector3{0., 0., 0.});
     move_waypoint_node_->setVisible(true);
   }
@@ -59,7 +80,9 @@ int WaypointSetTool::processMouseEvent(rviz_common::ViewportMouseEvent & event)
     move_waypoint_node_->setVisible(true);
 
     if (event.leftDown()) {
-      // makeWaypoints(intersection);
+      ++waypoint_id_cnt_;
+      waypoints_position_.push_back(Ogre::Vector2(intersection.x, intersection.y));
+      makeWaypoints();
       return Render | Finished;
     }
   } else {
@@ -94,7 +117,7 @@ void WaypointSetTool::moveWaypoint(const Ogre::Vector3 & position)
   visual_->setWaypointFlagPosition(waypoint_flag_position);
   visual_->setWaypointTextPosition(waypoint_text_position);
   visual_->setWaypointAreaScale(waypoint_area_scale);
-  // visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint.id)));
+  visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint_id_cnt_)));
   visual_->setWaypointTextHeight(0.3);
 
   Ogre::Quaternion waypoint_area_orientation =
@@ -121,49 +144,78 @@ void WaypointSetTool::moveWaypoint(const Ogre::Vector3 & position)
   }
 }
 
-bool WaypointSetTool::getWaypointsProperty()
+bool WaypointSetTool::getWaypointsProperty(const rviz_common::DisplayGroup * display_group)
 {
-  for (int diplay_number = 0; diplay_number < context_->getRootDisplayGroup()->numDisplays();
-       ++diplay_number) {
-    if (context_->getRootDisplayGroup()->getDisplayAt(diplay_number)->getNameStd() == "Waypoints") {
-      // clang-format off
-      waypoint_text_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
-                                        (context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoint Text Color"));
-      waypoint_area_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
-                                        (context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoint Area Color"));
-      waypoint_flag_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
-                                        (context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoint Flag Color"));
-      waypoint_flag_scale_property_ = context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoint Flag Scale");
-      waypoint_text_scale_property_ = context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoint Text Scale");
-      waypoints_alpha_property_ = context_->getRootDisplayGroup()
-                                        ->getDisplayAt(diplay_number)
-                                        ->subProp("Waypoints Alpha");
-      // clang-format on
-
-      return true;
+  for (int diplay_number = 0; diplay_number < display_group->numDisplays(); ++diplay_number) {
+    rviz_common::DisplayGroup * sub_display =
+      qobject_cast<rviz_common::DisplayGroup *>(display_group->getDisplayAt(diplay_number));
+    if (sub_display) {
+      if (getWaypointsProperty(sub_display)) {
+        return true;
+      }
+    } else {
+      if (display_group->getDisplayAt(diplay_number)->getNameStd() == "Waypoints") {
+        // clang-format off
+        waypoint_text_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                          (display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoint Text Color"));
+        waypoint_area_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                          (display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoint Area Color"));
+        waypoint_flag_color_property_ = dynamic_cast<rviz_common::properties::ColorProperty *>
+                                          (display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoint Flag Color"));
+        waypoint_flag_scale_property_ = display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoint Flag Scale");
+        waypoint_text_scale_property_ = display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoint Text Scale");
+        waypoints_alpha_property_ = display_group->getDisplayAt(diplay_number)
+                                          ->subProp("Waypoints Alpha");
+        // clang-format on
+        return true;
+      }
     }
   }
 
   return false;
 }
 
-void WaypointSetTool::makeWaypoints(const Ogre::Vector3 & position)
+void WaypointSetTool::makeWaypoints()
 {
-  createWaypointsMsg();
-  publishWaypoints();
+  auto waypoints_msg = createWaypointsMsg();
+  publishWaypoints(waypoints_msg);
 }
-void WaypointSetTool::createWaypointsMsg() {}
-void WaypointSetTool::publishWaypoints() {}
+
+ike_nav_msgs::msg::Waypoints WaypointSetTool::createWaypointsMsg()
+{
+  ike_nav_msgs::msg::Waypoints waypoints_msg;
+  for (uint32_t i = 0; i < waypoints_position_.size(); ++i) {
+    ike_nav_msgs::msg::Waypoint waypoint_msg;
+    waypoint_msg.id = i + 1;
+    waypoint_msg.pose.position.x = waypoints_position_[i].x;
+    waypoint_msg.pose.position.y = waypoints_position_[i].y;
+
+    waypoint_msg.function.variable_waypoint_radius.waypoint_radius = waypoint_radius_;
+
+    waypoints_msg.waypoints.push_back(waypoint_msg);
+  }
+
+  waypoints_msg.header.frame_id = "map";
+  waypoints_msg.header.stamp = rclcpp::Time();
+
+  return waypoints_msg;
+}
+void WaypointSetTool::publishWaypoints(const ike_nav_msgs::msg::Waypoints & msg)
+{
+  waypoints_pub_->publish(msg);
+}
+
+rclcpp::Node::SharedPtr WaypointSetTool::createNewNode(const std::string & node_name)
+{
+  std::string node = "__node:=" + node_name;
+  auto options = rclcpp::NodeOptions().arguments({"--ros-args", "--remap", node, "--"});
+  return std::make_shared<rclcpp::Node>("_", options);
+}
 
 }  // namespace ike_nav_rviz_plugins
 
