@@ -54,7 +54,7 @@ jobs:
         rosdep install -i -y --from-path src --rosdistro $ROS_DISTRO
       shell: bash
 
-    - name: Build ROS 2 package
+    - name: Build IKE_NAV
       run: |
         source /opt/ros/$ROS_DISTRO/setup.sh
         cd ~/ros2_ws
