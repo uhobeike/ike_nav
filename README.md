@@ -2,7 +2,7 @@
   <br>
   <img src="https://i.gyazo.com/368ca99e1363425f18462f1aaedf2df0.png" width="600">
   <h1>Simple ROS 2 Navigation Stack with C++ Implementation</h1>
-  <strong>"IKE_NAV" (not IKE IKE NAV) does not imply a superior navigation package</strong>
+  <strong><em>"IKE_NAV"</em>（ not <em>IKE IKE NAV</em> ）does not imply a superior navigation package</strong>
 </div>
 <br>
 <p align="center">
@@ -15,7 +15,7 @@
 </p>
 
 
-## ⚡ Demo *IKE_NAV*
+## ⚡ Quick demo *IKE_NAV*
 
 ```
 docker run -it \
@@ -47,7 +47,7 @@ source install/setup.bash
 
 ## 🧐 Known bug（これから修正予定）
 
-* ウェイポイントをセット時に稀に出力され、ナビゲーションシステムが停止する
+* ウェイポイントをセット時、稀に出力され、ナビゲーションシステムが停止する
 
 ```
 [rviz2-5] [ERROR] [1693991158.604136358] [rviz2]: ItemIdentityException: Material with the name goal_flag_material_0.244069 already exists. in ResourceManager::add at ./.obj-x86_64-linux-gnu/ogre-v1.12.1-prefix/src/ogre-v1.12.1/OgreMain/src/OgreResourceManager.cpp (line 148)
