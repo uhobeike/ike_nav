@@ -30,7 +30,7 @@ jobs:
         cp -rf . ~/ros2_ws/src/ike_nav
       shell: bash
 
-    - name: Cache ROS 2 build
+    - name: Cache IKE_NAV build
       uses: actions/cache@v2
       with:
         path: |
