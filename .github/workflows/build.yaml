@@ -24,12 +24,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Copy repository
-      run: |
-        mkdir -p ~/ros2_ws/src/ike_nav
-        cp -rf . ~/ros2_ws/src/ike_nav
-      shell: bash
-
     - name: Cache IKE_NAV build
       uses: actions/cache@v2
       with:
@@ -37,17 +31,24 @@ jobs:
           ~/ros2_ws/build
           ~/ros2_ws/install
           ~/ros2_ws/log
-        key: ${{ runner.os }}-ros2-${{ hashFiles('**/package.xml', '**/CMakeLists.txt') }}
+          ~/ros2_ws/src
+        key: ${{ runner.os }}-ike_nav-${{ hashFiles('**/package.xml', '**/CMakeLists.txt') }}
         restore-keys: |
-          ${{ runner.os }}-ros2-
+          ${{ runner.os }}-ike_nav-
 
-    - name: Update install apt
+    - name: Sync repository
+      run: |
+        [ ! -d "~/ros2_ws/src/ike_nav" ] && mkdir -p ~/ros2_ws/src/ike_nav
+        rsync -auv --delete . ~/ros2_ws/src/ike_nav
+      shell: bash
+
+    - name: Update and install apt dependencies
       run: |
         sudo apt update -y
         sudo apt install -y
       shell: bash
 
-    - name: Resolve dependent packages
+    - name: Resolve ROS 2 package dependencies
       run: |
         cd ~/ros2_ws
         rosdep update
