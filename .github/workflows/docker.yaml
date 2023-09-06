@@ -39,6 +39,6 @@ jobs:
           context: ${{ env.DOCKER-CONTEXT }}
           file: ${{ env.DOCKER-FILE }}
           tags: ghcr.io/${{ github.repository_owner }}/ike_nav:humble
-          build-args: USERNAME=${{ USER }}
+          build-args: USERNAME=runner
           no-cache: true
           push: true
