@@ -53,7 +53,7 @@ RUN echo "setw -g mouse on" >> $HOME/.tmux.conf && \
     echo "    export PS1='${NO_GIT_PS1}'" >> $HOME/.bashrc && \
     echo "fi" >> $HOME/.bashrc && \
     bash <(curl -s https://raw.githubusercontent.com/uhobeike/ros2_humble_install_script/main/ros2_setting.sh) && \
-    wget -O /tmp/start_tmux.sh https://raw.githubusercontent.com/uhobeike/ike_nav/feat/docker-demo-tmux-auto/.github/start_tmux.sh && chmod +x /tmp/start_tmux.sh
+    wget -O /tmp/start_tmux.sh https://raw.githubusercontent.com/uhobeike/ike_nav/main/.github/start_tmux.sh && chmod +x /tmp/start_tmux.sh
 
 WORKDIR /home/$USERNAME/ike_nav_ws/src/ike_nav
 ENTRYPOINT ["/tmp/start_tmux.sh"]
