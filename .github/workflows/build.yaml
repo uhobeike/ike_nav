@@ -45,7 +45,7 @@ jobs:
     - name: Update and install apt dependencies
       run: |
         sudo apt update -y
-        sudo apt install -y
+        sudo apt install -y rsync
       shell: bash
 
     - name: Resolve ROS 2 package dependencies
