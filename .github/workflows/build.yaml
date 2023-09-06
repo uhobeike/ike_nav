@@ -24,6 +24,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Update and install apt dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y rsync
+      shell: bash
+
     - name: Cache IKE_NAV build
       uses: actions/cache@v2
       with:
@@ -40,12 +46,6 @@ jobs:
       run: |
         [ ! -d "~/ros2_ws/src/ike_nav" ] && mkdir -p ~/ros2_ws/src/ike_nav
         rsync -auv --delete . ~/ros2_ws/src/ike_nav
-      shell: bash
-
-    - name: Update and install apt dependencies
-      run: |
-        sudo apt update -y
-        sudo apt install -y rsync
       shell: bash
 
     - name: Resolve ROS 2 package dependencies
