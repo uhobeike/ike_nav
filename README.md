@@ -16,6 +16,9 @@
 
 [![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
 
+## 📖 Package overview
+C++実装によるシンプルなROS 2ナビゲーションスタック
+
 ## ⚡ Quick demo *IKE_NAV*
 
 ```
