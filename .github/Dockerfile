@@ -18,6 +18,7 @@ RUN apt update && apt upgrade -y && \
     bash-completion \
     git \
     terminator \
+    tmux \
     vim \
     wget \
     ros-$ROS_DISTRO-turtlebot3-gazebo
@@ -42,7 +43,8 @@ RUN mkdir -p $HOME/.gazebo/models && \
     tar xvzf /tmp/sun -C $HOME/.gazebo/models && \
     tar xvzf /tmp/ground_plane -C $HOME/.gazebo/models
 
-RUN echo "export TURTLEBOT3_MODEL=burger" >> $HOME/.bashrc && \
+RUN echo "setw -g mouse on" >> $HOME/.tmux.conf && \
+    echo "export TURTLEBOT3_MODEL=burger" >> $HOME/.bashrc && \
     echo "source /home/$USERNAME/ike_nav_ws/install/setup.bash" >> $HOME/.bashrc && \
     echo "source /etc/bash_completion" >> $HOME/.bashrc && \
     echo "if [ -f /etc/bash_completion.d/git-prompt ]; then" >> $HOME/.bashrc && \
@@ -50,7 +52,8 @@ RUN echo "export TURTLEBOT3_MODEL=burger" >> $HOME/.bashrc && \
     echo "else" >> $HOME/.bashrc && \
     echo "    export PS1='${NO_GIT_PS1}'" >> $HOME/.bashrc && \
     echo "fi" >> $HOME/.bashrc && \
-    bash <(curl -s https://raw.githubusercontent.com/uhobeike/ros2_humble_install_script/main/ros2_setting.sh)
+    bash <(curl -s https://raw.githubusercontent.com/uhobeike/ros2_humble_install_script/main/ros2_setting.sh) && \
+    wget -O /tmp/start_tmux.sh https://raw.githubusercontent.com/uhobeike/ike_nav/feat/docker-demo-tmux-auto/.github/start_tmux.sh && chmod +x /tmp/start_tmux.sh
 
 WORKDIR /home/$USERNAME/ike_nav_ws/src/ike_nav
-CMD ["/bin/bash"]
+ENTRYPOINT ["/tmp/start_tmux.sh"]
