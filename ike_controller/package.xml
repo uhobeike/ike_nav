@@ -9,12 +9,6 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
-  <depend>libgoogle-glog-dev</depend>
-  <depend>libatlas-base-dev</depend>
-  <depend>libeigen3-dev</depend>
-  <depend>libsuitesparse-dev</depend>
-  <depend>libceres-dev</depend>
-
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <exec_depend>ike_localization</exec_depend>

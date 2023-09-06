@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - '**'
+      - '!.clang-format'
+      - '!.gitignore'
+      - '!LICENSE'
+      - '!README.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: osrf/ros:humble-desktop-full
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Update and install apt dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y rsync
+      shell: bash
+
+    - name: Cache IKE_NAV build
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/ros2_ws/build
+          ~/ros2_ws/install
+          ~/ros2_ws/log
+          ~/ros2_ws/src
+        key: ${{ runner.os }}-ike_nav-${{ hashFiles('**/package.xml', '**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-ike_nav-
+
+    - name: Sync repository
+      run: |
+        [ ! -d "~/ros2_ws/src/ike_nav" ] && mkdir -p ~/ros2_ws/src/ike_nav
+        rsync -auv --delete . ~/ros2_ws/src/ike_nav
+      shell: bash
+
+    - name: Resolve ROS 2 package dependencies
+      run: |
+        cd ~/ros2_ws
+        rosdep update
+        rosdep install -i -y --from-path src --rosdistro $ROS_DISTRO
+      shell: bash
+
+    - name: Build IKE_NAV
+      run: |
+        source /opt/ros/$ROS_DISTRO/setup.sh
+        cd ~/ros2_ws
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+      shell: bash
