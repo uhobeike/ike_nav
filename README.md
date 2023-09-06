@@ -14,6 +14,7 @@
   </a>
 </p>
 
+[![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
 
 ## ⚡ Quick demo *IKE_NAV*
 
@@ -28,8 +29,6 @@ docker run -it \
            ghcr.io/uhobeike/ike_nav:humble
 ```
 
-[![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
-
 ## 🔨 Install and Build
 
 ```
@@ -41,16 +40,16 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ```
 
-## ⚖️ License
-*IKE_NAV*は、[LGPL-3.0-or-laterとApache-2.0のライセンス](./LICENSE)で構成されています。  
-詳しくは、各パッケージのpackage.xmlファイルを確認してください。
-
 ## 🧐 Known bug（これから修正予定）
 
-* ウェイポイントをセット時、稀に出力され、ナビゲーションシステムが停止する
+* ウェイポイントをセット時、稀に出力され、ナビゲーションが停止する
 
 ```
 [rviz2-5] [ERROR] [1693991158.604136358] [rviz2]: ItemIdentityException: Material with the name goal_flag_material_0.244069 already exists. in ResourceManager::add at ./.obj-x86_64-linux-gnu/ogre-v1.12.1-prefix/src/ogre-v1.12.1/OgreMain/src/OgreResourceManager.cpp (line 148)
 ```
 
 * たまに自己位置推定が、落ちる（エラーの出力は無い）
+
+## ⚖️ License
+*IKE_NAV*は、[LGPL-3.0-or-laterとApache-2.0のライセンス](./LICENSE)で構成されています。  
+詳しくは、各パッケージのpackage.xmlファイルを確認してください。
