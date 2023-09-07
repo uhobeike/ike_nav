@@ -10,10 +10,6 @@ Model Predictive ControlのROS 2実装です。
 
 ### Input
 
-| **Name（Topic）** | **Type**                                          | **Description**                             | 
-| ------------- | --------------------------------------------- | --------------------------------------- | 
-| `/predictive_horizon`          | `nav_msgs::msg::Path`                  | 予測ホライズン         | 
-
 | **Name（Service）** | **Type**                                          | **Description**                             | 
 | ------------- | --------------------------------------------- | --------------------------------------- | 
 | `/get_twist`          | `ike_nav_msgs::srv::GetTwist`                  | ロボットの姿勢、目標経路を入力         | 
