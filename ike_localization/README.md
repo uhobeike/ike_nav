@@ -43,7 +43,7 @@ Monte Carlo localization[^1]のROS 2実装です。
 | `loop_mcl_hz`         | `double`      | MClの周期              |
 | `publish_particles_scan_match_point`         | `bool`        | 各パーティクルのスキャンと尤度場のマッチポイントの可視化（可視化すると、見応えがあるが非常に重い処理）              |
 
-### Reference
+## Reference
 
 * 動作モデル
   * https://github.com/ros-planning/navigation2/blob/ef4de1527997c3bd813afe0c6296ff65e05700e0/nav2_amcl/src/motion_model/differential_motion_model.cpp#L57-L61
@@ -64,4 +64,4 @@ Monte Carlo localization[^1]のROS 2実装です。
 
 ### Citation
 
-[^1]: Jens-Steffen Gutmann and Dieter Fox: ``An Experimental Comparison of Localization Methods Continued,'' Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.
+[^1]: Jens-Steffen Gutmann and Dieter Fox: ‘‘An Experimental Comparison of Localization Methods Continued,’’ Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.

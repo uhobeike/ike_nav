@@ -38,7 +38,7 @@ Model Predictive ControlのROS 2実装です。
 | `recovery_rotate_velocity`           | `double` | 最適化計算が開始されるまで回転する時の角速度           | 
 | `limit_absolute_rotate_velocity`           | `double` | 設定した以上の角速度は出力されないようにする           | 
 
-### Reference
+## Reference
 
 * [Model Predictive Control: モデル予測制御入門](https://myenigma.hatenablog.com/entry/2016/07/25/214014)
 * [モデル予測制御（MPC）による軌道追従制御](https://qiita.com/taka_horibe/items/47f86e02e2db83b0c570)
