@@ -62,6 +62,6 @@ Monte Carlo localization[^1]のROS 2実装です。
 動作モデルとtf周りで[navigation2/nav2_amcl](https://github.com/ros-planning/navigation2/tree/main/nav2_amcl)
 を参考にした箇所があるため[GPL v3.0](./LICENSE)ライセンスとなっています。
 
-## Citation
+### Citation
 
 [^1]: Jens-Steffen Gutmann and Dieter Fox: ``An Experimental Comparison of Localization Methods Continued,'' Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.
