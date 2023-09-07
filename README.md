@@ -17,7 +17,11 @@
 [![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
 
 ## 📖 Package overview
-C++実装によるシンプルなROS 2ナビゲーションスタック
+*IKE_NAV*は、C++実装によるシンプルなROS 2ナビゲーションスタックです。  
+
+2次元地図（[nav_msgs/OccupancyGrid](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)）と
+2次元センサ情報（[sensor_msgs/LaserScan](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/LaserScan.html)）と
+移動ロボットのオドメトリ情報（[tf2_msgs/TFMessage](http://docs.ros.org/en/jade/api/tf2_msgs/html/msg/TFMessage.html)）を入力し、与えられた目標位置までに到達するための速度（[geometry_msgs/Twist](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)）を出力します。
 
 ## ⚡ Quick demo *IKE_NAV*
 
