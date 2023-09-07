@@ -57,11 +57,11 @@ Monte Carlo localization[^1]のROS 2実装です。
 * 『詳解 確率ロボティクス ― Pythonによる基礎アルゴリズムの実装 ―』講談社〈KS理工学専門書〉、2019年、ISBN 978-406-51-7006-9
 * 『確率ロボティクス』 上田隆一 訳、毎日コミュニケーションズ〈MYCOM ROBOT books〉、2007年、ISBN 9784839924010。（プレミアムブック版 ISBN 978-483-99-5298-3）
 
-### Citation
-
-[^1]: Jens-Steffen Gutmann and Dieter Fox: ``An Experimental Comparison of Localization Methods Continued,'' Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.
-
 ## LICENSE
 
 動作モデルとtf周りで[navigation2/nav2_amcl](https://github.com/ros-planning/navigation2/tree/main/nav2_amcl)
 を参考にした箇所があるため[GPL v3.0](./LICENSE)ライセンスとなっています。
+
+## Citation
+
+[^1]: Jens-Steffen Gutmann and Dieter Fox: ``An Experimental Comparison of Localization Methods Continued,'' Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.
