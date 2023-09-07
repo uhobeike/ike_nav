@@ -1,18 +1,11 @@
 # ike_localization
 
-<div align="center">
-<img src="https://user-images.githubusercontent.com/40545422/218437382-8091b9dc-05bf-4410-8071-5c27bc8c9b97.gif" width="1000">
-</div>
+## Package overview
+Monte Carlo localization[^1]のROS 2実装です。
 
-## Overview
-Monte Carlo localizationのROS 2実装です。
-
-このパッケージには、以下のような**特徴**があります。
-* MCl実装とROS 2実装を分割
-* シンプルなMCl実装（可読性があるかは。。。）
-* 尤度場の可視化
-* 各パーティクルのスキャンと尤度場のマッチポイントの可視化
-* 日本語のコメントアウトが多め（ヘッダーファイルに説明が書かれている）
+2次元地図[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)、
+2次元センサ情報[`sensor_msgs/LaserScan`](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/LaserScan.html)、
+移動ロボットのオドメトリ情報[`tf2_msgs/TFMessage`](http://docs.ros.org/en/jade/api/tf2_msgs/html/msg/TFMessage.html)から、2次元地図上での自己位置[`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)を推定します。
 
 ## Input / Output
 
@@ -29,12 +22,12 @@ Monte Carlo localizationのROS 2実装です。
 | **Name（Topic）**        | **Type**                                 | **Description**                                      | 
 | -------------------- | ------------------------------------ | ------------------------------------------------ | 
 | `/likelihood_map`      | `nav_msgs::msg::OccupancyGrid`         | 尤度場                                           | 
-| `/particle_cloud`      | `nav2_msgs::msg::ParticleCloud`        | パーティクル群                                   | 
-| `/mcl_pose`            | `geometry_msgs::msg::PoseStamped`      | 最尤なパーティクルの姿勢                         | 
+| `/particle_cloud`      | `nav2_msgs::msg::ParticleCloud`        | パーティクル群群                                   | 
+| `/mcl_pose`            | `geometry_msgs::msg::PoseStamped`      |  パーティクル全体の平均姿勢                       | 
 | `/marginal_likelihood` | `std_msgs::msg::Float32`               | 周辺尤度                                         | 
 | `/scan_match_point`    | `visualization_msgs::msg::MarkerArray` | 各パーティクルのスキャンと尤度場のマッチポイント | 
 
-### Parameters
+### [Parameters](../ike_nav_parameters/config/ike_localization_parameter.yaml)
 
 | **Name（Parameter）**   | **Type**        | **Description**            | 
 | ------------------- | ----------- | ---------------------- | 
@@ -50,12 +43,7 @@ Monte Carlo localizationのROS 2実装です。
 | `loop_mcl_hz`         | `double`      | MClの周期              |
 | `publish_particles_scan_match_point`         | `bool`        | 各パーティクルのスキャンと尤度場のマッチポイントの可視化（可視化すると、見応えがあるが非常に重い処理）              |
 
-## LICENSE
-
-動作モデルとtf周りで[navigation2/nav2_amcl](https://github.com/ros-planning/navigation2/tree/main/nav2_amcl)
-を参考にした箇所があるため[GPL v3.0](./LICENSE)ライセンスとなっています。
-
-### 参考箇所
+### Reference
 
 * 動作モデル
   * https://github.com/ros-planning/navigation2/blob/ef4de1527997c3bd813afe0c6296ff65e05700e0/nav2_amcl/src/motion_model/differential_motion_model.cpp#L57-L61
@@ -65,8 +53,15 @@ Monte Carlo localizationのROS 2実装です。
 * マップ座標系からオドメトリ座標系への変換
   * https://github.com/ros-planning/navigation2/blob/ef4de1527997c3bd813afe0c6296ff65e05700e0/nav2_amcl/src/amcl_node.cpp#L975-L1016
 
-## Reference
-
 * [ros-planning/navigation2/nav2_amcl](https://github.com/ros-planning/navigation2/tree/main/nav2_amcl)
 * 『詳解 確率ロボティクス ― Pythonによる基礎アルゴリズムの実装 ―』講談社〈KS理工学専門書〉、2019年、ISBN 978-406-51-7006-9
 * 『確率ロボティクス』 上田隆一 訳、毎日コミュニケーションズ〈MYCOM ROBOT books〉、2007年、ISBN 9784839924010。（プレミアムブック版 ISBN 978-483-99-5298-3）
+
+## LICENSE
+
+動作モデルとtf周りで[navigation2/nav2_amcl](https://github.com/ros-planning/navigation2/tree/main/nav2_amcl)
+を参考にした箇所があるため[GPL v3.0](./LICENSE)ライセンスとなっています。
+
+### Citation
+
+[^1]: Jens-Steffen Gutmann and Dieter Fox: ``An Experimental Comparison of Localization Methods Continued,'' Proc. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp.~454-459, 2002.
