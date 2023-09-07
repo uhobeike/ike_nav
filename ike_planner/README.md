@@ -1,10 +1,9 @@
-# ike_controller
+# ike_planner
 
 ## Package overview
-Model Predictive ControlのROS 2実装です。
+A*[^1]およびDijkstra[^2]のROS 2実装です。
 
-ある経路[`nav_msgs/Path`](http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Path.html)に対して追従する速度[`geometry_msgs/Twist`](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)を、
-差動二輪型ロボットの予測モデルから[Ceres Solver](https://github.com/ceres-solver/ceres-solver)による最適化によって求めます。
+地図上での自己位置から与えられた目標位置までの最短経路を求めます。
 
 ## Input / Output
 
@@ -24,7 +23,7 @@ Model Predictive ControlのROS 2実装です。
 | ------------- | --------------------------------------------- | --------------------------------------- | 
 | `/get_twist`          | `ike_nav_msgs::srv::GetTwist`                  | ロボットの姿勢、目標経路から速度を出力         | 
 
-### [Parameters](../ike_nav_parameters/config/ike_controller_parameter.yaml)
+### [Parameters](../ike_nav_parameters/config/ike_planner_parameter.yaml)
 
 | **Name（Parameter）**   | **Type**        | **Description**            | 
 | ------------------- | ----------- | ---------------------- | 
@@ -40,9 +39,13 @@ Model Predictive ControlのROS 2実装です。
 
 ## Reference
 
-* [Model Predictive Control: モデル予測制御入門](https://myenigma.hatenablog.com/entry/2016/07/25/214014)
-* [モデル予測制御（MPC）による軌道追従制御](https://qiita.com/taka_horibe/items/47f86e02e2db83b0c570)
+* [MATLABよる経路平滑化(Path Smoothing)プログラム](https://myenigma.hatenablog.com/entry/20140510/1399694663)
+* [AtsushiSakai/PythonRobotics PathPlanning/AStar/a_star.py](https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathPlanning/AStar/a_star.py)
 
 ## LICENSE
 
 Apache License, Version 2.0に基づいています。
+
+### Citation
+[^1]: P. E. Hart, N. J. Nilsson and B. Raphael: ‘‘A Formal Basis for the Heuristic Determination of Minimum Cost Paths,’’ in IEEE Transactions on Systems Science and Cybernetics, vol. 4, no. 2, pp. 100-107, July 1968.
+[^2]: E. W. Dijkstra: ‘‘A note on two problems in connexion with graphs,’’ Numer. Math., vol. 1, no. 1, pp. 269–271, Dec 1959.
