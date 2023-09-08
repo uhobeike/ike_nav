@@ -41,7 +41,7 @@
 | ------------------- | ----------- | ---------------------- | 
 | `inflation_layer/inflation_radius`           | `double` | どのくらい障害物の範囲を広げるか           | 
 | `obstacle_layer/inflation_radius`           | `double` | どのくらい障害物の範囲を広げるか           | 
-| `obstacle_layer/obstacle_range`           | `double` | どのくらいの距離を観測した時に動的障害物であると判断するか           | 
+| `obstacle_layer/obstacle_range`           | `double` | どのくらいの距離の障害物を観測した時に動的障害物であると判断するか           | 
 | `publish_costmap_2d_hz`           | `double` |      2次元コストマップのパブリッシュ周期      | 
 
 ## LICENSE
