@@ -1,41 +1,42 @@
 # ike_planner
 
 ## Package overview
-A*[^1]およびDijkstra[^2]のROS 2実装です。
+A*[^1]およびDijkstra[^2]探索のROS 2 C++実装です。
 
-地図上での自己位置から与えられた目標位置までの最短経路を求めます。
+地図上での自己位置から、与えられた目標位置までの最短経路を求めます。
 
 ## Input / Output
 
 ### Input
 
+| **Name（Topic）**        | **Type**                                 | **Description**                                      | 
+| -------------------- | ------------------------------------ | ------------------------------------------------ | 
+| `/costmap_2d`          | `nav_msgs::msg::OccupancyGrid`                  | すべてのレイヤーを統合したコストマップ         | 
+
 | **Name（Service）** | **Type**                                          | **Description**                             | 
 | ------------- | --------------------------------------------- | --------------------------------------- | 
-| `/get_twist`          | `ike_nav_msgs::srv::GetTwist`                  | ロボットの姿勢、目標経路を入力         | 
+| `/get_path`          | `ike_nav_msgs::srv::GetPath`                  | ロボットの姿勢と目標位置を入力         | 
 
 ### Output
 
 | **Name（Topic）**        | **Type**                                 | **Description**                                      | 
 | -------------------- | ------------------------------------ | ------------------------------------------------ | 
-| `/predictive_horizon`          | `nav_msgs::msg::Path`                  | 予測ホライズン         | 
+| `/plan_path`          | `nav_msgs::msg::Path`                  | 求めた最短経路         | 
+| `/planner_searched_map`          | `nav_msgs::msg::OccupancyGrid`                  | 最短経路を求めるのに探索したエリア         | 
 
 | **Name（Service）** | **Type**                                          | **Description**                             | 
 | ------------- | --------------------------------------------- | --------------------------------------- | 
-| `/get_twist`          | `ike_nav_msgs::srv::GetTwist`                  | ロボットの姿勢、目標経路から速度を出力         | 
+| `/get_path`          | `ike_nav_msgs::srv::GetPath`                  | ロボットの姿勢と目標位置間の最短経路を出力         | 
 
 ### [Parameters](../ike_nav_parameters/config/ike_planner_parameter.yaml)
 
 | **Name（Parameter）**   | **Type**        | **Description**            | 
 | ------------------- | ----------- | ---------------------- | 
-| `delta_time`           | `double` | 予測モデルでの経過時間           | 
-| `predictive_horizon_num`           | `int` | 方策の数           | 
-| `lower_bound_linear_velocity`           | `double` | 最低速度           | 
-| `lower_bound_angular_velocity`           | `double` | 最低角速度           | 
-| `upper_bound_linear_velocity`           | `double` | 最大速度           | 
-| `upper_bound_angular_velocity`           | `double` | 最大角速度           | 
-| `max_num_iterations`           | `double` | 最大反復回数           | 
-| `recovery_rotate_velocity`           | `double` | 最適化計算が開始されるまで回転する時の角速度           | 
-| `limit_absolute_rotate_velocity`           | `double` | 設定した以上の角速度は出力されないようにする           | 
+| `use_dijkstra`           | `bool` | Dijkstra法で最短経路を求めるか           | 
+| `publish_searched_map`           | `int` | 探索エリアをパブリッシュするか           | 
+| `update_path_weight`           | `double` | 経路のスムージングのために、データをどれだけ元からずらすかの重み           | 
+| `smooth_path_weight`           | `double` | 経路をどれだけ、スムージングするかの重み           | 
+| `iteration_delta_threshold`           | `double` | 反復の閾値           | 
 
 ## Reference
 

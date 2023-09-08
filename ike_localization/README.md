@@ -1,7 +1,7 @@
 # ike_localization
 
 ## Package overview
-Monte Carlo localization[^1]のROS 2実装です。
+Monte Carlo localization[^1]のROS 2 C++実装です。
 
 2次元地図[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)、
 2次元センサ情報[`sensor_msgs/LaserScan`](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/LaserScan.html)、
