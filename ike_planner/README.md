@@ -1,7 +1,7 @@
 # ike_planner
 
 ## Package overview
-A*[^1]およびDijkstra[^2]探索のROS 2実装です。
+A*[^1]およびDijkstra[^2]探索のROS 2 C++実装です。
 
 地図上での自己位置から、与えられた目標位置までの最短経路を求めます。
 

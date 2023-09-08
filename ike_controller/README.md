@@ -1,7 +1,7 @@
 # ike_controller
 
 ## Package overview
-Model Predictive ControlのROS 2実装です。
+Model Predictive ControlのROS 2 C++実装です。
 
 ある経路[`nav_msgs/Path`](http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Path.html)に対して追従する速度[`geometry_msgs/Twist`](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)を、
 差動二輪型ロボットの予測モデルから[Ceres Solver](https://github.com/ceres-solver/ceres-solver)による最適化によって求めます。
