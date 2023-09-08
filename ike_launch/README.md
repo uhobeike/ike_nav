@@ -1,7 +1,7 @@
 # ike_launch
 
 ## Package overview
-`IKE_NAV`を立ち上げるために必要なファイルをまとめたパッケージです。
+*IKE_NAV*を立ち上げるために必要なファイルをまとめたパッケージです。
 
 ## LICENSE
 
