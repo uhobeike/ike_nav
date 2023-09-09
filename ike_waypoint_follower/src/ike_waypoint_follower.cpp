@@ -17,6 +17,7 @@ IkeWaypointFollower::IkeWaypointFollower(const rclcpp::NodeOptions & options)
 
   initTf();
   initPublisher();
+  initSubscription();
   initServiceServer();
   initActionClient();
   initTimer();
@@ -46,6 +47,28 @@ void IkeWaypointFollower::initPublisher()
 {
   waypoints_pub_ = this->create_publisher<ike_nav_msgs::msg::Waypoints>(
     "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+}
+
+void IkeWaypointFollower::initSubscription()
+{
+  auto waypoints_callback = [&](const ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) {
+    if (!msg->waypoints.size()) {
+      this->loop_timer_->cancel();
+      this->cancelGoal();
+      this->waypoint_id_ = 0;
+    }
+    if (waypoint_id_ >= msg->waypoints.size()) {
+      if (msg->waypoints.size()) {
+        waypoint_id_ = msg->waypoints.size() - 1;
+      } else {
+        waypoint_id_ = 0;
+      }
+    }
+    waypoints_ = *msg;
+  };
+
+  waypoints_sub_ = this->create_subscription<ike_nav_msgs::msg::Waypoints>(
+    "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable(), waypoints_callback);
 }
 
 void IkeWaypointFollower::initServiceServer()
@@ -239,6 +262,12 @@ void IkeWaypointFollower::cancelGoal()
 void IkeWaypointFollower::loop()
 {
   RCLCPP_INFO(get_logger(), "Run IkeWaypointFollower::loop");
+
+  if (!waypoints_.waypoints.size()) {
+    this->loop_timer_->cancel();
+    this->cancelGoal();
+    this->waypoint_id_ = 0;
+  }
 
   getMapFrameRobotPose(robot_pose_);
   if (get_robot_pose_) {

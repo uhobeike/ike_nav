@@ -8,8 +8,8 @@
 #include <rviz_common/panel.hpp>
 
 #include "ike_nav_msgs/action/navigate_to_goal.hpp"
+#include "ike_nav_msgs/srv/get_waypoints_msg.hpp"
 #include "ike_nav_msgs/srv/load_waypoint_yaml.hpp"
-#include <ike_nav_msgs/srv/get_waypoints_msg.hpp>
 #include <std_srvs/srv/trigger.hpp>
 
 using NavigateToGoal = ike_nav_msgs::action::NavigateToGoal;
