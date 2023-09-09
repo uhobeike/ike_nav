@@ -3,8 +3,7 @@
 ## Package overview
 2次元マップサーバー（地図の管理）のROS 2 C++実装です。
 
-2次元地図（PGM形式画像）から
-ROS 2のメッセージで表現した2次元地図[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)を出力します。
+2次元地図（PGM形式画像）からROS 2のメッセージで表現した2次元地図[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)を出力します。
 
 ## Input / Output
 
