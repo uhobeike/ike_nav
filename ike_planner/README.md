@@ -3,7 +3,10 @@
 ## Package overview
 A*[^1]およびDijkstra[^2]探索のROS 2 C++実装です。
 
-地図上での自己位置から、与えられた目標位置までの最短経路を求めます。
+地図上[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)での
+自己位置[`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)から、
+与えられた目標位置[`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)までの
+最短経路[`nav_msgs/Path`](http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Path.html)を求めます。
 
 ## Input / Output
 
