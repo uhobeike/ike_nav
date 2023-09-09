@@ -28,6 +28,7 @@ WaypointSetTool::WaypointSetTool()
   getParam();
 
   initPublisher();
+  initSubscription();
   initServiceServer();
 
   timer_id_ = startTimer(100);
@@ -50,6 +51,17 @@ void WaypointSetTool::initPublisher()
     "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
+void WaypointSetTool::initSubscription()
+{
+  auto waypoints_callback = [&](const ike_nav_msgs::msg::Waypoints::ConstSharedPtr msg) {
+    waypoints_ = *msg;
+    get_waypoints_ = true;
+  };
+
+  waypoints_sub_ = client_node_->create_subscription<ike_nav_msgs::msg::Waypoints>(
+    "waypoints", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable(), waypoints_callback);
+}
+
 void WaypointSetTool::initServiceServer()
 {
   auto delete_waypoint =
@@ -59,11 +71,16 @@ void WaypointSetTool::initServiceServer()
       std::shared_ptr<std_srvs::srv::Trigger_Response> response) -> void {
     (void)request_header;
 
-    if (waypoint_id_cnt_ > 1 && waypoints_position_.size()) {
+    if (!get_waypoints_ && waypoint_id_cnt_ > 1 && waypoints_position_.size()) {
       waypoint_id_cnt_ -= 1;
       waypoints_position_.pop_back();
+      makeWaypoints();
     }
-    makeWaypoints();
+
+    if (get_waypoints_ && waypoints_.waypoints.size()) {
+      waypoints_.waypoints.pop_back();
+      publishWaypoints(waypoints_);
+    }
 
     response->success = true;
     response->message = "Called /delete_waypoint. Send goal done.";
@@ -80,7 +97,8 @@ void WaypointSetTool::initServiceServer()
 
     waypoint_id_cnt_ = 1;
     waypoints_position_.clear();
-    makeWaypoints();
+    waypoints_.waypoints.clear();
+    publishWaypoints(waypoints_);
 
     response->success = true;
     response->message = "Called /delete_all_waypoints. Send goal done.";
@@ -179,7 +197,12 @@ void WaypointSetTool::moveWaypoint(const Ogre::Vector3 & position)
   visual_->setWaypointFlagPosition(waypoint_flag_position);
   visual_->setWaypointTextPosition(waypoint_text_position);
   visual_->setWaypointAreaScale(waypoint_area_scale);
-  visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint_id_cnt_)));
+  if (get_waypoints_) {
+    auto waypoint_id_cnt = waypoints_.waypoints.back().id;
+    visual_->setWaypointTextCaption(Ogre::String(std::to_string(++waypoint_id_cnt)));
+  } else {
+    visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint_id_cnt_)));
+  }
   visual_->setWaypointTextHeight(0.3);
 
   Ogre::Quaternion waypoint_area_orientation =
@@ -245,6 +268,16 @@ bool WaypointSetTool::getWaypointsProperty(const rviz_common::DisplayGroup * dis
 void WaypointSetTool::makeWaypoints()
 {
   auto waypoints_msg = createWaypointsMsg();
+  if (get_waypoints_ && waypoints_.waypoints.size()) {
+    waypoints_msg.waypoints.back().id = waypoints_.waypoints.back().id + 1;
+    waypoints_.waypoints.push_back(waypoints_msg.waypoints.back());
+    waypoints_msg = waypoints_;
+  } else if (get_waypoints_ && !waypoints_.waypoints.size()) {
+    waypoints_msg.waypoints.back().id = 1;
+    waypoints_.waypoints.push_back(waypoints_msg.waypoints.back());
+    waypoints_msg = waypoints_;
+  }
+
   publishWaypoints(waypoints_msg);
 }
 

@@ -13,8 +13,8 @@
 #include <rviz_common/tool.hpp>
 #include <rviz_rendering/objects/movable_text.hpp>
 
-#include <ike_nav_msgs/msg/waypoints.hpp>
-#include <ike_nav_msgs/srv/get_waypoints_msg.hpp>
+#include "ike_nav_msgs/msg/waypoints.hpp"
+#include "ike_nav_msgs/srv/get_waypoints_msg.hpp"
 #include <std_srvs/srv/trigger.hpp>
 
 #include <Ogre.h>
@@ -49,6 +49,7 @@ public:
 protected:
   void getParam();
   void initPublisher();
+  void initSubscription();
   void initServiceServer();
 
   void onInitialize() override;
@@ -74,6 +75,7 @@ private:
 
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
+  rclcpp::Subscription<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_sub_;
 
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_waypoint_service_server_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_all_waypoints_service_server_;
@@ -105,6 +107,9 @@ private:
 
   std::deque<Ogre::Vector2> waypoints_position_;
   double waypoint_radius_;
+
+  ike_nav_msgs::msg::Waypoints waypoints_;
+  bool get_waypoints_;
 
   int timer_id_;
 };
