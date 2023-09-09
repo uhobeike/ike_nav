@@ -1,11 +1,9 @@
 # ike_nav_server
 
 ## Package overview
-navigation server（ロボットの目標地点到達の管理）のROS 2 C++実装です。
+navigation server（ロボットの目標地点到達までの管理）のROS 2 C++実装です。
 
-目標位置[`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)が与えられると、
-経路計画と経路追従を開始し、速度[`geometry_msgs/Twist`](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)を
-出力します。
+目標位置[`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)が与えられると、経路計画と経路追従を開始し、速度[`geometry_msgs/Twist`](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)を出力します。
 
 ## Input / Output
 
