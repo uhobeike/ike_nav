@@ -13,7 +13,7 @@ navigation server（ロボットの目標地点到達までの管理）のROS 2 
 | ------------- | --------------------------------------------- | --------------------------------------- | 
 | `/goal_pose`          | `geometry_msgs::msg::PoseStamped`                  | 目標位置         |
 
-| **Name（Server）** | **Type**                                          | **Description**                             | 
+| **Name（Service）** | **Type**                                          | **Description**                             | 
 | ------------- | --------------------------------------------- | --------------------------------------- | 
 | `/get_path`          | `ike_nav_msgs::srv::GetPath`                  | 経路         | 
 | `/get_twist`          | `ike_nav_msgs::srv::GetTwist`                  | 速度         | 
