@@ -13,8 +13,8 @@ waypoint follower（複数の目標位置の管理）のROS 2 C++実装です。
 | ------------- | --------------------------------------------- | --------------------------------------- | 
 | `/load_waypoint_yaml`          | `ike_nav_msgs::srv::LoadWaypointYaml`                  | ウェイポイントの読み込み         |
 | `/start_waypoint_follower`          | `std_srvs::srv::Trigger`                  |   waypoint followerの開始       | 
-| `/stop_waypoint_follower`          | `std_srvs::srv::Trigger`                  | waypoint followerの停止（再開すると停止前の通過点から開始）       |
-| `/cancel_waypoint_follower`          | `std_srvs::srv::Trigger`                  | waypoint followerの終了（再開すると最初の通過点から開始）         |
+| `/stop_waypoint_follower`          | `std_srvs::srv::Trigger`                  | waypoint followerの停止（再開すると停止前の目標位置から開始）       |
+| `/cancel_waypoint_follower`          | `std_srvs::srv::Trigger`                  | waypoint followerの終了（再開すると最初の目標位置から開始）         |
 
 ### Output
 
