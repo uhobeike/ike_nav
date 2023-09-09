@@ -198,10 +198,16 @@ void WaypointSetTool::moveWaypoint(const Ogre::Vector3 & position)
   visual_->setWaypointTextPosition(waypoint_text_position);
   visual_->setWaypointAreaScale(waypoint_area_scale);
   if (get_waypoints_) {
-    auto waypoint_id_cnt = waypoints_.waypoints.back().id;
-    visual_->setWaypointTextCaption(Ogre::String(std::to_string(++waypoint_id_cnt)));
+    if (waypoints_.waypoints.size()) {
+      auto waypoint_id_cnt = waypoints_.waypoints.back().id;
+      visual_->setWaypointTextCaption(Ogre::String(std::to_string(++waypoint_id_cnt)));
+    } else {
+      visual_->setWaypointTextCaption(Ogre::String("1"));
+    }
   } else {
-    visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint_id_cnt_)));
+    if (waypoints_.waypoints.size()) {
+      visual_->setWaypointTextCaption(Ogre::String(std::to_string(waypoint_id_cnt_)));
+    }
   }
   visual_->setWaypointTextHeight(0.3);
 

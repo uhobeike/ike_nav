@@ -33,6 +33,7 @@ protected:
 
   void initTf();
   void initPublisher();
+  void initSubscription();
   void initServiceServer();
   void initActionClient();
   void initTimer();
@@ -49,6 +50,7 @@ protected:
 private:
   // clang-format off
   rclcpp::Publisher<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_pub_;
+  rclcpp::Subscription<ike_nav_msgs::msg::Waypoints>::SharedPtr waypoints_sub_;
   rclcpp::Service<ike_nav_msgs::srv::LoadWaypointYaml>::SharedPtr load_waypoint_yaml_service_server_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_service_server_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_service_server_;
