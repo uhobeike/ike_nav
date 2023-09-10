@@ -52,21 +52,33 @@ void IkeNavPanel::initSubscription()
   navigation_feedback_sub_ =
     client_node_->create_subscription<NavigateToGoal::Impl::FeedbackMessage>(
       "navigate_to_goal/_action/feedback", 1,
-      [this](const NavigateToGoal::Impl::FeedbackMessage msg) {
+      [this](const NavigateToGoal::Impl::FeedbackMessage::ConstSharedPtr msg) {
         this->ui_->waypoint_id_value_label->setText(
-          std::to_string(msg.feedback.waypoint_id).c_str());
-        std::string distance_remaining = std::to_string(msg.feedback.distance_remaining) + " [m]";
+          std::to_string(msg->feedback.waypoint_id).c_str());
+        std::string distance_remaining = std::to_string(msg->feedback.distance_remaining) + " [m]";
         this->ui_->distance_remaining_value_label->setText(distance_remaining.c_str());
 
-        if (msg.feedback.navigation_status == 0) {
+        if (msg->feedback.navigation_status == 0) {
           this->ui_->navigation_status_value_label->setText("Planning");
           QPalette palette = this->ui_->navigation_status_value_label->palette();
           palette.setColor(QPalette::WindowText, Qt::blue);
           this->ui_->navigation_status_value_label->setPalette(palette);
-        } else if (msg.feedback.navigation_status == 1) {
+        } else if (msg->feedback.navigation_status == 1) {
           this->ui_->navigation_status_value_label->setText("Goal Reached");
           QPalette palette = this->ui_->navigation_status_value_label->palette();
           palette.setColor(QPalette::WindowText, Qt::green);
+          this->ui_->navigation_status_value_label->setPalette(palette);
+        }
+      });
+
+  navigation_cancel_sub_ =
+    client_node_->create_subscription<NavigateToGoal::Impl::GoalStatusMessage>(
+      "navigate_to_goal/_action/status", 1,
+      [this](const NavigateToGoal::Impl::GoalStatusMessage::ConstSharedPtr msg) {
+        if (msg->status_list.back().status == 5) {
+          this->ui_->navigation_status_value_label->setText("Cancel");
+          QPalette palette = this->ui_->navigation_status_value_label->palette();
+          palette.setColor(QPalette::WindowText, Qt::red);
           this->ui_->navigation_status_value_label->setPalette(palette);
         }
       });
