@@ -7,17 +7,19 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**/.clang-format'
-      - '**/.gitignore'
-      - '**/LICENSE'
-      - '**/README.md'
+    paths:
+      - '**'
+      - '!**.clang-format'
+      - '!**.gitignore'
+      - '!**LICENSE'
+      - '!**README.md'
   pull_request:
-    paths-ignore:
-      - '**/.clang-format'
-      - '**/.gitignore'
-      - '**/LICENSE'
-      - '**/README.md'
+    paths:
+      - '**'
+      - '!**.clang-format'
+      - '!**.gitignore'
+      - '!**LICENSE'
+      - '!**README.md'
 
 jobs:
   build:
