@@ -25,6 +25,8 @@ IkeNavPanel::IkeNavPanel(QWidget * parent)
 {
   ui_->setupUi(this);
   addLogo();
+  ui_->stop->setEnabled(false);
+  ui_->cancel->setEnabled(false);
 
   initSubscription();
   initServiceClient();
@@ -251,6 +253,7 @@ void IkeNavPanel::onStopButtonClicked()
 void IkeNavPanel::onCancelButtonClicked()
 {
   ui_->cancel->setEnabled(false);
+  ui_->stop->setEnabled(false);
 
   using namespace std::chrono_literals;
 
@@ -303,6 +306,8 @@ void IkeNavPanel::onDeleteWaypointButtonClicked()
 void IkeNavPanel::onDeleteAllWaypointsButtonClicked()
 {
   ui_->delete_all_waypoints->setEnabled(false);
+  ui_->stop->setEnabled(false);
+  ui_->cancel->setEnabled(false);
 
   using namespace std::chrono_literals;
 
@@ -323,6 +328,7 @@ void IkeNavPanel::onDeleteAllWaypointsButtonClicked()
   auto future_result =
     delete_all_waypoints_client_->async_send_request(request, response_received_callback);
 
+  ui_->start->setEnabled(true);
   ui_->delete_all_waypoints->setEnabled(true);
 }
 
