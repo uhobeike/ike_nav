@@ -54,6 +54,7 @@ private:
 
   rclcpp::Node::SharedPtr client_node_;
   rclcpp::Subscription<NavigateToGoal::Impl::FeedbackMessage>::SharedPtr navigation_feedback_sub_;
+  rclcpp::Subscription<NavigateToGoal::Impl::GoalStatusMessage>::SharedPtr navigation_cancel_sub_;
   rclcpp::Client<ike_nav_msgs::srv::LoadWaypointYaml>::SharedPtr load_waypoint_yaml_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_waypoint_follower_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_waypoint_follower_client_;
