@@ -113,8 +113,12 @@ void WaypointSetTool::initServiceServer()
       std::shared_ptr<ike_nav_msgs::srv::GetWaypointsMsg_Response> response) -> void {
     (void)request_header;
 
-    auto waypoints_msg = createWaypointsMsg();
-    response->waypoints = waypoints_msg;
+    if (get_waypoints_) {
+      response->waypoints = waypoints_;
+    } else {
+      auto waypoints_msg = createWaypointsMsg();
+      response->waypoints = waypoints_msg;
+    }
 
     response->success = true;
   };
