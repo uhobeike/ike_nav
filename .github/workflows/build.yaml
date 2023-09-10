@@ -12,14 +12,14 @@ on:
       - '!**.clang-format'
       - '!**.gitignore'
       - '!**LICENSE'
-      - '!**README.md'
+      - '!**.md'
   pull_request:
     paths:
       - '**'
       - '!**.clang-format'
       - '!**.gitignore'
       - '!**LICENSE'
-      - '!**README.md'
+      - '!**.md'
 
 jobs:
   build:
