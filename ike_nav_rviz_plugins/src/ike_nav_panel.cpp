@@ -130,7 +130,7 @@ void IkeNavPanel::onWaypointLoadButtonClicked()
   std::string waypoint_yaml_path =
     ament_index_cpp::get_package_share_directory("ike_launch") + "/config";
   QString path = QFileDialog::getOpenFileName(
-    this, tr("Open Waypoint Yaml"), waypoint_yaml_path.c_str(), tr("Yaml Files (*.yaml)"));
+    this, tr("Load Waypoint Yaml"), waypoint_yaml_path.c_str(), tr("Yaml Files (*.yaml)"));
 
   if (!path.toStdString().empty()) {
     using namespace std::chrono_literals;
