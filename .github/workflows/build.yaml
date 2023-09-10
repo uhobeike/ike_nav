@@ -8,16 +8,16 @@ on:
     branches:
       - main
     paths-ignore:
-      - '.clang-format'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
+      - '**/.clang-format'
+      - '**/.gitignore'
+      - '**/LICENSE'
+      - '**/*.md'
   pull_request:
     paths-ignore:
-      - '.clang-format'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
+      - '**/.clang-format'
+      - '**/.gitignore'
+      - '**/LICENSE'
+      - '**/*.md'
 
 jobs:
   build:
