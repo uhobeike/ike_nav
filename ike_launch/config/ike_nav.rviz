@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
   - Class: ike_nav_rviz_plugins/IkeNavPanel
     Name: IkeNavPanel
 Visualization Manager:
@@ -155,44 +155,13 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: true
-            base_footprint:
-              Value: true
-            base_link:
-              Value: true
-            base_scan:
-              Value: true
-            caster_back_link:
-              Value: true
-            imu_link:
-              Value: true
-            map:
-              Value: true
-            odom:
-              Value: true
-            wheel_left_link:
-              Value: true
-            wheel_right_link:
-              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: false
           Tree:
-            map:
-              odom:
-                base_footprint:
-                  base_link:
-                    base_scan:
-                      {}
-                    caster_back_link:
-                      {}
-                    imu_link:
-                      {}
-                    wheel_left_link:
-                      {}
-                    wheel_right_link:
-                      {}
+            {}
           Update Interval: 0
           Value: true
         - Class: rviz_default_plugins/MarkerArray
