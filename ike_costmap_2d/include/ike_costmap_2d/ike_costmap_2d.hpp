@@ -49,7 +49,6 @@ protected:
   std::vector<std::pair<uint32_t, uint32_t>> calculateHitPoint(
     sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose);
   geometry_msgs::msg::PoseStamped getMapFrameRobotPose();
-  inline double getRadian(double degree) { return degree * M_PI / 180; }
 
   nav_msgs::msg::OccupancyGrid getMap();
 

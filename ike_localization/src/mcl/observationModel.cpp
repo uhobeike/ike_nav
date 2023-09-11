@@ -76,16 +76,14 @@ double ObservationModel::calculateParticleWeight(const Particle p)
 
   std::vector<double> hit_xy;
   double particle_weight = 0.;
-  double scan_angle_increment = scan_.angle_increment;
+  double scan_angle_increment = 0.;
   for (auto scan_range : scan_.ranges) {
-    ++scan_angle_increment;
+    scan_angle_increment += scan_.angle_increment;
     if (scan_range == INFINITY || scan_range == NAN) continue;
 
     hit_xy.clear();
-    hit_xy.push_back(
-      p.pose.position.x + scan_range * cos(p.pose.euler.yaw + getRadian(scan_angle_increment)));
-    hit_xy.push_back(
-      p.pose.position.y + scan_range * sin(p.pose.euler.yaw + getRadian(scan_angle_increment)));
+    hit_xy.push_back(p.pose.position.x + scan_range * cos(p.pose.euler.yaw + scan_angle_increment));
+    hit_xy.push_back(p.pose.position.y + scan_range * sin(p.pose.euler.yaw + scan_angle_increment));
     particles_scan_match_point_.push_back(hit_xy);
     particle_weight += getProbFromLikelihoodMap(hit_xy.at(0), hit_xy.at(1));
   }

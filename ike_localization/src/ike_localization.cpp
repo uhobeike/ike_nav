@@ -403,7 +403,7 @@ void IkeLocalization::loopMcl()
         getCurrentRobotPose(current_pose_);
         past_pose_ = current_pose_;
       }
-      if (map_receive_ && !init_mcl_) initMcl();
+      if (map_receive_ && scan_receive_ && !init_mcl_) initMcl();
       if (not scan_receive_)
         RCLCPP_WARN(get_logger(), "Not yet received scan. Therefore, MCL cannot be initiated.");
       if (not map_receive_)
