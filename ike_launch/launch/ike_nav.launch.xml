@@ -12,27 +12,31 @@
 
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_costmap_2d" namespace="" args="">
     <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
-      <extra_arg name="use_intra_process_comms" value="false"/>
+      <param name="inflation_layer/inflation_radius"  value="10."/>
+      <param name="obstacle_layer/inflation_radius"   value="10."/>
+      <param name="obstacle_layer/obstacle_range"     value="3."/>
+      <param name="publish_costmap_2d_hz"             value="2."/>
+      <extra_arg name="use_intra_process_comms"       value="false"/>
     </composable_node>
   </node_container>
   
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
     <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
-      <param name="loop_mcl_hz"                         value="10.0"/>
+      <param name="loop_mcl_hz"                         value="10."/>
       <param name="particle_size"                       value="500"/>
-      <param name="initial_pose_x"                      value="8.0"/>
+      <param name="initial_pose_x"                      value="8."/>
       <param name="initial_pose_y"                      value="9.5"/>
       <param name="initial_pose_a"                      value="0.3"/>
       <param name="map_frame"                           value="map"/>
       <param name="odom_frame"                          value="odom"/>
       <param name="robot_frame"                         value="base_footprint"/>
-      <param name="alpha_trans_trans"                   value="1.0"/>
+      <param name="alpha_trans_trans"                   value="1."/>
       <param name="alpha_trans_rotate"                  value="0.2"/>
       <param name="alpha_rotate_trans"                  value="0.2"/>
       <param name="alpha_rotate_rotate"                 value="0.02"/>
-      <param name="likelihood_dist"                     value="10.0"/>
+      <param name="likelihood_dist"                     value="10."/>
       <param name="publish_particles_scan_match_point"  value="false"/>
-      <extra_arg name="use_intra_process_comms" value="false"/>
+      <extra_arg name="use_intra_process_comms"         value="false"/>
     </composable_node>
 
     <composable_node pkg="ike_planner" plugin="ike_nav::IkePlanner" name="ike_planner" namespace="">
@@ -45,18 +49,31 @@
     </composable_node>
 
     <composable_node pkg="ike_controller" plugin="ike_nav::IkeController" name="ike_controller" namespace="">
-      <extra_arg name="use_intra_process_comms" value="false"/>
+      <param name="mpc/delta_time"                      value="0.7"/>
+      <param name="mpc/predictive_horizon_num"          value="10"/>
+      <param name="mpc/lower_bound_linear_velocity"     value="0."/>
+      <param name="mpc/lower_bound_angular_velocity"    value="-3.14159265358979323846"/>
+      <param name="mpc/upper_bound_linear_velocity"     value="0.1"/>
+      <param name="mpc/upper_bound_angular_velocity"    value="3.14159265358979323846"/>
+      <param name="mpc/max_num_iterations"              value="100"/>
+      <param name="mpc/recovery_rotate_velocity"        value="0.3"/>
+      <param name="mpc/limit_absolute_rotate_velocity"  value="1.0"/>
+      <extra_arg name="use_intra_process_comms"         value="false"/>
     </composable_node>
 
     <composable_node pkg="ike_nav_server" plugin="ike_nav::IkeNavServer" name="ike_nav_server" namespace="">
-      <extra_arg name="use_intra_process_comms" value="false"/>
+      <param name="ike_nav_server_loop_hz"        value="10."/>
+      <param name="goal_tolerance_xy"             value="0.2"/>
+      <param name="publish_stop_velocity_hz"      value="10."/>
+      <extra_arg name="use_intra_process_comms"   value="false"/>
     </composable_node>
   </node_container>
 
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav_waypoint_follower" namespace="" args="">
     <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
-      <param name="waypoint_yaml_path"          value="$(var waypoint_yaml)"/>
-      <extra_arg name="use_intra_process_comms" value="false"/>
+      <param name="waypoint_yaml_path"            value="$(var waypoint_yaml)"/>
+      <param name="waypoint_radius"               value="0.5"/>
+      <extra_arg name="use_intra_process_comms"   value="false"/>
     </composable_node>
   </node_container>
 
