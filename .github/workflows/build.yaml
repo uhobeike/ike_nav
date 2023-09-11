@@ -12,12 +12,14 @@ on:
       - '**/.gitignore'
       - '**/LICENSE'
       - '**/*.md'
+      - '**/*.drawio'
   pull_request:
     paths-ignore:
       - '**/.clang-format'
       - '**/.gitignore'
       - '**/LICENSE'
       - '**/*.md'
+      - '**/*.drawio'
 
 jobs:
   build:
