@@ -35,8 +35,7 @@ RUN cd /home/$USERNAME/ike_nav_ws/ && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release && \
     : "remove cache" && \
     sudo apt-get autoremove -y -qq && \
-    sudo rm -rf /var/lib/apt/lists/* && \
-    rm -rf build log
+    sudo rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p $HOME/.gazebo/models && \
     wget -O /tmp/sun http://models.gazebosim.org/sun/model.tar.gz && \
