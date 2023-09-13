@@ -59,6 +59,10 @@ source install/setup.bash
 
 * たまに自己位置推定が、落ちる（エラーの出力は無い）
 
+## 👨‍💻🔥 ToDo（現在、対応中）
+* 実機で使用できるようにする
+* 大きな地図でもサクサク動くようにする
+
 ## ⚖️ License
 *IKE_NAV*は、[LGPL-3.0-or-laterとApache-2.0のライセンス](./LICENSE)で構成されています。  
 詳しくは、各パッケージのpackage.xmlファイルを確認してください。
