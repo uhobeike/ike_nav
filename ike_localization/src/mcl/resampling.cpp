@@ -13,13 +13,13 @@ Resampling::~Resampling(){};
 
 void Resampling::resampling(std::vector<Particle> & particles)
 {
-  std::cout << "Run Resampling::resampling."
+  std::cerr << "Run Resampling::resampling."
             << "\n";
 
   normalize(particles);
   systematicSampling(particles);
 
-  std::cout << "Done Resampling::resampling."
+  std::cerr << "Done Resampling::resampling."
             << "\n";
 }
 

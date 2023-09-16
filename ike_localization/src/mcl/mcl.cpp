@@ -13,7 +13,7 @@ Mcl::Mcl(
   float scan_angle_min, float scan_angle_max, float scan_angle_increment, float scan_range_min,
   float scan_range_max)
 {
-  std::cout << "Run Mcl::Mcl."
+  std::cerr << "Run Mcl::Mcl."
             << "\n";
 
   initParticles(ini_pose_x, ini_pose_y, ini_pose_yaw, particle_size);
@@ -29,7 +29,7 @@ Mcl::Mcl(
     scan_range_min, scan_range_max);
 
   resampling_ = std::make_shared<Resampling>(particle_size);
-  std::cout << "Done Mcl::Mcl."
+  std::cerr << "Done Mcl::Mcl."
             << "\n";
 }
 
@@ -38,7 +38,7 @@ Mcl::~Mcl() { release_pointers(); }
 void Mcl::initParticles(
   double ini_pose_x, double ini_pose_y, double ini_pose_yaw, int particle_size)
 {
-  std::cout << "Run Mcl::initParticles."
+  std::cerr << "Run Mcl::initParticles."
             << "\n";
 
   Particle p;
@@ -54,7 +54,7 @@ void Mcl::initParticles(
     particles_[i].weight = 1. / particle_size;
   }
 
-  std::cout << "Done Mcl::initParticles."
+  std::cerr << "Done Mcl::initParticles."
             << "\n";
 }
 

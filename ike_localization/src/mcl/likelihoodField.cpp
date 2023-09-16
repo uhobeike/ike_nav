@@ -18,20 +18,20 @@ LikelihoodField::LikelihoodField(
   origin_y_(origin_y),
   data_(data.begin(), data.end())
 {
-  std::cout << "Create LikelihoodField."
+  std::cerr << "Create LikelihoodField."
             << "\n";
 
   createLikelihoodField();
 
-  std::cout << "Done Create LikelihoodField."
+  std::cerr << "Done Create LikelihoodField."
             << "\n";
 };
 LikelihoodField::~LikelihoodField(){};
 
 void LikelihoodField::createLikelihoodField()
 {
-  for (uint32_t y = 0; y < width_; y++)
-    for (uint32_t x = 0; x < height_; x++)
+  for (uint32_t y = 0; y < height_; y++)
+    for (uint32_t x = 0; x < width_; x++)
       if (data_[width_ * (height_ - y - 1) + x] == 100) {
         calculateLikelihood(x, y);
       }
@@ -51,17 +51,28 @@ void LikelihoodField::calculateLikelihood(uint32_t map_x, uint32_t map_y)
   sub_map_x_end = map_x + likelihood_dist_;
   sub_map_y_end = map_y + likelihood_dist_;
 
-  for (auto y = sub_map_y_start - likelihood_dist_; y < sub_map_y_end; y++)
-    for (auto x = sub_map_x_start - likelihood_dist_; x < sub_map_x_end; x++)
-      if (hypot(x - map_x, y - map_y) < likelihood_dist_)
+  for (auto y = sub_map_y_start - likelihood_dist_; y < sub_map_y_end; y++) {
+    for (auto x = sub_map_x_start - likelihood_dist_; x < sub_map_x_end; x++) {
+      if (hypot(x - map_x, y - map_y) < likelihood_dist_) {
+        try {
+          data_.at(width_ * (height_ - y - 1) + x);
+        } catch (const std::out_of_range & e) {
+          std::cerr << "Index out of range: " << e.what() << std::endl;
+          continue;
+        }
+
         if (
           normalizePdf(
             calculateProb(0, likelihood_dist_),
             calculateProb(hypot(x - map_x, y - map_y), likelihood_dist_)) >
-          data_[width_ * (height_ - y - 1) + x])
-          data_[width_ * (height_ - y - 1) + x] = normalizePdf(
+          data_.at(width_ * (height_ - y - 1) + x)) {
+          data_.at(width_ * (height_ - y - 1) + x) = normalizePdf(
             calculateProb(0, likelihood_dist_),
             calculateProb(hypot(x - map_x, y - map_y), likelihood_dist_));
+        }
+      }
+    }
+  }
 };
 
 double LikelihoodField::calculateProb(double stochastic_variable, double likelihood_dist)

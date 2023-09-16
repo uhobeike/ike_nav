@@ -17,7 +17,7 @@ MotionModel::MotionModel(
   alpha_rotate_rotate_(alpha_rotate_rotate),
   engine_(seed_gen_())
 {
-  std::cout << "Done MotionModel::MotionModel."
+  std::cerr << "Done MotionModel::MotionModel."
             << "\n";
 };
 MotionModel::~MotionModel(){};
@@ -27,7 +27,7 @@ void MotionModel::update(
   std::vector<Particle> & particles, double current_pose_yaw, double delta_x, double delta_y,
   double delta_yaw)
 {
-  std::cout << "Run MotionModel::update."
+  std::cerr << "Run MotionModel::update."
             << "\n";
 
   double delta_rotate_1, delta_rotate_2, delta_trans;
@@ -68,7 +68,7 @@ void MotionModel::update(
     p.pose.euler.yaw = normalizeAngle(p.pose.euler.yaw) + delta_rotate_1_hat + delta_rotate_2_hat;
   }
 
-  std::cout << "Done MotionModel::update."
+  std::cerr << "Done MotionModel::update."
             << "\n";
 }
 
