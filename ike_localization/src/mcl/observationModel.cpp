@@ -10,12 +10,12 @@ ObservationModel::ObservationModel(
   float angle_increment, float range_min, float range_max)
 : likelihood_field_(std::move(likelihood_field)), marginal_likelihood_(0.)
 {
-  std::cout << "Run ObservationModel::ObservationModel."
+  std::cerr << "Run ObservationModel::ObservationModel."
             << "\n";
 
   initScan(angle_min, angle_max, angle_increment, range_min, range_max);
 
-  std::cout << "Done ObservationModel::ObservationModel."
+  std::cerr << "Done ObservationModel::ObservationModel."
             << "\n";
 };
 ObservationModel::~ObservationModel(){};
@@ -23,7 +23,7 @@ ObservationModel::~ObservationModel(){};
 void ObservationModel::initScan(
   float angle_min, float angle_max, float angle_increment, float range_min, float range_max)
 {
-  std::cout << "Run ObservationModel::initScan."
+  std::cerr << "Run ObservationModel::initScan."
             << "\n";
 
   scan_.angle_min = angle_min;
@@ -32,25 +32,25 @@ void ObservationModel::initScan(
   scan_.range_min = range_min;
   scan_.range_max = range_max;
 
-  std::cout << "Done ObservationModel::initScan."
+  std::cerr << "Done ObservationModel::initScan."
             << "\n";
 }
 
 void ObservationModel::setScan(std::vector<float> & scan_data)
 {
-  std::cout << "Run ObservationModel::setScan."
+  std::cerr << "Run ObservationModel::setScan."
             << "\n";
 
   scan_.ranges.resize(scan_data.size());
   std::copy(std::begin(scan_data), std::end(scan_data), std::begin(scan_.ranges));
 
-  std::cout << "Done ObservationModel::setScan."
+  std::cerr << "Done ObservationModel::setScan."
             << "\n";
 }
 
 void ObservationModel::update(std::vector<Particle> & particles, std::vector<float> scan_data)
 {
-  std::cout << "Run ObservationModel::update."
+  std::cerr << "Run ObservationModel::update."
             << "\n";
 
   setScan(scan_data);
@@ -65,13 +65,13 @@ void ObservationModel::update(std::vector<Particle> & particles, std::vector<flo
 
   marginal_likelihood_ = sum_score / (particles.size() * scan_.ranges.size());
 
-  std::cout << "Done ObservationModel::update."
+  std::cerr << "Done ObservationModel::update."
             << "\n";
 }
 
 double ObservationModel::calculateParticleWeight(const Particle p)
 {
-  // std::cout << "Run ObservationModel::calculateParticleWeight."
+  // std::cerr << "Run ObservationModel::calculateParticleWeight."
   //           << "\n";
 
   std::vector<double> hit_xy;
@@ -88,20 +88,20 @@ double ObservationModel::calculateParticleWeight(const Particle p)
     particle_weight += getProbFromLikelihoodMap(hit_xy.at(0), hit_xy.at(1));
   }
 
-  // std::cout << "Done ObservationModel::calculateParticleWeight."
+  // std::cerr << "Done ObservationModel::calculateParticleWeight."
   //           << "\n";
   return particle_weight;
 }
 
 double ObservationModel::getProbFromLikelihoodMap(double x, double y)
 {
-  // std::cout << "Run ObservationModel::getProbFromLikelihoodMap."
+  // std::cerr << "Run ObservationModel::getProbFromLikelihoodMap."
   //           << "\n";
 
   int grid_x = x / likelihood_field_->resolution_;
   int grid_y = y / likelihood_field_->resolution_;
 
-  // std::cout << "Done ObservationModel::getProbFromLikelihoodMap."
+  // std::cerr << "Done ObservationModel::getProbFromLikelihoodMap."
   //           << "\n";
 
   return likelihood_field_->data_[grid_y * likelihood_field_->width_ + grid_x];
