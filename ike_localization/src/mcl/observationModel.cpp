@@ -76,10 +76,10 @@ double ObservationModel::calculateParticleWeight(const Particle p)
 
   std::vector<double> hit_xy;
   double particle_weight = 0.;
-  double scan_angle_increment = 0.;
+  double scan_angle_increment = scan_.angle_min;
   for (auto scan_range : scan_.ranges) {
     scan_angle_increment += scan_.angle_increment;
-    if (scan_range == INFINITY || scan_range == NAN) continue;
+    if (std::isinf(scan_range) || std::isnan(scan_range)) continue;
 
     hit_xy.clear();
     hit_xy.push_back(p.pose.position.x + scan_range * cos(p.pose.euler.yaw + scan_angle_increment));
