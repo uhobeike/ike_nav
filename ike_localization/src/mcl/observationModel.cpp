@@ -104,6 +104,12 @@ double ObservationModel::getProbFromLikelihoodMap(double x, double y)
   // std::cerr << "Done ObservationModel::getProbFromLikelihoodMap."
   //           << "\n";
 
+  try {
+    likelihood_field_->data_.at(grid_y * likelihood_field_->width_ + grid_x);
+  } catch (const std::out_of_range & e) {
+    return 1.0e-10;
+  }
+
   return likelihood_field_->data_[grid_y * likelihood_field_->width_ + grid_x];
 }
 
