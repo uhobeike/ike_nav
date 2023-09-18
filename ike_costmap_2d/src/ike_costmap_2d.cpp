@@ -159,8 +159,8 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
 {
   auto inflation_layer = map;
 
-  for (uint32_t map_y = 0; map_y < inflation_layer.info.width; map_y++) {
-    for (uint32_t map_x = 0; map_x < inflation_layer.info.height; map_x++)
+  for (uint32_t map_y = 0; map_y < inflation_layer.info.height; map_y++) {
+    for (uint32_t map_x = 0; map_x < inflation_layer.info.width; map_x++)
       if (inflation_layer.data[map_y * inflation_layer.info.width + map_x] == 100) {
         calculateInflation(inflation_layer, inflation_layer_inflation_radius_, map_x, map_y);
       }
@@ -242,17 +242,27 @@ void IkeCostMap2D::calculateInflation(
   auto sub_map_x_end = map_x + inflation_radius;
   auto sub_map_y_end = map_y + inflation_radius;
 
-  for (auto y = sub_map_y_start - inflation_radius; y < sub_map_y_end; y++)
-    for (auto x = sub_map_x_start - inflation_radius; x < sub_map_x_end; x++)
-      if (hypot(x - map_x, y - map_y) < inflation_radius)
+  for (auto y = sub_map_y_start - inflation_radius; y < sub_map_y_end; y++) {
+    for (auto x = sub_map_x_start - inflation_radius; x < sub_map_x_end; x++) {
+      if (hypot(x - map_x, y - map_y) < inflation_radius) {
+        try {
+          map.data.at(y * map.info.width + x);
+        } catch (const std::out_of_range & e) {
+          continue;
+        }
+
         if (
           normalizeCost(
             calculateCost(0., inflation_radius),
             calculateCost(hypot(x - map_x, y - map_y), inflation_radius)) >
-          map.data[y * map.info.width + x])
+          map.data[y * map.info.width + x]) {
           map.data[y * map.info.width + x] = normalizeCost(
             calculateCost(0., inflation_radius),
             calculateCost(hypot(x - map_x, y - map_y), inflation_radius));
+        }
+      }
+    }
+  }
 }
 
 double IkeCostMap2D::calculateCost(double stochastic_variable, double inflation_radius)
