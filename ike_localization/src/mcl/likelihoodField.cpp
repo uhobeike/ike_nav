@@ -57,7 +57,6 @@ void LikelihoodField::calculateLikelihood(uint32_t map_x, uint32_t map_y)
         try {
           data_.at(width_ * (height_ - y - 1) + x);
         } catch (const std::out_of_range & e) {
-          std::cerr << "Index out of range: " << e.what() << std::endl;
           continue;
         }
 
