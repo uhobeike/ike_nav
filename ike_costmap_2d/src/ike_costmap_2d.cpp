@@ -201,10 +201,12 @@ std::vector<std::pair<uint32_t, uint32_t>> IkeCostMap2D::calculateHitPoint(
   sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose)
 {
   std::vector<std::pair<uint32_t, uint32_t>> hits_xy;
-  double scan_angle_increment = 0.;
+  double scan_angle_increment = scan.angle_min;
   for (auto scan_range : scan.ranges) {
     scan_angle_increment += scan_.angle_increment;
-    if (scan_range == INFINITY || scan_range == NAN || scan_range > obstacle_layer_obstacle_range_)
+    if (
+      std::isinf(scan_range) || std::isnan(scan_range) ||
+      scan_range > obstacle_layer_obstacle_range_)
       continue;
 
     auto hit_x = lidar_pose.pose.position.x +
