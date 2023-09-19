@@ -12,9 +12,9 @@
 
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_costmap_2d" namespace="" args="">
     <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
-      <param name="inflation_layer/inflation_radius"  value="10."/>
-      <param name="obstacle_layer/inflation_radius"   value="10."/>
-      <param name="obstacle_layer/obstacle_range"     value="3."/>
+      <param name="inflation_layer.inflation_radius"  value="30."/>
+      <param name="obstacle_layer.inflation_radius"   value="20."/>
+      <param name="obstacle_layer.obstacle_range"     value="3."/>
       <param name="publish_costmap_2d_hz"             value="2."/>
       <extra_arg name="use_intra_process_comms"       value="false"/>
     </composable_node>
@@ -23,7 +23,7 @@
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
     <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
       <param name="loop_mcl_hz"                         value="10."/>
-      <param name="particle_size"                       value="500"/>
+      <param name="particle_size"                       value="100"/>
       <param name="initial_pose_x"                      value="8."/>
       <param name="initial_pose_y"                      value="9.5"/>
       <param name="initial_pose_a"                      value="0.3"/>
@@ -49,15 +49,15 @@
     </composable_node>
 
     <composable_node pkg="ike_controller" plugin="ike_nav::IkeController" name="ike_controller" namespace="">
-      <param name="mpc/delta_time"                      value="0.7"/>
-      <param name="mpc/predictive_horizon_num"          value="10"/>
-      <param name="mpc/lower_bound_linear_velocity"     value="0."/>
-      <param name="mpc/lower_bound_angular_velocity"    value="-3.14159265358979323846"/>
-      <param name="mpc/upper_bound_linear_velocity"     value="0.1"/>
-      <param name="mpc/upper_bound_angular_velocity"    value="3.14159265358979323846"/>
-      <param name="mpc/max_num_iterations"              value="100"/>
-      <param name="mpc/recovery_rotate_velocity"        value="0.3"/>
-      <param name="mpc/limit_absolute_rotate_velocity"  value="1.0"/>
+      <param name="mpc.delta_time"                      value="0.7"/>
+      <param name="mpc.predictive_horizon_num"          value="10"/>
+      <param name="mpc.lower_bound_linear_velocity"     value="0."/>
+      <param name="mpc.lower_bound_angular_velocity"    value="-3.14159265358979323846"/>
+      <param name="mpc.upper_bound_linear_velocity"     value="0.1"/>
+      <param name="mpc.upper_bound_angular_velocity"    value="3.14159265358979323846"/>
+      <param name="mpc.max_num_iterations"              value="100"/>
+      <param name="mpc.recovery_rotate_velocity"        value="0.3"/>
+      <param name="mpc.limit_absolute_rotate_velocity"  value="1.0"/>
       <extra_arg name="use_intra_process_comms"         value="false"/>
     </composable_node>
 
