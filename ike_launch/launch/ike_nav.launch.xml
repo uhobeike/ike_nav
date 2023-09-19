@@ -12,8 +12,8 @@
 
   <node_container pkg="rclcpp_components" exec="component_container" name="ike_costmap_2d" namespace="" args="">
     <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
-      <param name="inflation_layer.inflation_radius"  value="30."/>
-      <param name="obstacle_layer.inflation_radius"   value="20."/>
+      <param name="inflation_layer.inflation_radius"  value="10."/>
+      <param name="obstacle_layer.inflation_radius"   value="10."/>
       <param name="obstacle_layer.obstacle_range"     value="3."/>
       <param name="publish_costmap_2d_hz"             value="2."/>
       <extra_arg name="use_intra_process_comms"       value="false"/>
