@@ -39,7 +39,11 @@ void Resampling::systematicSampling(std::vector<Particle> & particles)
   std::vector<Particle> new_particles;
   double systematic_sampling_start = calculateSystematicSamplingStart(1. / static_cast<double>(particle_size_));
   double systematic_sampling_step = calculateSystematicSamplingStep();
-  while (new_particles.size() <= particle_size_) {
+  while (true) {
+    if (new_particles.size() == particle_size_) {
+      break;
+    }
+
     if (systematic_sampling_start + step < particles_weight_sum[index]) {
       new_particles.push_back(particles[index]);
       step += systematic_sampling_step;
