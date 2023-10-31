@@ -57,8 +57,6 @@ source install/setup.bash
 [rviz2-5] [ERROR] [1693991158.604136358] [rviz2]: ItemIdentityException: Material with the name goal_flag_material_0.244069 already exists. in ResourceManager::add at ./.obj-x86_64-linux-gnu/ogre-v1.12.1-prefix/src/ogre-v1.12.1/OgreMain/src/OgreResourceManager.cpp (line 148)
 ```
 
-* たまに自己位置推定が、落ちる（エラーの出力は無い）
-
 ## 👨‍💻 ToDo（現在、対応中）
 * 実機で使用できるようにする
 * 大きな地図でもサクサク動くようにする
