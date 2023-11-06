@@ -12,6 +12,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include "ike_nav_msgs/srv/get_map.hpp"
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
@@ -47,12 +48,13 @@ protected:
 
   void getParam();  // パラメータを取得する
 
-  void initPubSub();   // パブリッシャ・サブスクライバ初期化
-  void initService();  // サービスサーバの初期化
-  void initTf();       // tf関連の初期化
-  void initMcl();      // MClの初期化
-  void getMap();       // サービス経由でmapを取得する
-  void mcl_to_ros2();  // MClからROS 2の橋渡し的なことをする
+  void initPubSub();         // パブリッシャ・サブスクライバ初期化
+  void initServiceServer();  // サービスサーバの初期化
+  void initServiceClient();  // サービスクライアントの初期化
+  void initTf();             // tf関連の初期化
+  void initMcl();            // MClの初期化
+  void getMap();             // サービス経由でmapを取得する
+  void mcl_to_ros2();        // MClからROS 2の橋渡し的なことをする
   void setParticles(nav2_msgs::msg::ParticleCloud &
                       particles);  // MCLのパーティクルからROS 2のパーティクルに置き換える
   geometry_msgs::msg::PoseStamped getMclPose(const Particle particle);
@@ -104,6 +106,9 @@ private:
 
   // サービスサーバの登録
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_likelihoodfield_map_srv_;
+
+  // サービスクライアントの登録
+  rclcpp::Client<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_client_;
 
   rclcpp::TimerBase::SharedPtr mcl_loop_timer_;  // MClのループ用のタイマー
 

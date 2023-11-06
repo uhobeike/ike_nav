@@ -8,7 +8,6 @@
 #include <nav2_util/geometry_utils.hpp>
 #include <nav2_util/string_utils.hpp>
 
-#include "ike_nav_msgs/srv/get_map.hpp"
 #include <nav_msgs/srv/get_map.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -43,9 +42,12 @@ IkeLocalization::IkeLocalization(const rclcpp::NodeOptions & options)
   getParam();
 
   initPubSub();
+  initServiceServer();
+  initServiceClient();
+
   getMap();
+
   loopMcl();
-  initService();
 }
 IkeLocalization::~IkeLocalization() { RCLCPP_INFO(this->get_logger(), "Done IkeLocalization."); }
 
@@ -102,7 +104,7 @@ void IkeLocalization::initPubSub()
   RCLCPP_INFO(get_logger(), "Done initPubSub.");
 }
 
-void IkeLocalization::initService()
+void IkeLocalization::initServiceServer()
 {
   auto publish_likelihoodfield_map =
     [this](
@@ -125,29 +127,32 @@ void IkeLocalization::initService()
     "publish_likelihoodfield_map", publish_likelihoodfield_map);
 }
 
+void IkeLocalization::initServiceClient()
+{
+  get_map_srv_client_ = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
+}
+
 void IkeLocalization::getMap()
 {
   RCLCPP_INFO(get_logger(), "Run getMap.");
 
-  auto get_map = this->create_client<ike_nav_msgs::srv::GetMap>("get_map");
-  while (!get_map->wait_for_service(std::chrono::seconds(1))) {
+  while (!get_map_srv_client_->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(this->get_logger(), "client interrupted while waiting for service to appear.");
     }
     RCLCPP_INFO(this->get_logger(), "waiting for service to appear...");
   }
-  auto request = std::make_shared<ike_nav_msgs::srv::GetMap::Request>();
-  auto result_future = get_map->async_send_request(request);
-  if (
-    rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) !=
-    rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(this->get_logger(), "service call failed :(");
-    get_map->remove_pending_request(result_future);
-  }
 
-  map_ = result_future.get()->map;
-  RCLCPP_INFO(get_logger(), "Received map.");
-  map_receive_ = true;
+  auto request = std::make_shared<ike_nav_msgs::srv::GetMap::Request>();
+  using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetMap>::SharedFuture;
+
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+    map_ = result.get()->map;
+    map_receive_ = true;
+    RCLCPP_INFO(get_logger(), "Received map.");
+  };
+  auto future_result = get_map_srv_client_->async_send_request(request, response_received_callback);
 
   RCLCPP_INFO(get_logger(), "Done getMap.");
 }
