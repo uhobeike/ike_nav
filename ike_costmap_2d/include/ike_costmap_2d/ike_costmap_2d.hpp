@@ -33,6 +33,7 @@ protected:
   void initPublisher();
   void initSubscription();
   void initServiceServer();
+  void initServiceClient();
   void initTimer();
 
   void createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map);
@@ -50,7 +51,7 @@ protected:
     sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose);
   geometry_msgs::msg::PoseStamped getMapFrameRobotPose();
 
-  nav_msgs::msg::OccupancyGrid getMap();
+  void getMap();
 
   void publishCostMap2DLayers(
     std::map<std::string, nav_msgs::msg::OccupancyGrid> & costmap_2d_layers);
@@ -63,7 +64,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
-  rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
+  rclcpp::Client<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_client_;
 
   rclcpp::TimerBase::SharedPtr create_obstacle_layer_timer_;
 
