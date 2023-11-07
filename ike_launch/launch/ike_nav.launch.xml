@@ -3,14 +3,12 @@
   <arg name ="waypoint_yaml"  default="$(find-pkg-share ike_launch)/config/waypoint.yaml"/>
   <arg name ="rviz_config"    default="$(find-pkg-share ike_launch)/config/ike_nav.rviz"/>
 
-  <node_container pkg="rclcpp_components" exec="component_container" name="ike_map_server" namespace="" args="">
+  <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
     <composable_node pkg="ike_map_server" plugin="ike_nav::IkeMapServer" name="ike_map_server" namespace="">
       <param name="map_yaml_path"               value="$(var map_yaml)"/>
       <extra_arg name="use_intra_process_comms" value="false"/>
     </composable_node>
-  </node_container>
 
-  <node_container pkg="rclcpp_components" exec="component_container" name="ike_costmap_2d" namespace="" args="">
     <composable_node pkg="ike_costmap_2d" plugin="ike_nav::IkeCostMap2D" name="ike_costmap_2d" namespace="">
       <param name="inflation_layer.inflation_radius"  value="10."/>
       <param name="obstacle_layer.inflation_radius"   value="10."/>
@@ -18,9 +16,7 @@
       <param name="publish_costmap_2d_hz"             value="2."/>
       <extra_arg name="use_intra_process_comms"       value="false"/>
     </composable_node>
-  </node_container>
-  
-  <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav" namespace="" args="">
+
     <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
       <param name="loop_mcl_hz"                         value="10."/>
       <param name="particle_size"                       value="100"/>
@@ -67,15 +63,13 @@
       <param name="publish_stop_velocity_hz"      value="10."/>
       <extra_arg name="use_intra_process_comms"   value="false"/>
     </composable_node>
-  </node_container>
 
-  <node_container pkg="rclcpp_components" exec="component_container" name="ike_nav_waypoint_follower" namespace="" args="">
     <composable_node pkg="ike_waypoint_follower" plugin="ike_nav::IkeWaypointFollower" name="ike_waypoint_follower" namespace="">
       <param name="waypoint_yaml_path"            value="$(var waypoint_yaml)"/>
       <param name="waypoint_radius"               value="0.5"/>
       <extra_arg name="use_intra_process_comms"   value="false"/>
     </composable_node>
   </node_container>
-
+  
   <node pkg="rviz2" exec="rviz2" name="rviz2" namespace="" args="-d $(var rviz_config)"/>
 </launch>
