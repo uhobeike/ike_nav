@@ -19,7 +19,7 @@ IkePlanner::IkePlanner(const rclcpp::NodeOptions & options) : Node("ike_planner"
   initServiceServer();
   initServiceClient();
 
-  initPlanner();
+  getCostMap2D();
 }
 
 void IkePlanner::getParam()
@@ -46,11 +46,16 @@ void IkePlanner::initPublisher()
 
 void IkePlanner::initSubscriber()
 {
-  auto costmap_2d_callback = [this](const nav_msgs::msg::OccupancyGrid::ConstSharedPtr msg) {
+  auto costmap_2d_callback = [this](const nav_msgs::msg::OccupancyGrid::UniquePtr msg) {
+    // RCLCPP_INFO(
+    //   this->get_logger(), "Subscribed message at address: %p", static_cast<void *>(msg.get()));
     this->obstacle_map_ = *msg;
   };
-  costmap_2d_sub_ =
-    this->create_subscription<nav_msgs::msg::OccupancyGrid>("costmap_2d", 1, costmap_2d_callback);
+
+  rclcpp::SubscriptionOptions options;
+  options.use_intra_process_comm = rclcpp::IntraProcessSetting::Enable;
+  costmap_2d_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
+    "costmap_2d", 1, costmap_2d_callback, options);
 }
 
 void IkePlanner::initServiceServer()
@@ -73,13 +78,13 @@ void IkePlanner::initServiceServer()
 
 void IkePlanner::initServiceClient()
 {
-  get_costmap_2d_map_srv_ = this->create_client<ike_nav_msgs::srv::GetCostMap2D>("get_costmap_2d");
+  get_costmap_2d_map_srv_client_ =
+    this->create_client<ike_nav_msgs::srv::GetCostMap2D>("get_costmap_2d");
 }
 
 void IkePlanner::initPlanner()
 {
   RCLCPP_INFO(this->get_logger(), "IkePlanner initialized");
-  obstacle_map_ = syncGetCostMap2D();
   resolution_ = obstacle_map_.info.resolution;
   robot_radius_ = 1.0;
   min_x_ = min_y_ = 0;
@@ -288,24 +293,25 @@ uint32_t IkePlanner::calcXYIndex(double position)
 
 uint32_t IkePlanner::calcGridIndex(ike_nav::Node node) { return node.y * x_width_ + node.x; }
 
-nav_msgs::msg::OccupancyGrid IkePlanner::syncGetCostMap2D()
+void IkePlanner::getCostMap2D()
 {
-  while (!get_costmap_2d_map_srv_->wait_for_service(std::chrono::seconds(1))) {
+  while (!get_costmap_2d_map_srv_client_->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(this->get_logger(), "client interrupted while waiting for service to appear.");
     }
     RCLCPP_INFO(this->get_logger(), "waiting for service to appear...");
   }
-  auto request = std::make_shared<ike_nav_msgs::srv::GetCostMap2D::Request>();
-  auto result_future = get_costmap_2d_map_srv_->async_send_request(request);
-  if (
-    rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) !=
-    rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(this->get_logger(), "service call failed :(");
-    get_costmap_2d_map_srv_->remove_pending_request(result_future);
-  }
 
-  return result_future.get()->costmap_2d;
+  auto request = std::make_shared<ike_nav_msgs::srv::GetCostMap2D::Request>();
+  using ServiceResponseFuture = rclcpp::Client<ike_nav_msgs::srv::GetCostMap2D>::SharedFuture;
+
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+    auto result = future.get();
+    obstacle_map_ = result.get()->costmap_2d;
+    initPlanner();
+  };
+  auto future_result =
+    get_costmap_2d_map_srv_client_->async_send_request(request, response_received_callback);
 }
 
 }  // namespace ike_nav
