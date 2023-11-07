@@ -84,9 +84,9 @@ void IkeCostMap2D::initServiceServer()
     createCostMap2DLayers(map_);
 
     if (costmap_2d_layers_.find("obstacle_layer") != costmap_2d_layers_.end()) {
-      response->costmap_2d = costmap_2d_layers_["obstacle_layer"];
+      response->costmap_2d = *costmap_2d_layers_["obstacle_layer"];
     } else {
-      response->costmap_2d = costmap_2d_layers_["inflation_layer"];
+      response->costmap_2d = *costmap_2d_layers_["inflation_layer"];
     }
     response->success = true;
     response->message = "Called /get_costmap_2d. Send map done.";
@@ -150,8 +150,10 @@ void IkeCostMap2D::getMap()
 
 void IkeCostMap2D::createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map)
 {
-  costmap_2d_layers_["static_layer"] = createStaticLayer(map);
-  costmap_2d_layers_["inflation_layer"] = createInflationLayer(map);
+  costmap_2d_layers_["static_layer"] =
+    std::make_unique<nav_msgs::msg::OccupancyGrid>(createStaticLayer(map));
+  costmap_2d_layers_["inflation_layer"] =
+    std::make_unique<nav_msgs::msg::OccupancyGrid>(createInflationLayer(map));
 }
 
 nav_msgs::msg::OccupancyGrid IkeCostMap2D::createStaticLayer(
@@ -177,8 +179,9 @@ nav_msgs::msg::OccupancyGrid IkeCostMap2D::createInflationLayer(
 
 void IkeCostMap2D::createObstacleLayer()
 {
-  if (costmap_2d_layers_.find("inflation_layer") != costmap_2d_layers_.end()) {
-    costmap_2d_layers_["obstacle_layer"] = costmap_2d_layers_["inflation_layer"];
+  if (costmap_2d_layers_["inflation_layer"]) {
+    costmap_2d_layers_["obstacle_layer"] =
+      std::make_unique<nav_msgs::msg::OccupancyGrid>(*costmap_2d_layers_["inflation_layer"]);
 
     auto lidar_pose = getMapFrameRobotPose();
     if (get_map_ && get_scan_ && get_lidar_pose_) {
@@ -186,19 +189,26 @@ void IkeCostMap2D::createObstacleLayer()
 
       for (const auto & hit_xy : hists_xy) {
         // clang-format off
-        costmap_2d_layers_
-          ["obstacle_layer"].data[hit_xy.second * map_.info.width + hit_xy.first] 
-            = 100;
+          costmap_2d_layers_
+            ["obstacle_layer"]->data[hit_xy.second * map_.info.width + hit_xy.first]
+              = 100;
         // clang-format on
 
         calculateInflation(
-          costmap_2d_layers_["obstacle_layer"], obstacle_layer_inflation_radius_, hit_xy.first,
+          *costmap_2d_layers_["obstacle_layer"], obstacle_layer_inflation_radius_, hit_xy.first,
           hit_xy.second);
-
-        costmap_2d_layers_["obstacle_layer"].header.stamp = rclcpp::Time();
-        obstacle_layer_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
-        costmap_2d_pub_->publish(costmap_2d_layers_["obstacle_layer"]);
       }
+      costmap_2d_layers_["master_layer"] =
+        std::make_unique<nav_msgs::msg::OccupancyGrid>(*costmap_2d_layers_["obstacle_layer"]);
+
+      costmap_2d_layers_["obstacle_layer"]->header.stamp = rclcpp::Time();
+      obstacle_layer_pub_->publish(std::move(costmap_2d_layers_["obstacle_layer"]));
+
+      // RCLCPP_INFO(
+      //   this->get_logger(), "Publishing message at address: %p",
+      //   static_cast<void *>(costmap_2d_layers_["master_layer"].get()));
+      costmap_2d_layers_["master_layer"]->header.stamp = rclcpp::Time();
+      costmap_2d_pub_->publish(std::move(costmap_2d_layers_["master_layer"]));
     }
   }
 }
@@ -282,17 +292,17 @@ double IkeCostMap2D::calculateCost(double stochastic_variable, double inflation_
 double IkeCostMap2D::normalizeCost(double max_pdf, double pdf) { return (pdf / max_pdf) * 100.; }
 
 void IkeCostMap2D::publishCostMap2DLayers(
-  std::map<std::string, nav_msgs::msg::OccupancyGrid> & costmap_2d_layers)
+  std::map<std::string, nav_msgs::msg::OccupancyGrid::UniquePtr> & costmap_2d_layers)
 {
-  costmap_2d_layers["static_layer"].header.stamp = rclcpp::Time();
-  costmap_2d_layers["inflation_layer"].header.stamp = rclcpp::Time();
+  costmap_2d_layers["static_layer"]->header.stamp = rclcpp::Time();
+  costmap_2d_layers["inflation_layer"]->header.stamp = rclcpp::Time();
 
-  static_layer_pub_->publish(costmap_2d_layers["static_layer"]);
-  inflation_layer_pub_->publish(costmap_2d_layers["inflation_layer"]);
+  static_layer_pub_->publish(std::move(costmap_2d_layers["static_layer"]));
+  inflation_layer_pub_->publish(std::move(costmap_2d_layers["inflation_layer"]));
 
   if (get_map_ && get_scan_ && get_lidar_pose_) {
-    costmap_2d_layers["obstacle_layer"].header.stamp = rclcpp::Time();
-    obstacle_layer_pub_->publish(costmap_2d_layers["obstacle_layer"]);
+    costmap_2d_layers["obstacle_layer"]->header.stamp = rclcpp::Time();
+    obstacle_layer_pub_->publish(std::move(costmap_2d_layers["obstacle_layer"]));
   }
 }
 

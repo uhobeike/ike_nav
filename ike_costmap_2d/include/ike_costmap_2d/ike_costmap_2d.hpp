@@ -54,7 +54,7 @@ protected:
   void getMap();
 
   void publishCostMap2DLayers(
-    std::map<std::string, nav_msgs::msg::OccupancyGrid> & costmap_2d_layers);
+    std::map<std::string, nav_msgs::msg::OccupancyGrid::UniquePtr> & costmap_2d_layers);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr static_layer_pub_;
@@ -74,7 +74,7 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  std::map<std::string, nav_msgs::msg::OccupancyGrid> costmap_2d_layers_;
+  std::map<std::string, nav_msgs::msg::OccupancyGrid::UniquePtr> costmap_2d_layers_;
 
   nav_msgs::msg::OccupancyGrid map_;
   sensor_msgs::msg::LaserScan scan_;
