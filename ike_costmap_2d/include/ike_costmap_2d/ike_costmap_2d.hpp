@@ -33,6 +33,7 @@ protected:
   void initPublisher();
   void initSubscription();
   void initServiceServer();
+  void initServiceClient();
   void initTimer();
 
   void createCostMap2DLayers(const nav_msgs::msg::OccupancyGrid & map);
@@ -50,10 +51,10 @@ protected:
     sensor_msgs::msg::LaserScan scan, geometry_msgs::msg::PoseStamped lidar_pose);
   geometry_msgs::msg::PoseStamped getMapFrameRobotPose();
 
-  nav_msgs::msg::OccupancyGrid getMap();
+  void getMap();
 
   void publishCostMap2DLayers(
-    std::map<std::string, nav_msgs::msg::OccupancyGrid> & costmap_2d_layers);
+    std::map<std::string, nav_msgs::msg::OccupancyGrid::UniquePtr> & costmap_2d_layers);
 
 private:
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr static_layer_pub_;
@@ -63,7 +64,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Service<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr publish_map_srv_;
-  rclcpp::Service<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_;
+  rclcpp::Client<ike_nav_msgs::srv::GetMap>::SharedPtr get_map_srv_client_;
 
   rclcpp::TimerBase::SharedPtr create_obstacle_layer_timer_;
 
@@ -73,7 +74,7 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  std::map<std::string, nav_msgs::msg::OccupancyGrid> costmap_2d_layers_;
+  std::map<std::string, nav_msgs::msg::OccupancyGrid::UniquePtr> costmap_2d_layers_;
 
   nav_msgs::msg::OccupancyGrid map_;
   sensor_msgs::msg::LaserScan scan_;

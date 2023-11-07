@@ -44,7 +44,7 @@ protected:
 
   void initPlanner();
 
-  nav_msgs::msg::OccupancyGrid syncGetCostMap2D();
+  void getCostMap2D();
 
   std::vector<std::tuple<int32_t, int32_t, uint8_t>> getMotionModel();
 
@@ -68,7 +68,7 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr plan_path_pub_;
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_2d_sub_;
   rclcpp::Service<ike_nav_msgs::srv::GetPath>::SharedPtr get_path_srv_;
-  rclcpp::Client<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_map_srv_;
+  rclcpp::Client<ike_nav_msgs::srv::GetCostMap2D>::SharedPtr get_costmap_2d_map_srv_client_;
 
   std::shared_ptr<ike_planner::ParamListener> param_listener_;
   ike_planner::Params params_;
