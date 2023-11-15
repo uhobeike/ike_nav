@@ -7,8 +7,10 @@ namespace mcl
 {
 ObservationModel::ObservationModel(
   std::shared_ptr<mcl::LikelihoodField> likelihood_field, float angle_min, float angle_max,
-  float angle_increment, float range_min, float range_max)
-: likelihood_field_(std::move(likelihood_field)), marginal_likelihood_(0.)
+  float angle_increment, float range_min, float range_max, bool publish_particles_scan_match_point)
+: likelihood_field_(std::move(likelihood_field)),
+  marginal_likelihood_(0.),
+  publish_particles_scan_match_point_(publish_particles_scan_match_point)
 {
   std::cerr << "Run ObservationModel::ObservationModel."
             << "\n";
@@ -74,18 +76,32 @@ double ObservationModel::calculateParticleWeight(const Particle p)
   // std::cerr << "Run ObservationModel::calculateParticleWeight."
   //           << "\n";
 
-  std::vector<double> hit_xy;
   double particle_weight = 0.;
   double scan_angle_increment = scan_.angle_min;
-  for (auto scan_range : scan_.ranges) {
-    scan_angle_increment += scan_.angle_increment;
-    if (std::isinf(scan_range) || std::isnan(scan_range)) continue;
 
-    hit_xy.clear();
-    hit_xy.push_back(p.pose.position.x + scan_range * cos(p.pose.euler.yaw + scan_angle_increment));
-    hit_xy.push_back(p.pose.position.y + scan_range * sin(p.pose.euler.yaw + scan_angle_increment));
-    particles_scan_match_point_.push_back(hit_xy);
-    particle_weight += getProbFromLikelihoodMap(hit_xy.at(0), hit_xy.at(1));
+  if (publish_particles_scan_match_point_) {
+    std::vector<double> hit_xy;
+    for (auto scan_range : scan_.ranges) {
+      scan_angle_increment += scan_.angle_increment;
+      if (std::isinf(scan_range) || std::isnan(scan_range)) continue;
+
+      hit_xy.clear();
+      hit_xy.push_back(
+        p.pose.position.x + scan_range * cos(p.pose.euler.yaw + scan_angle_increment));
+      hit_xy.push_back(
+        p.pose.position.y + scan_range * sin(p.pose.euler.yaw + scan_angle_increment));
+      particles_scan_match_point_.push_back(hit_xy);
+      particle_weight += getProbFromLikelihoodMap(hit_xy.at(0), hit_xy.at(1));
+    }
+  } else {
+    for (auto scan_range : scan_.ranges) {
+      scan_angle_increment += scan_.angle_increment;
+      if (std::isinf(scan_range) || std::isnan(scan_range)) continue;
+
+      auto hit_x = p.pose.position.x + scan_range * cos(p.pose.euler.yaw + scan_angle_increment);
+      auto hit_y = p.pose.position.y + scan_range * sin(p.pose.euler.yaw + scan_angle_increment);
+      particle_weight += getProbFromLikelihoodMap(hit_x, hit_y);
+    }
   }
 
   // std::cerr << "Done ObservationModel::calculateParticleWeight."
