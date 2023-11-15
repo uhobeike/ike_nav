@@ -11,7 +11,7 @@ Mcl::Mcl(
   int particle_size, double likelihood_dist, uint32_t map_width, uint32_t map_height,
   double map_resolution, double map_origin_x, double map_origin_y, std::vector<int8_t> map_data,
   float scan_angle_min, float scan_angle_max, float scan_angle_increment, float scan_range_min,
-  float scan_range_max)
+  float scan_range_max, bool publish_particles_scan_match_point)
 {
   std::cerr << "Run Mcl::Mcl."
             << "\n";
@@ -26,7 +26,7 @@ Mcl::Mcl(
     alpha_trans_trans, alpha_trans_rotate, alpha_rotate_trans, alpha_rotate_rotate);
   observation_model_ = std::make_shared<ObservationModel>(
     std::move(likelihood_field_), scan_angle_min, scan_angle_max, scan_angle_increment,
-    scan_range_min, scan_range_max);
+    scan_range_min, scan_range_max, publish_particles_scan_match_point);
 
   resampling_ = std::make_shared<Resampling>(particle_size);
   std::cerr << "Done Mcl::Mcl."

@@ -18,7 +18,8 @@ class ObservationModel
 public:
   ObservationModel(
     std::shared_ptr<mcl::LikelihoodField> likelihood_field, float angle_min, float angle_max,
-    float angle_increment, float range_min, float range_max);
+    float angle_increment, float range_min, float range_max,
+    bool publish_particles_scan_match_point);
   ~ObservationModel();
 
   void initScan(
@@ -37,6 +38,7 @@ public:
 
   float marginal_likelihood_;
   std::vector<std::vector<double>> particles_scan_match_point_;
+  bool publish_particles_scan_match_point_;
 };
 }  // namespace mcl
 

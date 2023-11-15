@@ -199,7 +199,7 @@ void IkeLocalization::initTf()
 // https://github.com/ros-planning/navigation2/blob/ef4de1527997c3bd813afe0c6296ff65e05700e0/nav2_amcl/src/amcl_node.cpp#L975-L1016
 void IkeLocalization::transformMapToOdom()
 {
-  // RCLCPP_INFO(get_logger(), "Run transformMapToOdom.");
+  RCLCPP_INFO(get_logger(), "Run transformMapToOdom.");
 
   geometry_msgs::msg::PoseStamped odom_to_map;
   try {
@@ -233,7 +233,7 @@ void IkeLocalization::transformMapToOdom()
   tf2::impl::Converter<false, true>::convert(latest_tf_.inverse(), tmp_tf_stamped.transform);
   tf_broadcaster_->sendTransform(tmp_tf_stamped);
 
-  // RCLCPP_INFO(get_logger(), "Done transformMapToOdom.");
+  RCLCPP_INFO(get_logger(), "Done transformMapToOdom.");
 }
 
 void IkeLocalization::getCurrentRobotPose(geometry_msgs::msg::PoseStamped & current_pose)
@@ -256,7 +256,7 @@ void IkeLocalization::getCurrentRobotPose(geometry_msgs::msg::PoseStamped & curr
 
 void IkeLocalization::setParticles(nav2_msgs::msg::ParticleCloud & particles)
 {
-  // RCLCPP_INFO(get_logger(), "Run setParticles.");
+  RCLCPP_INFO(get_logger(), "Run setParticles.");
 
   std_msgs::msg::Header header;
   header.frame_id = "map";
@@ -274,12 +274,12 @@ void IkeLocalization::setParticles(nav2_msgs::msg::ParticleCloud & particles)
     particles.particles[i].weight = mcl_->particles_[i].weight;
   }
 
-  // RCLCPP_INFO(get_logger(), "Done setParticles.");
+  RCLCPP_INFO(get_logger(), "Done setParticles.");
 }
 
 geometry_msgs::msg::PoseStamped IkeLocalization::getMclPose(const Particle particle)
 {
-  // RCLCPP_INFO(get_logger(), "Run getMclPose.");
+  RCLCPP_INFO(get_logger(), "Run getMclPose.");
 
   std_msgs::msg::Header header;
   header.frame_id = "map";
@@ -296,7 +296,7 @@ geometry_msgs::msg::PoseStamped IkeLocalization::getMclPose(const Particle parti
   mcl_pose.set__header(header);
   mcl_pose.set__pose(pose);
 
-  // RCLCPP_INFO(get_logger(), "Done getMclPose.");
+  RCLCPP_INFO(get_logger(), "Done getMclPose.");
 
   return mcl_pose;
 }
@@ -350,7 +350,8 @@ void IkeLocalization::initMcl()
     initial_pose_x_, initial_pose_y_, initial_pose_a_, alpha1_, alpha2_, alpha3_, alpha4_,
     particle_size_, likelihood_dist_, map_.info.width, map_.info.height, map_.info.resolution,
     map_.info.origin.position.x, map_.info.origin.position.y, map_.data, scan_.angle_min,
-    scan_.angle_max, scan_.angle_increment, scan_.range_min, scan_.range_max);
+    scan_.angle_max, scan_.angle_increment, scan_.range_min, scan_.range_max,
+    publish_particles_scan_match_point_);
 
   mcl_->observation_model_->likelihood_field_->getLikelihoodField(map_.data);
   likelihood_map_pub_->publish(map_);
@@ -364,7 +365,7 @@ void IkeLocalization::initMcl()
 
 void IkeLocalization::mcl_to_ros2()
 {
-  // RCLCPP_INFO(get_logger(), "Run mcl_to_ros2.");
+  RCLCPP_INFO(get_logger(), "Run mcl_to_ros2.");
 
   nav2_msgs::msg::ParticleCloud particles;
   transformMapToOdom();
@@ -375,7 +376,7 @@ void IkeLocalization::mcl_to_ros2()
   if (publish_particles_scan_match_point_)
     publishParticlesScanMatchPoint(createSphereMarkerArray(mcl_->getParticlesScanMatchPoint()));
 
-  // RCLCPP_INFO(get_logger(), "Done mcl_to_ros2.");
+  RCLCPP_INFO(get_logger(), "Done mcl_to_ros2.");
 }
 
 void IkeLocalization::loopMcl()

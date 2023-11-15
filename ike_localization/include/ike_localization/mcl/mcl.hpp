@@ -24,7 +24,7 @@ public:
     int particle_size, double likelihood_dist, uint32_t map_width, uint32_t map_height,
     double map_resolution, double map_origin_x, double map_origin_y, std::vector<int8_t> map_data,
     float scan_angle_min, float scan_angle_max, float scan_angle_increment, float scan_range_min,
-    float scan_range_max);
+    float scan_range_max, bool publish_particles_scan_match_point);
   ~Mcl();
 
   void release_pointers();
