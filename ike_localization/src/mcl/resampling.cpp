@@ -13,14 +13,14 @@ Resampling::~Resampling(){};
 
 void Resampling::resampling(std::vector<Particle> & particles)
 {
-  std::cerr << "Run Resampling::resampling."
-            << "\n";
+  // std::cerr << "Run Resampling::resampling."
+  //           << "\n";
 
   normalize(particles);
   systematicSampling(particles);
 
-  std::cerr << "Done Resampling::resampling."
-            << "\n";
+  // std::cerr << "Done Resampling::resampling."
+  //           << "\n";
 }
 
 // 詳解 確率ロボティクス p.131
