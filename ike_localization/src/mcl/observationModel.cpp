@@ -40,20 +40,20 @@ void ObservationModel::initScan(
 
 void ObservationModel::setScan(std::vector<float> & scan_data)
 {
-  std::cerr << "Run ObservationModel::setScan."
-            << "\n";
+  // std::cerr << "Run ObservationModel::setScan."
+  //           << "\n";
 
   scan_.ranges.resize(scan_data.size());
   std::copy(std::begin(scan_data), std::end(scan_data), std::begin(scan_.ranges));
 
-  std::cerr << "Done ObservationModel::setScan."
-            << "\n";
+  // std::cerr << "Done ObservationModel::setScan."
+  //           << "\n";
 }
 
 void ObservationModel::update(std::vector<Particle> & particles, std::vector<float> scan_data)
 {
-  std::cerr << "Run ObservationModel::update."
-            << "\n";
+  // std::cerr << "Run ObservationModel::update."
+  //           << "\n";
 
   setScan(scan_data);
 
@@ -67,8 +67,8 @@ void ObservationModel::update(std::vector<Particle> & particles, std::vector<flo
 
   marginal_likelihood_ = sum_score / (particles.size() * scan_.ranges.size());
 
-  std::cerr << "Done ObservationModel::update."
-            << "\n";
+  // std::cerr << "Done ObservationModel::update."
+  //           << "\n";
 }
 
 double ObservationModel::calculateParticleWeight(const Particle p)

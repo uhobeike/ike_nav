@@ -27,8 +27,8 @@ void MotionModel::update(
   std::vector<Particle> & particles, double current_pose_yaw, double delta_x, double delta_y,
   double delta_yaw)
 {
-  std::cerr << "Run MotionModel::update."
-            << "\n";
+  // std::cerr << "Run MotionModel::update."
+  //           << "\n";
 
   double delta_rotate_1, delta_rotate_2, delta_trans;
   double delta_rotate_1_hat, delta_rotate_2_hat, delta_trans_hat;
@@ -68,8 +68,8 @@ void MotionModel::update(
     p.pose.euler.yaw = normalizeAngle(p.pose.euler.yaw) + delta_rotate_1_hat + delta_rotate_2_hat;
   }
 
-  std::cerr << "Done MotionModel::update."
-            << "\n";
+  // std::cerr << "Done MotionModel::update."
+  //           << "\n";
 }
 
 double MotionModel::drawNoise(double sigma)
