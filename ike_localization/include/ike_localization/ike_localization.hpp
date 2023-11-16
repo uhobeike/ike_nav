@@ -141,8 +141,9 @@ private:
   Particle maximum_likelihood_particle_;
 
   // ike_localization用のパラメータ
-  int loop_mcl_ms_;                                          // MClの実行周期
-  int particle_size_;                                        // パーティクルのサイズ
+  int loop_mcl_ms_;             // MClの実行周期
+  double transform_tolerance_;  //tfの座標変換の遅延の許容時間
+  int particle_size_;           // パーティクルのサイズ
   double initial_pose_x_, initial_pose_y_, initial_pose_a_;  // パーティクルの初期位置
   std::string map_frame_, odom_frame_, robot_frame_;         // 各座標系
   double alpha1_, alpha2_, alpha3_, alpha4_;                 // 動作モデル用の誤差

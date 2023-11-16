@@ -61,6 +61,8 @@ void IkeLocalization::getParam()
 
   loop_mcl_ms_ = 1 / this->params_.loop_mcl_hz * 1000;
 
+  transform_tolerance_ = this->params_.transform_tolerance;
+
   particle_size_ = get_parameter("particle_size").get_value<int>();
 
   initial_pose_x_ = this->params_.initial_pose_x;
@@ -223,12 +225,12 @@ void IkeLocalization::transformMapToOdom()
   }
 
   auto stamp = tf2_ros::fromMsg(scan_.header.stamp);
-  tf2::TimePoint transform_tolerance_ = stamp + tf2::durationFromSec(0.0);
+  tf2::TimePoint transform_expiration = stamp + tf2::durationFromSec(transform_tolerance_);
 
   tf2::impl::Converter<true, false>::convert(odom_to_map.pose, latest_tf_);
   geometry_msgs::msg::TransformStamped tmp_tf_stamped;
   tmp_tf_stamped.header.frame_id = map_frame_;
-  tmp_tf_stamped.header.stamp = tf2_ros::toMsg(transform_tolerance_);
+  tmp_tf_stamped.header.stamp = tf2_ros::toMsg(transform_expiration);
   tmp_tf_stamped.child_frame_id = odom_frame_;
   tf2::impl::Converter<false, true>::convert(latest_tf_.inverse(), tmp_tf_stamped.transform);
   tf_broadcaster_->sendTransform(tmp_tf_stamped);
