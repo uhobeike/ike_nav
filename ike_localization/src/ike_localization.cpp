@@ -243,6 +243,7 @@ void IkeLocalization::getCurrentRobotPose(geometry_msgs::msg::PoseStamped & curr
   while (rclcpp::ok() &&
          not tf_buffer_->canTransform(odom_frame_, robot_frame_, tf2::TimePoint())) {
     RCLCPP_WARN(get_logger(), "Wait Can Transform");
+    rclcpp::sleep_for(std::chrono::seconds(1));
   }
 
   geometry_msgs::msg::PoseStamped robot_pose;
