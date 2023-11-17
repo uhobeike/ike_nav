@@ -19,7 +19,7 @@
 
     <composable_node pkg="ike_localization" plugin="ike_nav::IkeLocalization" name="ike_localization" namespace="">
       <param name="loop_mcl_hz"                         value="10."/>
-      <param name="particle_size"                       value="100"/>
+      <param name="particle_size"                       value="1000"/>
       <param name="initial_pose_x"                      value="8."/>
       <param name="initial_pose_y"                      value="9.5"/>
       <param name="initial_pose_a"                      value="0.3"/>
@@ -45,11 +45,12 @@
     </composable_node>
 
     <composable_node pkg="ike_controller" plugin="ike_nav::IkeController" name="ike_controller" namespace="">
-      <param name="mpc.delta_time"                      value="0.7"/>
+      <param name="mpc.delta_time"                      value="0.1"/>
       <param name="mpc.predictive_horizon_num"          value="10"/>
+      <param name="mpc.target_velocity"                 value="0.3"/>
       <param name="mpc.lower_bound_linear_velocity"     value="0."/>
       <param name="mpc.lower_bound_angular_velocity"    value="-3.14159265358979323846"/>
-      <param name="mpc.upper_bound_linear_velocity"     value="0.1"/>
+      <param name="mpc.upper_bound_linear_velocity"     value="0.3"/>
       <param name="mpc.upper_bound_angular_velocity"    value="3.14159265358979323846"/>
       <param name="mpc.max_num_iterations"              value="100"/>
       <param name="mpc.recovery_rotate_velocity"        value="0.3"/>
