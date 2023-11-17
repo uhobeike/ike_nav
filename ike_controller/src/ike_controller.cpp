@@ -38,6 +38,7 @@ void IkeController::getParam()
 
   dt_ = this->params_.mpc.delta_time;
   predictive_horizon_num_ = this->params_.mpc.predictive_horizon_num;
+  target_velocity_ = this->params_.mpc.target_velocity;
   lower_bound_linear_velocity_ = this->params_.mpc.lower_bound_linear_velocity;
   lower_bound_angular_velocity_ = this->params_.mpc.lower_bound_angular_velocity;
   upper_bound_linear_velocity_ = this->params_.mpc.upper_bound_linear_velocity;
@@ -122,7 +123,7 @@ std::pair<std::vector<double>, std::vector<double>> IkeController::optimize(
     new ceres::DynamicAutoDiffCostFunction<ObjectiveFunction, MAX_PREDICTIVE_HORIZON_NUM>(
       new ObjectiveFunction(
         std::get<0>(robot_pose), std::get<1>(robot_pose), std::get<2>(robot_pose),
-        std::get<0>(path), std::get<1>(path), dt_, predictive_horizon_num_));
+        std::get<0>(path), std::get<1>(path), dt_, predictive_horizon_num_, target_velocity_));
 
   cost_function->SetNumResiduals(predictive_horizon_num_);
   cost_function->AddParameterBlock(predictive_horizon_num_);
@@ -253,8 +254,8 @@ geometry_msgs::msg::TwistStamped IkeController::convertTwist(
   twist.header.stamp = rclcpp::Time();
 
   // todo fix
-  twist.twist.linear.x = action.first[0] + action.first[1];
-  twist.twist.angular.z = action.second[0] + action.second[1];
+  twist.twist.linear.x = action.first[0];
+  twist.twist.angular.z = action.second[0];
 
   return twist;
 }

@@ -12,6 +12,12 @@ ike_controller:
       description: "",
     }
 
+    target_velocity: {
+      type: double,
+      default_value: 0.3,
+      description: "",
+    }
+
     lower_bound_linear_velocity: {
       type: double,
       default_value: 0.0,

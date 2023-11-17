@@ -64,6 +64,7 @@ private:
 
   double dt_;
   int predictive_horizon_num_;
+  double target_velocity_;
   double lower_bound_linear_velocity_;
   double lower_bound_angular_velocity_;
   double upper_bound_linear_velocity_;
@@ -77,14 +78,15 @@ struct ObjectiveFunction
 {
   ObjectiveFunction(
     double init_pose_x, double init_pose_y, double init_pose_th, std::vector<double> path_x,
-    std::vector<double> path_y, double dt, int predictive_horizon_num)
+    std::vector<double> path_y, double dt, int predictive_horizon_num, double target_velocity)
   : init_pose_x_(init_pose_x),
     init_pose_y_(init_pose_y),
     init_pose_th_(init_pose_th),
     path_x_(path_x),
     path_y_(path_y),
     dt_(dt),
-    predictive_horizon_num_(predictive_horizon_num)
+    predictive_horizon_num_(predictive_horizon_num),
+    target_velocity_(target_velocity)
   {
   }
 
@@ -108,13 +110,15 @@ struct ObjectiveFunction
               parameters[1][i] * dt_;
       // clang-format on
 
-      T cost = pow((path_x_[i] - x), 2) + pow((path_y_[i] - y), 2);
+      T path_cost = pow((path_x_[i] - x), 2) + pow((path_y_[i] - y), 2);
+      T linear_velocity_cost = pow(((T)target_velocity_ - parameters[0][i]), 2);
+      T angular_velocity_cost = (i > 0) ? pow((parameters[1][i] - parameters[1][i - 1]), 2) : (T)0;
 
       xs[i + 1] = x;
       ys[i + 1] = y;
       ths[i + 1] = th;
 
-      residual[i] = cost;
+      residual[i] = path_cost + linear_velocity_cost + angular_velocity_cost;
     }
 
     return true;
@@ -126,6 +130,7 @@ private:
   std::vector<double> path_y_;
   double dt_;
   int predictive_horizon_num_;
+  double target_velocity_;
 };
 
 }  // namespace ike_nav
