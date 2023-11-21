@@ -63,6 +63,8 @@ void Mcl::getMeanParticle(Particle & particle)
   Particle mean_pose;
   double euler_sin = 0.;
   double euler_cos = 0.;
+  mean_pose.pose.position.x = mean_pose.pose.position.y = 0;
+
   for (auto p : particles_) {
     mean_pose.pose.position.x += p.pose.position.x;
     mean_pose.pose.position.y += p.pose.position.y;
