@@ -16,6 +16,9 @@
 
 [![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
 
+## 😎 I tried running it on a real machine
+[![Image from Gyazo](https://i.gyazo.com/c83b726008a11b7e43fa0795abb431d6.png)](https://youtu.be/JAkgeEioptg?si=uIB7caMVqJkvSmke)
+
 ## 📖 Package overview
 *IKE_NAV*は、C++実装によるシンプルなROS 2ナビゲーションスタックです。  
 
