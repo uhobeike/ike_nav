@@ -274,7 +274,7 @@ bool IkePlanner::verifyNode(ike_nav::Node node)
 
 double IkePlanner::calcHeurisic(ike_nav::Node node1, ike_nav::Node node2)
 {
-  auto w = 1.0;
+  auto w = 8.0;
   double d = w * std::hypot(
                    static_cast<double>(node1.x) - static_cast<double>(node2.x),
                    static_cast<double>(node1.y) - static_cast<double>(node2.y)) +
