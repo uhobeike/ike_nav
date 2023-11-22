@@ -24,7 +24,7 @@
 
 2次元地図[`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/OccupancyGrid.html)、2次元センサ情報[`sensor_msgs/LaserScan`](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/LaserScan.html)、移動ロボットのオドメトリ情報[`tf2_msgs/TFMessage`](http://docs.ros.org/en/jade/api/tf2_msgs/html/msg/TFMessage.html)を入力し、与えられた目標位置までに到達するための速度[`geometry_msgs/Twist`](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html)を出力します。
 
-[![](https://i.gyazo.com/54fed2846c77c3587dd778b544ef7709.png)](https://viewer.diagrams.net/?tags=%7B%7D&highlight=0000ff&edit=_blank&layers=1&nav=1&title=ike_nav_architecture.drawio#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fuhobeike%2Fike_nav%2Ffix%2Farchitecture-figure-2023-9-11-22-48%2F.github%2Fike_nav_architecture.drawio)
+[![](https://i.gyazo.com/54fed2846c77c3587dd778b544ef7709.png)](https://viewer.diagrams.net/?tags=%7B%7D&highlight=0000ff&edit=_blank&layers=1&nav=1&title=ike_nav_architecture.drawio#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fuhobeike%2Fike_nav%2Fmain%2F.github%2Fike_nav_architecture.drawio)
 
 ## ⚡ Quick demo *IKE_NAV*
 
@@ -54,15 +54,16 @@ source install/setup.bash
 
 ## 🧐 Known bug（これから修正予定）
 
-* ウェイポイントをセット時、稀に出力され、ナビゲーションが停止する
+* ウェイポイントのセット時、稀に出力され、ナビゲーションが停止する
 
 ```
 [rviz2-5] [ERROR] [1693991158.604136358] [rviz2]: ItemIdentityException: Material with the name goal_flag_material_0.244069 already exists. in ResourceManager::add at ./.obj-x86_64-linux-gnu/ogre-v1.12.1-prefix/src/ogre-v1.12.1/OgreMain/src/OgreResourceManager.cpp (line 148)
 ```
 
 ## 👨‍💻 ToDo（現在、対応中）
-* 実機で使用できるようにする
-* 大きな地図でもサクサク動くようにする
+* 障害物回避の安定化
+* ウェイポイント通過後の安定化
+* グローバルコストマップ、尤度場の作成の高速化
 
 ## ⚖️ License
 *IKE_NAV*は、[LGPL-3.0-or-laterとApache-2.0のライセンス](./LICENSE)で構成されています。  
