@@ -63,7 +63,7 @@ void IkeLocalization::getParam()
 
   transform_tolerance_ = this->params_.transform_tolerance;
 
-  particle_size_ = get_parameter("particle_size").get_value<int>();
+  particle_size_ = this->params_.particle_size;
 
   initial_pose_x_ = this->params_.initial_pose_x;
   initial_pose_y_ = this->params_.initial_pose_y;
