@@ -42,4 +42,4 @@ public:
 };
 }  // namespace mcl
 
-#endif
+#endif  // IKE_LOCALIZATION__OBSERVATIONMODEL_HPP_

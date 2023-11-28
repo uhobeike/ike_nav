@@ -32,4 +32,4 @@ public:
 };
 }  // namespace mcl
 
-#endif
+#endif  // IKE_LOCALIZATION__RESAMPLING_HPP_

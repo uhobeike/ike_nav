@@ -51,4 +51,4 @@ public:
 };
 }  // namespace mcl
 
-#endif
+#endif  // IKE_LOCALIZATION__MCL_HPP_

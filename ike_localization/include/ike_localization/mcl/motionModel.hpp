@@ -41,4 +41,4 @@ public:
 };
 }  // namespace mcl
 
-#endif
+#endif  // IKE_LOCALIZATION__MOTIONMODEL_HPP_
