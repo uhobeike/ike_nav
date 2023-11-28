@@ -35,4 +35,4 @@ public:
 };
 }  // namespace mcl
 
-#endif
+#endif  // IKE_LOCALIZATION__LIKELIHOODFIELD_HPP_
