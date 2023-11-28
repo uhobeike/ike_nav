@@ -16,7 +16,7 @@
 
 [![Image from Gyazo](https://i.gyazo.com/489e59d6dc9457911d26fcbcb926c120.png)](https://gyazo.com/489e59d6dc9457911d26fcbcb926c120)
 
-## 😎 I tried running it on a real machine
+## 😎 I tried running it on a real machine with *IKE_NAV*
 [![Image from Gyazo](https://i.gyazo.com/c83b726008a11b7e43fa0795abb431d6.png)](https://youtu.be/JAkgeEioptg?si=uIB7caMVqJkvSmke)
 
 ## 📖 Package overview
@@ -45,7 +45,7 @@ https://github.com/uhobeike/ike_nav/assets/40545422/1f8b58f8-acae-4aea-9a2c-8f0c
 
 ```
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws
-git clone https://github.com/uhobeike/ike_nav.git
+git clone https://github.com/uhobeike/ike_nav.git src/ike_nav
 rosdep update
 rosdep install -i -y --from-path src --rosdistro $ROS_DISTRO
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
