@@ -263,7 +263,7 @@ void IkeLocalization::setParticles(nav2_msgs::msg::ParticleCloud & particles)
 
   std_msgs::msg::Header header;
   header.frame_id = "map";
-  header.stamp.nanosec = ros_clock_.now().nanoseconds();
+  header.stamp = ros_clock_.now();
   particles.set__header(header);
 
   particles.particles.resize(particle_size_);
@@ -286,7 +286,7 @@ geometry_msgs::msg::PoseStamped IkeLocalization::getMclPose(const Particle parti
 
   std_msgs::msg::Header header;
   header.frame_id = "map";
-  header.stamp.nanosec = ros_clock_.now().nanoseconds();
+  header.stamp = ros_clock_.now();
 
   geometry_msgs::msg::Pose pose;
   pose.position.x = particle.pose.position.x;
@@ -311,7 +311,7 @@ visualization_msgs::msg::MarkerArray IkeLocalization::createSphereMarkerArray(
   std::string name = "";
   std_msgs::msg::Header header;
   header.frame_id = map_frame_;
-  header.stamp.nanosec = ros_clock_.now().nanoseconds();
+  header.stamp = ros_clock_.now();
 
   auto marker_array = visualization_msgs::msg::MarkerArray();
   for (auto hit_xy : particles_scan_match_point) {
