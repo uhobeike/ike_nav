@@ -68,3 +68,7 @@ source install/setup.bash
 ## ⚖️ License
 *IKE_NAV*は、[LGPL-3.0-or-laterとApache-2.0のライセンス](./LICENSE)で構成されています。  
 詳しくは、各パッケージのpackage.xmlファイルを確認してください。
+
+## 🤩 STARCHART
+
+[![Stargazers over time](https://starchart.cc/uhobeike/ike_nav.svg)](https://starchart.cc/uhobeike/ike_nav)
